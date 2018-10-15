@@ -177,9 +177,21 @@ const RootQuery = new GraphQLObjectType({
     tweet: {
       type: TweetType,
       args: {
-        id: { type: GraphQLID }
+        id: { type: GraphQLID },
+        login: { type: GraphQLString },
+        password: { type: GraphQLString },
+        targetID: { type: GraphQLID }
       },
-      resolve: (_, { id }) => Tweet.findById(id)
+      async resolve(_, { id: _id, login, password, targetID }) {
+        let user = await User.findOne({ _id, login, password }),
+            tweet = await Tweet.findById(targetID);
+
+        if(user && tweet) {
+          return tweet;
+        } else {
+          return null;
+        }
+      }
     },
     comments: {
       type: new GraphQLList(CommentType),

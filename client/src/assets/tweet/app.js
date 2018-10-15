@@ -3,6 +3,7 @@ import './main.css';
 
 import { gql } from 'apollo-boost';
 import { graphql, compose } from 'react-apollo';
+import cookieControl from '../../cookieControl';
 
 const image = "https://pbs.twimg.com/profile_images/710038421436170240/apTtjpa4_bigger.jpg";
 
@@ -80,6 +81,18 @@ class App extends Component {
   }
 }
 
-// this.props.match.params.id - string
-
-export default App;
+export default compose(
+  graphql(gql`
+    query($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
+      tweet(id: $id, login: $login, password: $password, targetID: $targetID)
+    }
+  `, {
+    name: "tweet",
+    options: {
+      id: cookieControl.get("userdata").id,
+      login: cookieControl.get("userdata").login,
+      password: cookieControl.get("userdata").password,
+      targetID: window.location.pathname.split("/")[2] // XXX
+    }
+  })
+)(App);
