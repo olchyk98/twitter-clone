@@ -53,6 +53,7 @@ const CommentType = new GraphQLObjectType({
     creatorID: { type: GraphQLID },
     sendedToID: { type: GraphQLID },
     content: { type: GraphQLString },
+    time: { type: GraphQLString },
     likes: {
       type: new GraphQLList(UserType),
       async resolve({ id }) {
@@ -97,6 +98,7 @@ const TweetType = new GraphQLObjectType({
     time: { type: GraphQLString },
     content: { type: GraphQLString },
     isLiked: { type: GraphQLBoolean },
+    isSubscribedToCreator: { type: GraphQLBoolean },
     likes: {
       type: new GraphQLList(UserType),
       async resolve({ id }) {
@@ -185,6 +187,8 @@ const RootQuery = new GraphQLObjectType({
       async resolve(_, { id: _id, login, password, targetID }) {
         let user = await User.findOne({ _id, login, password }),
             tweet = await Tweet.findById(targetID);
+
+        tweet.isSubscribedToCreator = user.subscribedTo.find(io => io.toString() === tweet.creatorID) ? true:false;
 
         if(user && tweet) {
           return tweet;
@@ -351,7 +355,8 @@ const RootMutation = new GraphQLObjectType({
           let model = new Comment({
             content,
             sendedToID: tweet.id,
-            creatorID: user.id
+            creatorID: user.id,
+            time: new Date()
           }).save();
 
           // ...pubsub...

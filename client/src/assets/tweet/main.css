@@ -257,3 +257,44 @@
   font-size:1em;
   margin-left:5px;
 }
+
+.rn-tweet-commat {
+  width:calc(100% - 20px);
+  height:40px;
+  position:relative;
+  display:flex;
+  align-items:center;
+  border-radius:3px;
+  padding-left:10px;
+  padding-right:10px;
+  margin-top:7.5px;
+}
+
+.rn-tweet-commat > * {
+  outline:0;
+  background:transparent;
+  border:none;
+}
+
+.rn-tweet-commat > input {
+  width:calc(100% - 40px);
+  height:100%;
+  padding:0;
+  padding-left:5px;
+  padding-right:5px;
+  font-size:1em;
+  color:rgba(255, 255, 255, .95);
+  font-family:"Quicksand";
+  font-weight:400;
+}
+
+.rn-tweet-commat > button {
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:blue;
+  padding:0;
+  color:white;
+  font-size:.85em;
+  cursor:pointer;
+}

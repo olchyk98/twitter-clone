@@ -76,6 +76,11 @@ class App extends Component {
           </div>
         </div>
         <div className="rn-tweet-brdt big" />
+        <div
+          className="rn-tweet-commat">
+          <input type="text" />
+          <button><i className="far fa-paper-plane" /></button>
+        </div>
       </div>
     );
   }
@@ -84,15 +89,19 @@ class App extends Component {
 export default compose(
   graphql(gql`
     query($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
-      tweet(id: $id, login: $login, password: $password, targetID: $targetID)
+      tweet(id: $id, login: $login, password: $password, targetID: $targetID) {
+        id
+      }
     }
   `, {
     name: "tweet",
     options: {
-      id: cookieControl.get("userdata").id,
-      login: cookieControl.get("userdata").login,
-      password: cookieControl.get("userdata").password,
-      targetID: window.location.pathname.split("/")[2] // XXX
+      variables: {
+        id: cookieControl.get("userdata").id,
+        login: cookieControl.get("userdata").login,
+        password: cookieControl.get("userdata").password,
+        targetID: window.location.pathname.split("/")[2] // XXX
+      }
     }
   })
 )(App);
