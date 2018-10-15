@@ -1,0 +1,39 @@
+:root {
+  --uicol: #1b2836;
+  --bgcol:#141d26;
+  --nav-height:50px;
+}
+
+html, body {
+  margin:0;
+  height:100%;
+  font-family:"Arial";
+  background:var(--bgcol);
+}
+
+a,
+a:hover,
+a:active {
+  text-decoration:none;
+}
+
+.mj-nav {
+  height:var(--nav-height);
+}
+
+#main {
+  position:relative;
+  top:var(--nav-height);
+  height:calc(100vh - var(--nav-height));
+  overflow:scroll;
+  /* overflow-x:hidden; */
+  /* overflow-y:hidden; */
+}
+
+.rn-tweet {
+  background:var(--uicol);
+}
+
+.rn-tweet-brdt {
+  background:var(--bgcol);
+}
