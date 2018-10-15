@@ -9,7 +9,7 @@
   border-radius:5px;
   height:auto;
   width:570px;
-  max-width:100%;
+  max-width:calc(100% - var(--tweetpadd) * 2);
   display:flex;
   flex-direction:column;
   margin-left:auto;
@@ -111,12 +111,14 @@
 }
 
 .rn-tweet-date > *:first-child,
-.rn-tweet-stat > *:first-child {
+.rn-tweet-stat > *:first-child,
+.rn-tweet-comments-comment-content-cri-inf > *:first-child {
   margin-left:0;
 }
 
 .rn-tweet-date > *:last-child,
-.rn-tweet-stat > *:last-child {
+.rn-tweet-stat > *:last-child,
+.rn-tweet-comments-comment-content-cri-inf > *:last-child {
   margin-right:0;
 }
 
@@ -173,8 +175,85 @@
   background:transparent;
   font-size:1.25em;
   cursor:pointer;
+  outline:0;
 }
 
-.rn-tweet-comment {
-  
+.rn-tweet-comments-comment {
+  margin-top:10px;
+  width:100%;
+  position:relative;
+  display:flex;
+}
+
+.rn-tweet-comments-comment-mg {
+  width:50px;
+  height:100%;
+  margin-right:10px;
+}
+
+.rn-tweet-comments-comment-mg > img {
+  height:50px;
+  width:50px;
+  border-radius:50%;
+}
+
+.rn-tweet-comments-comment-content {
+  width:calc(100% - 40px);
+}
+
+.rn-tweet-comments-comment-content-cri {
+  display:flex;
+  flex-direction:column;
+}
+
+.rn-tweet-comments-comment-content-cri-inf {
+  display:flex;
+  align-items:center;
+  font-family:"Quicksand";
+  color:rgba(255, 255, 255, .6);
+}
+
+.rn-tweet-comments-comment-content-cri-inf > * {
+  margin-left:3px;
+  margin-right:3px;
+}
+
+.rn-tweet-comments-comment-content-cri-inf-name {
+  color:white;
+  font-weight:400;
+}
+
+.rn-tweet-comments-comment-content-cri-inf-url {
+  font-size:.9em;
+}
+
+.rn-tweet-comments-comment-content-mat {
+  color:rgba(255, 255, 255, .85);
+  font-weight:100;
+  margin-top:7.5px;
+  margin-bottom:10px;
+}
+
+.rn-tweet-comments-comment-content-control {
+  display:flex;
+  width:calc(100% + 90px);
+  position:relative;
+  left:-75px;
+  justify-content:space-around;
+}
+
+.rn-tweet-comments-comment-content-control-btn {
+  background:transparent;
+  border:none;
+  color:rgba(255, 255, 255, .5);
+  font-size:1.1em;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  outline:0;
+}
+
+.rn-tweet-comments-comment-content-control-btn > span {
+  font-size:1em;
+  margin-left:5px;
 }

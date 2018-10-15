@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import './main.css';
 
+import { gql } from 'apollo-boost';
+import { graphql, compose } from 'react-apollo';
+
 const image = "https://pbs.twimg.com/profile_images/710038421436170240/apTtjpa4_bigger.jpg";
 
 class App extends Component {
@@ -40,18 +43,43 @@ class App extends Component {
         </div>
         <div className="rn-tweet-brdt" />
         <div className="rn-tweet-controls">
-          <button className="rn-tweet-controls-btn"><i className="far fa-comment" /></button>
           <button className="rn-tweet-controls-btn"><i className="far fa-heart" /></button>
+          <button className="rn-tweet-controls-btn"><i className="far fa-comment" /></button>
         </div>
         <div className="rn-tweet-brdt big" />
         <div className="rn-tweet-comments">
-          <div className="rn-tweet-comment">
-
+          <div className="rn-tweet-comments-comment">
+            <div className="rn-tweet-comments-comment-mg">
+              <img src={ image } alt="" />
+            </div>
+            <div className="rn-tweet-comments-comment-content">
+              <div className="rn-tweet-comments-comment-content-cri">
+                <div className="rn-tweet-comments-comment-content-cri-inf">
+                  <span className="rn-tweet-comments-comment-content-cri-inf-name">Oles</span>
+                  <span className="rn-tweet-comments-comment-content-cri-inf-url">@oles</span>
+                  <span>•</span>
+                  <span className="rn-tweet-comments-comment-content-cri-inf-time">8h</span>
+                </div>
+                <span className="rn-tweet-comments-comment-content-cri-repl"></span>
+              </div>
+              <p className="rn-tweet-comments-comment-content-mat">
+                В школе на родительском собрании учительницы говорили моим родителям "он конечно долбоеб, но швей будет хороших нанимать"
+              </p>
+              <div className="rn-tweet-comments-comment-content-control">
+                <button className="rn-tweet-comments-comment-content-control-btn">
+                  <i className="far fa-heart" />
+                  <span>3</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+        <div className="rn-tweet-brdt big" />
       </div>
     );
   }
 }
+
+// this.props.match.params.id - string
 
 export default App;
