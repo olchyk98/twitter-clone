@@ -6,8 +6,6 @@ const cors = require('cors');
 
 const schema = require('./schema');
 
-//
-
 mongoose.connect("mongodb://oles:0password@ds263571.mlab.com:63571/graphql-twittersclone", {
   useNewUrlParser: true
 });
