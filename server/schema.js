@@ -186,8 +186,10 @@ const RootQuery = new GraphQLObjectType({
       },
       async resolve(_, { id: _id, login, password, targetID }) {
         let user = await User.findOne({ _id, login, password }),
-            tweet = await Tweet.findById(targetID);
+            tweet = await Tweet.findById(targetID),
+            str = str1 => str1.toString();
 
+        tweet.isLiked = tweet.likes.find(io => str(io) === str(user._id)) ? true:false;
         tweet.isSubscribedToCreator = user.subscribedTo.find(io => io.toString() === tweet.creatorID) ? true:false;
 
         if(user && tweet) {
