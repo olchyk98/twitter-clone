@@ -124,6 +124,7 @@ class App extends Component {
     let a = new Date(parseInt(time)),
         b = b1 => b1.toString(),
         c = c1 => (b(c1).length === 1) ? "0" + c1 : b(c1);
+    console.log(a, time);
 
     if(!isFull) { // 8:32
       return `${ c(a.getHours()) }:${ c(a.getMinutes()) }`;
@@ -141,7 +142,8 @@ class App extends Component {
         "Oct",
         "Nov",
         "Dec"
-      ][a.getMonth() + 1]
+      ][a.getMonth()];
+      return `${ d } ${ c(a.getDate()) }, ${ c(a.getFullYear()) }`
     }
   }
 
@@ -168,9 +170,9 @@ class App extends Component {
           { this.getAPI().content }
         </p>
         <div className="rn-tweet-date">
-          <span>{ this.convertTime(this.getAPI(null, false)) }</span>
+          <span>{ this.convertTime(this.getAPI({time:null}).time, false) }</span>
           <span>•</span>
-          <span>{ this.convertTime(this.getAPI(null, "full")) }</span>
+          <span>{ this.convertTime(this.getAPI({time:null}).time, true) }</span>
         </div>
         <div className="rn-tweet-brdt" />
         <div className="rn-tweet-stat">
