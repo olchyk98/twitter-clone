@@ -90,7 +90,24 @@ export default compose(
   graphql(gql`
     query($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
       tweet(id: $id, login: $login, password: $password, targetID: $targetID) {
-        id
+        id,
+        content,
+        time,
+        likesInt,
+        commentsInt,
+        isLiked,
+        creator {
+          image,
+          id,
+          url,
+          name,
+          isSubscribed
+        },
+        comments {
+          id,
+          content,
+          time,
+        }
       }
     }
   `, {
