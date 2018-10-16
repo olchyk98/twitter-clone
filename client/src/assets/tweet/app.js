@@ -96,17 +96,24 @@ export default compose(
         likesInt,
         commentsInt,
         isLiked,
+        isSubscribedToCreator,
         creator {
           image,
           id,
           url,
-          name,
-          isSubscribed
+          name
         },
         comments {
           id,
           content,
           time,
+          likesInt,
+          creator {
+            image,
+            name,
+            url,
+            id
+          }
         }
       }
     }
