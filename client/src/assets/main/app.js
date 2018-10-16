@@ -7,8 +7,10 @@ import { Link } from 'react-router-dom';
 
 import links from '../../links';
 import cookieControl from '../../cookieControl';
+import client from '../../apollo';
 
 function destroySession() {
+  return;
   cookieControl.delete("userdata");
   return window.location.reload();
 }
@@ -159,6 +161,7 @@ class MainNewsItem extends Component {
           <img src={ this.props.creatorImage } alt={ this.props.creatorName } />
         </Link>
         <div className="rn-main-news-mat-item-mat">
+          <Link className="rn-main-news-mat-item-rft" to={ `${ links["TWEET_PAGE"] }/${ this.props.id }` } />
           <div className="rn-main-news-mat-item-mat-tit">
             <Link to="/account">
               <span className="rn-main-news-mat-item-mat-name">{ this.props.creatorName }</span>
@@ -253,6 +256,10 @@ class MainNews extends Component {
 }
 
 class Main extends Component {
+  componentDidUpdate() {
+    if(!this.props.feed.loading && this.props.feed.error) client.resetStore();
+  }
+
   getFeedData = () => {
     let a = this.props.feed;
     if(a.loading) return [];
@@ -334,10 +341,10 @@ export default compose(
   graphql(gql`
     mutation($id: ID!, $login: String!, $password: String!, $content: String!) {
       addTweet(id: $id, login: $login, password: $password, content: $content) {
+        id,
         commentsInt,
         likesInt,
         content,
-        id,
         time,
         isLiked,
         creator {

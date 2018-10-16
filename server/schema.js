@@ -54,6 +54,18 @@ const CommentType = new GraphQLObjectType({
     sendedToID: { type: GraphQLID },
     content: { type: GraphQLString },
     time: { type: GraphQLString },
+    isLiked: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: GraphQLID },
+        login: { type: GraphQLString },
+        password: { type: GraphQLString }
+      },
+      resolve(parent, args) {
+        console.log("A");
+        return true;
+      }
+    },
     likes: {
       type: new GraphQLList(UserType),
       async resolve({ id }) {
@@ -289,6 +301,8 @@ const RootMutation = new GraphQLObjectType({
         targetID: { type: new GraphQLNonNull(GraphQLID) }
       },
       async resolve(_, { id: _id, login, password, targetID }) {
+        if(_id === targetID) return false;
+
         let mainUser = await User.findOne({ _id, login, password }),
             targetUser = await User.findById(targetID);
         if(mainUser && targetUser && mainUser._id !== targetUser._id) {
@@ -341,7 +355,7 @@ const RootMutation = new GraphQLObjectType({
       }
     },
     commentTweet: {
-      type: GraphQLBoolean,
+      type: CommentType,
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
         login: { type: new GraphQLNonNull(GraphQLString) },

@@ -65,15 +65,15 @@
 
   height:32.5px;
   width:105px; /* XXX: must be expressed in padding */
-  border:1px solid var(--color);
   border-radius:45px;
   background:transparent;
   color:var(--color);
+  border:none;
   font-family:"Roboto";
   font-weight:600;
   outline:0;
   font-size:1em;
-  line-height:29px;
+  line-height:30px;
   cursor:pointer;
   -webkit-font-smoothing:antialiased;
   transition:.4s;
@@ -87,6 +87,10 @@
 .rn-tweet-creator-follow.active {
   background:#34a1f2;
   color:white;
+}
+
+.rn-tweet-creator-follow.active:hover {
+  background:rgb(194, 27, 27);
 }
 
 .rn-tweet-content {

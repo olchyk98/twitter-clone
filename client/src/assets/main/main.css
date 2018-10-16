@@ -144,6 +144,22 @@
   color:white;
   width:calc(90% - 10px);
   margin-left:10px;
+  position:relative;
+}
+
+.rn-main-news-mat-item-mat > * {
+  position:relative;
+  z-index:4;
+}
+
+.rn-main-news-mat-item-rft {
+  z-index:1;
+  width:100%;
+  position:absolute;
+  top:0;
+  left:0;
+  height:100%;
+  cursor:pointer;
 }
 
 .rn-main-news-mat-item-mat-name {

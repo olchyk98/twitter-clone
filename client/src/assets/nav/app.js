@@ -28,9 +28,13 @@ class Nav extends Component {
     }
   }
 
+  componentDidMount() {
+
+  }
+
   getAPI = dat => {
     let a = this.props.navdata;
-    return (!a.loading && a.user) ? a.user[dat] : "";
+    return ((!a.loading && a.user) || this.props.navdata.user) ? a.user[dat] : "";
   }
 
   render() {
