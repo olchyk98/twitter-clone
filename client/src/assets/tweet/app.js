@@ -9,12 +9,41 @@ import client from '../../apollo';
 const image = "https://pbs.twimg.com/profile_images/710038421436170240/apTtjpa4_bigger.jpg";
 
  class Comment extends Component {
+   convertTime(time) { // clear function
+    // minute -- 60
+    // hour -- 3600
+    // day -- 86400
+    // week -- 604800
+    // month -- 2678400
+    // date
+
+    let a = (new Date()).getTime(), // unixtime to jsdate
+        b = b1 => b1.toString(),
+        c = c1 => a - time < c1,
+        d = d1 => Math.round(d1);
+
+    console.log(a - time, time);
+    if(c(60)) { // seconds<minute
+      return d((a - time) / 60) + "s";
+    } else if(c(3600)) { // minutes<hour
+      return d((a - time) / 3600) + "m";
+    } else if(c(86400)) { // hours<day
+      return d((a - time) / 86400) + "h";
+    } else if(c(604800)) { // days<week
+      return d((a - time) / 604800) + "d";
+    } else if(c(2678400)) { // weeks<month
+      return d((a - time) / 2678400) + "w";
+    } else { // date
+      return "many much time";
+    }
+   }
+
    render() {
      return(
       <React.Fragment>
         <div className="rn-tweet-comments-comment">
            <div className="rn-tweet-comments-comment-mg">
-             <img src={ this.props.creator.image } alt="" />
+             <img src={ this.props.creator.image } alt={ this.props.creator.name } />
            </div>
            <div className="rn-tweet-comments-comment-content">
              <div className="rn-tweet-comments-comment-content-cri">
@@ -22,7 +51,7 @@ const image = "https://pbs.twimg.com/profile_images/710038421436170240/apTtjpa4_
                  <span className="rn-tweet-comments-comment-content-cri-inf-name">{ this.props.creator.name }</span>
                  <span className="rn-tweet-comments-comment-content-cri-inf-url">@{ this.props.creator.url }</span>
                  <span>•</span>
-                 <span className="rn-tweet-comments-comment-content-cri-inf-time">8h</span>
+                 <span className="rn-tweet-comments-comment-content-cri-inf-time">{ this.convertTime(this.props.time) }</span>
                </div>
                <span className="rn-tweet-comments-comment-content-cri-repl"></span>
              </div>
@@ -118,13 +147,12 @@ class App extends Component {
     }
   }
 
-  convertTime = (time, isFull) => {
+  convertTime(time, isFull) {
     if(!time) return false;
 
     let a = new Date(parseInt(time)),
         b = b1 => b1.toString(),
         c = c1 => (b(c1).length === 1) ? "0" + c1 : b(c1);
-    console.log(a, time);
 
     if(!isFull) { // 8:32
       return `${ c(a.getHours()) }:${ c(a.getMinutes()) }`;
@@ -152,7 +180,11 @@ class App extends Component {
       <div className="rn-tweet">
         <div className="rn-tweet-creator">
           <div className="rn-tweet-creator-bx">
-            <img className="rn-tweet-creator-mg" alt="" src={ this.getAPI({creator:{image:""}}).creator.image } />
+            <img
+              className="rn-tweet-creator-mg"
+              alt={ this.getAPI({creator:{name:""}}).creator.name }
+              src={ this.getAPI({creator:{image:""}}).creator.image }
+            />
             <div className="rn-tweet-creator-info">
               <p className="rn-tweet-creator-info-name">{ this.getAPI({creator:{name:""}}).creator.name }</p>
               <span className="rn-tweet-creator-info-url">@{ this.getAPI({creator:{url:""}}).creator.url }</span>

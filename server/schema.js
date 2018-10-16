@@ -62,7 +62,6 @@ const CommentType = new GraphQLObjectType({
         password: { type: GraphQLString }
       },
       resolve(parent, args) {
-        console.log("A");
         return true;
       }
     },
