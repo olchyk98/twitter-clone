@@ -258,7 +258,7 @@ class MainNews extends Component {
 
 class Main extends Component {
   componentDidUpdate() {
-    if(!this.props.feed.loading && this.props.feed.error) client.resetStore();
+    if(!this.props.feed.loading && this.props.feed.networkStatus === 8) client.resetStore();
   }
 
   getFeedData = () => {
@@ -267,9 +267,8 @@ class Main extends Component {
 
     if(!a.loading && a.fetchFeed) {
       return a.fetchFeed;
-    } else if(!a.loading && !a.fetchFeed) {
-      client.resetStore();
-      // destroySession();
+    } else if(!a.loading && !a.fetchFeed && a.networkStatus !== 8) { // XXX
+      destroySession();
     }
   }
 
