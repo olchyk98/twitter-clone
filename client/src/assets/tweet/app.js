@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import './main.css';
-
 import { gql } from 'apollo-boost';
 import { compose, graphql } from 'react-apollo';
 
