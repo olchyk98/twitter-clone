@@ -13,7 +13,18 @@ function destroySession() {
 }
 
  class Comment extends Component {
+   constructor(props) {
+     super(props);
+
+     this.state = {
+       time: -1
+     }
+
+     this.timerInt = null;
+   }
+
    convertTime(time) { // clf
+     if(!time) return "";
     // minute -- 60
     // hour -- 3600
     // day -- 86400
@@ -21,22 +32,23 @@ function destroySession() {
     // month -- 2419200
     // date
 
-    let a = (new Date()).getTime(), // unixtime to jsdate
+    let a = (new Date()).getTime() / 1000,
         // b = b1 => b1.toString(),
         c = c1 => a - time < c1,
-        d = d1 => Math.round(d1);
+        d = Math.round;
 
-    console.log(a - time, time);
     if(c(60)) { // seconds<minute
-      return d((a - time) / 60) + "s";
+      return d((a - time)) + "s";
     } else if(c(3600)) { // minutes<hour
-      return d((a - time) / 3600) + "m";
+      return d((a - time) / 60) + "m";
     } else if(c(86400)) { // hours<day
-      return d((a - time) / 86400) + "h";
+      return d((a - time) / 3600) + "h";
     } else if(c(604800)) { // days<week
-      return d((a - time) / 604800) + "d";
+      return d((a - time) / 86400) + "d";
     } else if(c(2419200)) { // weeks<month
-      return d((a - time) / 2419200) + "w";
+      return d((a - time) / 604800) + "w";
+    } else if(time < 0) {
+      return "";
     } else { // date
       return "many much time";
     }
