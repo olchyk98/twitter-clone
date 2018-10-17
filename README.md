@@ -3,7 +3,7 @@
 
 Full List:
   # Javascript
-    Vanilla Javascript for some of ADX packages.
+    For some of ADX packages.
   # React
     Main framework for client.
   # Node
