@@ -14,6 +14,19 @@ function destroySession() {
 }
 
  class Comment extends Component {
+   constructor(props) {
+     super(props);
+
+     this.state = {
+       likes: {
+        allowed: false,
+        fromState: false,
+        isLiked: false,
+        likes: 0
+       }
+     }
+   }
+
    convertTime(time) { // clf
      if(!time) return "";
     // minute -- 60
@@ -63,8 +76,36 @@ function destroySession() {
     }
    }
 
-   likeTweet = () => {
-     
+   likeComment = () => {
+      let a = cookieControl.get("userdata"),
+          b = this.state.likes.fromState,
+          c = this.props.likes,
+          d = this.state.likes.likes,
+          e = (!b) ? !this.props.isLiked : !this.state.likes.isLiked;
+
+     this.setState(({ likes }) => {
+       return {
+         likes: {
+           ...likes,
+           fromState: true,
+           isLiked: b,
+           likes: !b ? e ? c + 1 : c - 1 : e ? d + 1 : d - 1
+         }
+       }
+     })
+
+     this.props.likeMutation({
+       variables: {
+        id: a.id,
+        login: a.login,
+        password: a.password,
+        targetID: this.props.id
+       }
+     }).then(console.log);
+   }
+
+   getLikesSource = () => {
+     return (!this.state.likes.fromState) ? this.props : this.state.likes;
    }
 
    render() {
@@ -88,10 +129,17 @@ function destroySession() {
                { this.props.content }
              </p>
              <div className="rn-tweet-comments-comment-content-control">
-               <button
-                 className={ `rn-tweet-comments-comment-content-control-btn rn-tweet-controls-btn ${ (!this.props.isLiked) ? "" : " active" }` }>
-                 <i className={ `${ (!this.props.isLiked) ? "far" : "fas" } fa-heart` } />
-                 <span>{ this.props.likes }</span>
+                <button
+                  className={ `rn-tweet-comments-comment-content-control-btn rn-tweet-controls-btn ${ (!this.getLikesSource().isLiked) ? "" : " active" }` }
+                  onClick={ this.likeComment }
+                  key={ (!this.getLikesSource().isLiked) ? "A":"B" }>
+                  {
+                    (!this.getLikesSource().isLiked) ?
+                      <i className="far fa-heart" />
+                    :
+                      <i className="fas fa-heart" />
+                  }
+                  <span>{ this.getLikesSource().likes }</span>
                </button>
              </div>
            </div>
@@ -332,6 +380,7 @@ class App extends Component {
                   isLiked={ isLiked }
                   likes={ likesInt }
                   creator={ creator }
+                  likeMutation={ this.props.likeComment }
                 />
               );
             })
@@ -357,5 +406,10 @@ export default compose(
     mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
       likeTweet(id: $id, login: $login, password: $password, targetID: $targetID)
     }
-  `, { name: "likeTweet" })
+  `, { name: "likeTweet" }),
+  graphql(gql`
+    mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
+      likeComment(id: $id, login: $login, password: $password, targetID: $targetID)
+    }
+  `, { name: "likeComment" })
 )(App);
