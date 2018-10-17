@@ -19,7 +19,7 @@ function destroySession() {
 
      this.state = {
        likes: {
-        allowed: false,
+        allowed: true,
         fromState: false,
         isLiked: false,
         likes: 0
@@ -76,32 +76,45 @@ function destroySession() {
     }
    }
 
-   likeComment = () => {
-      let a = cookieControl.get("userdata"),
-          b = this.state.likes.fromState,
-          c = this.props.likes,
-          d = this.state.likes.likes,
-          e = (!b) ? !this.props.isLiked : !this.state.likes.isLiked;
+  likeComment = () => {
+    if(!this.state.likes.allowed) return;
 
-     this.setState(({ likes }) => {
-       return {
-         likes: {
-           ...likes,
-           fromState: true,
-           isLiked: b,
-           likes: !b ? e ? c + 1 : c - 1 : e ? d + 1 : d - 1
-         }
-       }
-     })
+    let a = cookieControl.get("userdata"),
+        b = this.state.likes.fromState,
+        c = (!b) ? this.props.likes : this.state.likes.likes,
+        d = (!b) ? !this.props.isLiked : !this.state.likes.isLiked;
 
-     this.props.likeMutation({
-       variables: {
-        id: a.id,
-        login: a.login,
-        password: a.password,
-        targetID: this.props.id
+   this.setState(({ likes }) => {
+     return {
+       likes: {
+         ...likes,
+         fromState: true,
+         isLiked: d,
+         likes: d ? c + 1 : c - 1,
+         allowed: false
        }
-     }).then(console.log);
+     }
+   });
+
+  this.props.likeMutation({
+    variables: {
+      id: a.id,
+      login: a.login,
+      password: a.password,
+      targetID: this.props.id
+    }
+   }).then(({ data: { likeComment: liked } }) => {
+    this.setState(({ likes }) => {
+      return {
+        likes: {
+          ...likes,
+          isLiked: liked,
+          likes: liked ? c + 1 : c - 1,
+          allowed: true
+        }
+      }
+    });
+  }).catch(destroySession);
    }
 
    getLikesSource = () => {
@@ -130,7 +143,7 @@ function destroySession() {
              </p>
              <div className="rn-tweet-comments-comment-content-control">
                 <button
-                  className={ `rn-tweet-comments-comment-content-control-btn rn-tweet-controls-btn ${ (!this.getLikesSource().isLiked) ? "" : " active" }` }
+                  className={ `rn-tweet-comments-comment-content-control-btn rn-tweet-controls-btn like ${ (!this.getLikesSource().isLiked) ? "" : " active" }` }
                   onClick={ this.likeComment }
                   key={ (!this.getLikesSource().isLiked) ? "A":"B" }>
                   {
@@ -161,6 +174,7 @@ class App extends Component {
     }
 
     this.commentRef = React.createRef();
+    this.commentsBlockRef = React.createRef();
   }
 
   componentDidMount() {
@@ -303,7 +317,36 @@ class App extends Component {
           isLikeAllowed: true
         }
       });
-    });
+    }).catch(destroySession);
+  }
+
+  commentTweet = e => {
+    e.preventDefault();
+
+    let { id, login, password } = cookieControl.get("userdata");
+
+    document.getElementById("main").scrollTo({ top: this.commentsBlockRef.getBoundingClientRect().top, behavior: "smooth" });
+    this.props.commentTweet({
+      variables: {
+        id,
+        login,
+        password,
+        targetID: this.state.tweet.id,
+        content: this.commentRef.value
+      }
+    }).then(({ data: { commentTweet: comment } }) => {
+      this.setState(({ tweet }) => {
+        return {
+          tweet: {
+            ...tweet,
+            comments: [
+              comment,
+              ...tweet.comments
+            ]
+          }
+        }
+      });
+    }).catch(destroySession);
   }
 
   render() {
@@ -368,7 +411,7 @@ class App extends Component {
           </button>
         </div>
         <div className="rn-tweet-brdt big" />
-        <div className="rn-tweet-comments">
+        <div className="rn-tweet-comments" ref={ ref => this.commentsBlockRef = ref }>
           {
             this.getAPI({comments:[]}).comments.map(({ isLiked, id, creator, content, time, likesInt }) => {
               return(
@@ -386,16 +429,18 @@ class App extends Component {
             })
           }
         </div>
-        <div
+        <form
+          onSubmit={ this.commentTweet }
           className="rn-tweet-commat">
           <input
             type="text"
+            placeholder="Leave your comment here..."
             ref={ ref => this.commentRef = ref }
             onFocus={ () => this.setState({ isCommenting: true }) }
             onBlur={ () => this.setState({ isCommenting: false }) }
           />
           <button><i className="far fa-paper-plane" /></button>
-        </div>
+        </form>
       </div>
     );
   }
@@ -411,5 +456,22 @@ export default compose(
     mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
       likeComment(id: $id, login: $login, password: $password, targetID: $targetID)
     }
-  `, { name: "likeComment" })
+  `, { name: "likeComment" }),
+  graphql(gql`
+    mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!, $content: String!) {
+      commentTweet(id: $id, login: $login, password: $password, targetID: $targetID, content: $content) {
+        id,
+        content,
+        time,
+        likesInt,
+        isLiked(id: $id, login: $login, password: $password),
+        creator {
+          image,
+          name,
+          url,
+          id
+        }
+      }
+    }
+  `, { name: "commentTweet" })
 )(App);
