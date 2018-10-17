@@ -3,25 +3,25 @@
 
 Full List:
   # Javascript
-    Some of ADX packages are written in(on) Javascript.
+    Vanilla Javascript for some of ADX packages.
   # React
-    ReactJS as main framework in(for) this project.
+    Main framework for client.
   # Node
      -
   # Express
-     -
+     Main framework for server.
   # GraphQL
     -
   # ->Apollo Server
-    Apollo Server as main transporter for server.
+    Main transporter for server.
   # ->Apollo Client
-    Apollo Client as main transporter for client.
+    Main transporter for client.
   # GraphQL Subscriptions
-    Uses for 
+    Messages, live reload.
   # SocketIO
-    Testing, ADX Controls
+    Live Tests, ADX Controls
   # Mocha
-    As main library for testing.
+    Main library for tests.
   # Chai
     -
   # Redux
