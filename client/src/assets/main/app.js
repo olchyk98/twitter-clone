@@ -10,7 +10,6 @@ import cookieControl from '../../cookieControl';
 import client from '../../apollo';
 
 function destroySession() {
-  return;
   cookieControl.delete("userdata");
   return window.location.reload();
 }
@@ -174,10 +173,12 @@ class MainNewsItem extends Component {
             { this.props.content }
           </p>
           <div className="rn-main-news-mat-item-control">
-            <button className="rn-main-news-mat-item-control-btn">
-              <i className="far fa-comment" />
-              <span>{ this.props.comments }</span>
-            </button>
+            <Link to={ `${ links["TWEET_PAGE"] }/${ this.props.id }` }>
+              <button className="rn-main-news-mat-item-control-btn">
+                <i className="far fa-comment" />
+                <span>{ this.props.comments }</span>
+              </button>
+            </Link>
             <button
               className={ `rn-main-news-mat-item-control-btn${ (!this.getLikeState().isLiked) ? "" : " liked" }` }
               onClick={ this.likeTweet }

@@ -2,23 +2,27 @@ import React, { Component } from 'react';
 import './main.css';
 
 import { gql } from 'apollo-boost';
-import { graphql, compose } from 'react-apollo';
+
 import cookieControl from '../../cookieControl';
 import client from '../../apollo';
+import links from '../../links';
 
-const image = "https://pbs.twimg.com/profile_images/710038421436170240/apTtjpa4_bigger.jpg";
+function destroySession() {
+  cookieControl.delete("userdata");
+  return window.location.href = links["REGISTER_PAGE"];
+}
 
  class Comment extends Component {
-   convertTime(time) { // clear function
+   convertTime(time) { // clf
     // minute -- 60
     // hour -- 3600
     // day -- 86400
     // week -- 604800
-    // month -- 2678400
+    // month -- 2419200
     // date
 
     let a = (new Date()).getTime(), // unixtime to jsdate
-        b = b1 => b1.toString(),
+        // b = b1 => b1.toString(),
         c = c1 => a - time < c1,
         d = d1 => Math.round(d1);
 
@@ -31,8 +35,8 @@ const image = "https://pbs.twimg.com/profile_images/710038421436170240/apTtjpa4_
       return d((a - time) / 86400) + "h";
     } else if(c(604800)) { // days<week
       return d((a - time) / 604800) + "d";
-    } else if(c(2678400)) { // weeks<month
-      return d((a - time) / 2678400) + "w";
+    } else if(c(2419200)) { // weeks<month
+      return d((a - time) / 2419200) + "w";
     } else { // date
       return "many much time";
     }
@@ -135,7 +139,7 @@ class App extends Component {
       this.setState(() => {
         return { tweet }
       });
-    });
+    }).catch(destroySession);
   }
 
   getAPI = (def = []) => {
