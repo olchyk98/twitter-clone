@@ -17,7 +17,7 @@ Full List:
   # ->Apollo Client
     Main transporter for client.
   # GraphQL Subscriptions
-    Messages, live reload.
+    Messages, live updates.
   # SocketIO
     Live Tests, ADX Controls
   # Mocha
