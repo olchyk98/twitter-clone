@@ -13,16 +13,6 @@ function destroySession() {
 }
 
  class Comment extends Component {
-   constructor(props) {
-     super(props);
-
-     this.state = {
-       time: -1
-     }
-
-     this.timerInt = null;
-   }
-
    convertTime(time) { // clf
      if(!time) return "";
     // minute -- 60
@@ -32,6 +22,7 @@ function destroySession() {
     // month -- 2419200
     // date
 
+    time /= 1000;
     let a = (new Date()).getTime() / 1000,
         // b = b1 => b1.toString(),
         c = c1 => a - time < c1,
@@ -95,6 +86,8 @@ class App extends Component {
     this.state = {
       tweet: false
     }
+
+    this.commentRef = React.createRef();
   }
 
   componentDidMount() {
@@ -148,6 +141,7 @@ class App extends Component {
         targetID: window.location.pathname.split("/")[2] // XXX
       }
     }).then(({ data: { tweet } }) => {
+      console.log(tweet);
       this.setState(() => {
         return { tweet }
       });
@@ -235,8 +229,19 @@ class App extends Component {
         </div>
         <div className="rn-tweet-brdt" />
         <div className="rn-tweet-controls">
-          <button className="rn-tweet-controls-btn"><i className="far fa-heart" />{ this.getA }</button>
-          <button className="rn-tweet-controls-btn"><i className="far fa-comment" /></button>
+          <button className={ `rn-tweet-controls-btn${ (!this.state.tweet.isLiked) ? "" : " active" }` } key={ (!this.state.tweet.isLiked) ? "A":"B" }>
+            {
+              (!this.state.tweet.isLiked) ?
+                <i className="far fa-heart" />
+              :
+                <i className="fas fa-heart" />
+            }
+          </button>
+          <button
+            className="rn-tweet-controls-btn"
+            onClick={ this.commentFillFocus }>
+            <i className="far fa-comment" />
+          </button>
         </div>
         <div className="rn-tweet-brdt big" />
         <div className="rn-tweet-comments">
@@ -257,7 +262,10 @@ class App extends Component {
         </div>
         <div
           className="rn-tweet-commat">
-          <input type="text" />
+          <input
+            type="text"
+            ref={ ref => this.commentRef = ref }
+          />
           <button><i className="far fa-paper-plane" /></button>
         </div>
       </div>
