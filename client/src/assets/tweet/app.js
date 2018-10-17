@@ -185,6 +185,17 @@ class App extends Component {
     }
   }
 
+  commentFillFocus = () => {
+    let a = this.commentRef,
+        b = document.getElementById("main"); // XXX ?
+    a.focus();
+    b.scrollTo({ top: window.scrollY });
+    b.scrollTo({
+      top: a.getBoundingClientRect().top,
+      behavior: "smooth"
+    })
+  }
+
   render() {
     return(
       <div className="rn-tweet">
