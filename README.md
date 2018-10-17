@@ -19,12 +19,12 @@ Full List:
   # GraphQL Subscriptions
     Messages, live updates.
   # SocketIO
-    Live Tests, ADX Controls
+    Live Tests, ADX Controls (GITHUB_EXCEPTION)
   # Mocha
-    Main library for tests.
+    Main library for tests. (GITHUB_EXCEPTION)
   # Chai
-    -
+    - (GITHUB_EXCEPTION)
   # Redux
-    -
+    - (GITHUB_EXCEPTION)
 
 # GITHUB TEST
