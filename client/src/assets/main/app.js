@@ -10,6 +10,7 @@ import cookieControl from '../../cookieControl';
 import client from '../../apollo';
 
 function destroySession() {
+  return;
   cookieControl.delete("userdata");
   return window.location.reload();
 }
@@ -268,6 +269,8 @@ class Main extends Component {
     if(!a.loading && a.fetchFeed) {
       return a.fetchFeed;
     } else if(!a.loading && !a.fetchFeed) { // unsecure session
+      client.clearStore();
+      return console.log("UNSECURE SESSION ALERT");
       destroySession();
     }
   }

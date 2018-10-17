@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './main.css';
 
 import { gql } from 'apollo-boost';
+import { compose, graphql } from 'react-apollo';
 
 import cookieControl from '../../cookieControl';
 import client from '../../apollo';
@@ -84,7 +85,9 @@ class App extends Component {
     super(props);
 
     this.state = {
-      tweet: false
+      tweet: false,
+      isLikeAllowed: true,
+      isCommenting: false
     }
 
     this.commentRef = React.createRef();
@@ -196,6 +199,44 @@ class App extends Component {
     })
   }
 
+  likeTweet = () => {
+    if(!this.state.isLikeAllowed) return;
+
+    let a = cookieControl.get("userdata"),
+        { likesInt, isLiked } = this.state.tweet;
+
+    this.setState(({ tweet }) => {
+      return {
+        tweet: {
+          ...tweet,
+          isLiked: !isLiked,
+          likesInt: !isLiked ? likesInt + 1 : likesInt - 1,
+        },
+        isLikeAllowed: false
+      }
+    });
+
+    this.props.likeTweet({
+      variables: {
+        id: a.id,
+        login: a.login,
+        password: a.password,
+        targetID: this.state.tweet.id
+      }
+    }).then(({ data: { likeTweet } }) => {
+      this.setState(({ tweet }) => {
+        return {
+          tweet: {
+            ...tweet,
+            isLiked: likeTweet,
+            likesInt: likeTweet ? likesInt + 1 : likesInt - 1,
+          },
+          isLikeAllowed: true
+        }
+      });
+    });
+  }
+
   render() {
     return(
       <div className="rn-tweet">
@@ -240,7 +281,10 @@ class App extends Component {
         </div>
         <div className="rn-tweet-brdt" />
         <div className="rn-tweet-controls">
-          <button className={ `rn-tweet-controls-btn${ (!this.state.tweet.isLiked) ? "" : " active" }` } key={ (!this.state.tweet.isLiked) ? "A":"B" }>
+          <button
+            className={ `rn-tweet-controls-btn like${ (!this.state.tweet.isLiked) ? "" : " active" }` }
+            key={ (!this.state.tweet.isLiked) ? "A":"B" }
+            onClick={ this.likeTweet }>
             {
               (!this.state.tweet.isLiked) ?
                 <i className="far fa-heart" />
@@ -249,7 +293,7 @@ class App extends Component {
             }
           </button>
           <button
-            className="rn-tweet-controls-btn"
+            className={ `rn-tweet-controls-btn${ !this.state.isCommenting ? "" : " active" }` }
             onClick={ this.commentFillFocus }>
             <i className="far fa-comment" />
           </button>
@@ -276,6 +320,8 @@ class App extends Component {
           <input
             type="text"
             ref={ ref => this.commentRef = ref }
+            onFocus={ () => this.setState({ isCommenting: true }) }
+            onBlur={ () => this.setState({ isCommenting: false }) }
           />
           <button><i className="far fa-paper-plane" /></button>
         </div>
@@ -284,4 +330,10 @@ class App extends Component {
   }
 }
 
-export default App;
+export default compose(
+  graphql(gql`
+    mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
+      likeTweet(id: $id, login: $login, password: $password, targetID: $targetID)
+    }
+  `, { name: "likeTweet" })
+)(App);
