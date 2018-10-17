@@ -350,6 +350,14 @@ class App extends Component {
   }
 
   render() {
+    if(this.state.tweet === false) {
+      return(
+        <div className="rn-tweet">
+          <div className="rn-tweet-loadingic"></div>
+        </div>
+      );
+    }
+
     return(
       <div className="rn-tweet">
         <div className="rn-tweet-creator">
