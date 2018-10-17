@@ -21,7 +21,6 @@ function destroySession() {
     // day -- 86400
     // week -- 604800
     // month -- 2419200
-    // date
 
     time /= 1000;
     let a = (new Date()).getTime() / 1000,
@@ -41,9 +40,31 @@ function destroySession() {
       return d((a - time) / 604800) + "w";
     } else if(time < 0) {
       return "";
-    } else { // date
-      return "many much time";
+    } else { // date - Oct 23, 2018 18:32
+      let e = new Date(time * 1000),
+          f = [
+            "Jan",
+            "Feb",
+            "March",
+            "Apr",
+            "May",
+            "June",
+            "July",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ][e.getMonth()];
+      return `${ f } ${ e.getDate() }, ${ e.getFullYear() } ${ e.getHours() }:${ e.getMinutes() }`;
     }
+   }
+
+   likeTweet = () => {
+     
    }
 
    render() {
@@ -67,8 +88,9 @@ function destroySession() {
                { this.props.content }
              </p>
              <div className="rn-tweet-comments-comment-content-control">
-               <button className="rn-tweet-comments-comment-content-control-btn">
-                 <i className="far fa-heart" />
+               <button
+                 className={ `rn-tweet-comments-comment-content-control-btn rn-tweet-controls-btn ${ (!this.props.isLiked) ? "" : " active" }` }>
+                 <i className={ `${ (!this.props.isLiked) ? "far" : "fas" } fa-heart` } />
                  <span>{ this.props.likes }</span>
                </button>
              </div>
@@ -144,7 +166,6 @@ class App extends Component {
         targetID: window.location.pathname.split("/")[2] // XXX
       }
     }).then(({ data: { tweet } }) => {
-      console.log(tweet);
       this.setState(() => {
         return { tweet }
       });
@@ -301,13 +322,14 @@ class App extends Component {
         <div className="rn-tweet-brdt big" />
         <div className="rn-tweet-comments">
           {
-            this.getAPI({comments:[]}).comments.map(({ id, creator, content, time, likesInt }) => {
+            this.getAPI({comments:[]}).comments.map(({ isLiked, id, creator, content, time, likesInt }) => {
               return(
                 <Comment
                   key={ id }
                   id={ id }
                   content={ content }
                   time={ time }
+                  isLiked={ isLiked }
                   likes={ likesInt }
                   creator={ creator }
                 />

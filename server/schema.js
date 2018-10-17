@@ -61,8 +61,13 @@ const CommentType = new GraphQLObjectType({
         login: { type: GraphQLString },
         password: { type: GraphQLString }
       },
-      resolve(parent, args) {
-        return true;
+      async resolve(parent, args) {
+        let user = await User.findOne({ _id: args.id, login: args.login, password: args.password });
+        if(user) {
+          return parent.likes.find(io => io.toString() === user._id.toString()) ? true:false;
+        } else {
+          return null;
+        }
       }
     },
     likes: {
@@ -137,7 +142,7 @@ const TweetType = new GraphQLObjectType({
     },
     comments: {
       type: new GraphQLList(CommentType),
-      resolve: ({ id }) => Comment.find({ sendedToID: id })
+      resolve: ({ id }) => Comment.find({ sendedToID: id }).sort({ time: -1 })
     },
     commentsInt: {
       type: GraphQLInt,
