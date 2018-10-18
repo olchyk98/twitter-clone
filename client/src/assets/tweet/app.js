@@ -169,7 +169,8 @@ class App extends Component {
     this.state = {
       tweet: false,
       isLikeAllowed: true,
-      isCommenting: false
+      isCommenting: false,
+      subscriptionAllowed: true
     }
 
     this.commentRef = React.createRef();
@@ -348,6 +349,41 @@ class App extends Component {
     }).catch(destroySession);
   }
 
+  followCreator = () => {
+    if(!this.state.subscriptionAllowed) return;
+
+    let { id, login, password } = cookieControl.get("userdata");
+
+    this.setState(({ tweet }) => {
+      return {
+        tweet: {
+          ...tweet,
+          isSubscribedToCreator: !tweet.isSubscribedToCreator
+        },
+        subscriptionAllowed: false
+      }
+    })
+
+    this.props.subscribeCreator({
+      variables: {
+        id,
+        login,
+        password,
+        targetID: this.state.tweet.creator.id
+      }
+    }).then(({ data: { subscribeUser: subscribed } }) => {
+      this.setState(({ tweet }) => {
+        return {
+          tweet: {
+            ...tweet,
+            isSubscribedToCreator: subscribed
+          },
+          subscriptionAllowed: true
+        }
+      })
+    });
+  }
+
   render() {
     if(this.state.tweet === false) {
       return(
@@ -374,7 +410,7 @@ class App extends Component {
           <div className="rn-tweet-creator-bx">
             {
               (this.getAPI({creator:{id:""}}).creator.id === cookieControl.get("userdata").id) ? null:(
-                <button className={ `rn-tweet-creator-follow${ (this.getAPI().isSubscribedToCreator) ? " active" : "" }` }>{ (this.getAPI().isSubscribedToCreator) ? "Following" : "Follow" }</button>
+                <button onClick={ this.followCreator } className={ `rn-tweet-creator-follow${ (this.getAPI().isSubscribedToCreator) ? " active" : "" }` }>{ (this.getAPI().isSubscribedToCreator) ? "Following" : "Follow" }</button>
               )
             }
           </div>
@@ -480,5 +516,10 @@ export default compose(
         }
       }
     }
-  `, { name: "commentTweet" })
+  `, { name: "commentTweet" }),
+  graphql(gql`
+    mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
+      subscribeUser(id: $id, login: $login, password: $password, targetID: $targetID)
+    }
+  `, { name: "subscribeCreator" })
 )(App);

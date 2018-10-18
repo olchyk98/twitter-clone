@@ -66,9 +66,9 @@
   height:32.5px;
   width:105px; /* XXX: must be expressed in padding */
   border-radius:45px;
+  border:1px solid var(--color);
   background:transparent;
   color:var(--color);
-  border:none;
   font-family:"Roboto";
   font-weight:600;
   outline:0;
@@ -87,6 +87,7 @@
 .rn-tweet-creator-follow.active {
   background:#34a1f2;
   color:white;
+  border:1px solid transparent;
 }
 
 .rn-tweet-creator-follow.active:hover {
