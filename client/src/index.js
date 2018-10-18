@@ -9,6 +9,7 @@ import Nav from './assets/nav/app';
 import Main from './assets/main/app';
 import Register from './assets/register/app';
 import Tweet from './assets/tweet/app';
+import Account from './assets/account/app';
 
 import { BrowserRouter, Redirect, Switch } from 'react-router-dom';
 import { Route } from 'react-router';
@@ -82,6 +83,13 @@ ReactDOM.render(
               exact
               path={ `${ links["TWEET_PAGE"] }/:id` }
               component={ Tweet }
+              aif={ cookieControl.get("userdata") }
+              redirect="/register"
+            />
+            <QuaRoute
+              exact
+              path={ `${ links["ACCOUNT_PAGE"] }/:id` }
+              component={ Account }
               aif={ cookieControl.get("userdata") }
               redirect="/register"
             />

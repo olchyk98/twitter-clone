@@ -19,6 +19,15 @@ const Comment = require('./models/comment');
 
 const hostname = require('./hostname');
 
+function gen() {
+  let a = "",
+      b = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+      c = () => Math.floor(Math.random() * b.length);
+  for(let ma = 0; ma < 225; ma++) a += b[c()];
+
+  return a;
+}
+
 const UserType = new GraphQLObjectType({ // name, login, password, image, subscribers
   name: "User",
   fields: () => ({
@@ -28,6 +37,10 @@ const UserType = new GraphQLObjectType({ // name, login, password, image, subscr
     login: { type: GraphQLString },
     password: { type: GraphQLString },
     image: { type: GraphQLString },
+    profileBackground: { type: GraphQLString },
+    profileDescription: { type: GraphQLString },
+    location: { type: GraphQLString },
+    joinedDate: { type: GraphQLString },
     subscribedTo: {
       type: new GraphQLList(UserType),
       async resolve({ id }) {
@@ -264,15 +277,6 @@ const RootMutation = new GraphQLObjectType({
         url: { type: new GraphQLNonNull(GraphQLString) }
       },
       async resolve(_, { name, login, password, image, url }) {
-        function gen() {
-          let a = "",
-              b = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-              c = () => Math.floor(Math.random() * b.length);
-          for(let ma = 0; ma < 225; ma++) a += b[c()];
-
-          return a;
-        }
-
         if(await User.findOne({ $or: [
           { url },
           { login }
@@ -294,6 +298,57 @@ const RootMutation = new GraphQLObjectType({
         });
 
         return a;
+      }
+    },
+    setPrfBackground: {
+      type: UserType,
+      args: {
+        id: { type: GraphQLID },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        image: { type: new GraphQLNonNull(GraphQLUpload) }
+      },
+      async resolve(_, { id: _id, login, password, image }) {
+        let user = await User.findOne({ _id, login, password });
+        if(user) {
+          let { mimetype, stream } = await image;
+          const imagePath = `/files/backgrounds/${ gen() }.${ mimeprocessor.extension(mimetype) }`;
+          stream.pipe(fs.createWriteStream('.' + imagePath));
+
+          return user.updateOne({
+            profileBackground: hostname + imagePath
+          });
+        } else {
+          return null;
+        }
+      }
+    },
+    setLocation: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        location: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      resolve(_, { id: _id, login, password, location }) {
+        return User.findOneAndUpdate({ _id, login, password }, {
+          location
+        });
+      }
+    },
+    setPrfDescription: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        description: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      resolve(_, { id: _id, login, password, description: profileDescription }) {
+        return User.findOneAndUpdate({ _id, login, password }, {
+          profileDescription
+        });
       }
     },
     subscribeUser: {

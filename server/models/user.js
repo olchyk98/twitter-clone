@@ -7,6 +7,10 @@ const UserSchema = new Schema({
   password: String,
   url: String,
   image: String,
+  profileBackground: String,
+  profileDescription: String,
+  location: String,
+  joinedDate: Date,
   subscribedTo: Array
 });
 
