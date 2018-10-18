@@ -1,0 +1,229 @@
+:root {
+  --focuscol:#34a1f2;
+}
+
+.rn-account {
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  margin-left:auto;
+  margin-right:auto;
+  width:700px;
+  max-width:100vw;
+}
+
+.rn-account-info {
+  width:100%;
+  height:auto;
+  padding-bottom:17.5px;
+  margin-top:15px;
+  overflow:hidden;
+  border-radius:3px;
+  margin-bottom:5px;
+}
+
+.rn-account-bg {
+  height:150px;
+  width:100%;
+  position:relative;
+}
+
+.rn-account-bg > img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
+
+.rn-account-controls {
+  height:50px;
+  padding-left:10px;
+  padding-right:10px;
+  width:calc(100% - 20px);
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  position:relative;
+}
+
+.rn-account-controls-avatar {
+  height:135px;
+  width:135px;
+  border-radius:50%;
+  position:relative;
+}
+
+.rn-account-controls-avatar > img {
+  height:100%;
+  width:100%;
+  object-fit:cover;
+  object-position:center;
+  border-radius:50%;
+}
+
+.rn-account-controls-mat {
+  display:flex;
+  align-items:center;
+  height:100%;
+}
+
+.rn-account-controls-mat-btn {
+  height:35px;
+  min-width:35px;
+  margin-left:5px;
+  margin-right:5px;
+  font-size:1em;
+  background:transparent;
+  border:1px solid var(--focuscol);
+  border-radius:45px;
+  color:var(--focuscol);
+  cursor:pointer;
+}
+
+.rn-account-controls-mat-btn:not(.icon) {
+  padding-left:15px;
+  padding-right:15px;
+}
+
+.rn-account-info-mat {
+  --margin:12.5px;
+
+  position:relative;
+  width:calc(100% - var(--margin) * 2);
+  margin-left:var(--margin);
+  margin-right:var(--margin);
+}
+
+:root {
+  --seccol: rgba(255, 255, 255, .45);
+}
+
+.rn-account-info-mat-name {
+  color:white;
+  font-family:"Roboto";
+  -webkit-font-smoothing:antialiased;
+  font-weight:600;
+  font-size:1.1em;
+  margin-top:15px;
+  margin-bottom:2.5px;
+}
+
+.rn-account-info-mat-url {
+  margin-top:0;
+  color:var(--seccol);
+  font-family:"Quicksand";
+  font-weight:400;
+}
+
+.rn-account-info-mat-desc {
+  font-family:"Roboto";
+  -webkit-font-smoothing:antialiased;
+  font-weight:400;
+  color:white;
+  margin-top:10px;
+  margin-bottom:10px;
+  margin-right:10px;
+}
+
+.rn-account-info-mat-addvinfo,
+.rn-account-info-mat-follows {
+  display:flex;
+  align-items:center;
+  margin-top:15px;
+}
+
+.rn-account-info-mat-addvinfo-item,
+.rn-account-info-mat-follows-item {
+  --margin:7.5px;
+
+  margin-left:var(--margin);
+  margin-right:var(--margin);
+  color:var(--seccol);
+  font-family:"Quicksand";
+  font-size:.975em;
+}
+
+.rn-account-info-mat-addvinfo-item > *,
+.rn-account-info-mat-follows-item > * {
+  --margin:2.5px;
+
+  margin-left:var(--margin);
+  margin-right:var(--margin);
+}
+
+.rn-account-info-mat-addvinfo-item:first-child,
+.rn-account-info-mat-addvinfo-item > *:first-child,
+.rn-account-info-mat-follows-item:first-child,
+.rn-account-info-mat-follows-item > *:first-child {
+  margin-left:0;
+}
+
+.rn-account-info-mat-addvinfo-item:last-child,
+.rn-account-info-mat-addvinfo-item > *:last-child,
+.rn-account-info-mat-follows-item:last-child,
+.rn-account-info-mat-follows-item > *:last-child {
+  margin-right:0;
+}
+
+.rn-account-info-mat-follows-item-num {
+  color:white;
+  font-weight:600;
+  -webkit-font-smoothing:antialiased;
+  font-size:1.05em;
+}
+
+.rn-account-tweets {
+  width:100%;
+  margin-top:5px;
+  border-radius:3px;
+  overflow:hidden;
+  padding-bottom:10px;
+}
+
+.rn-account-tweets-nav {
+  display:flex;
+  height:45px;
+  width:100%;
+  position:relative;
+}
+
+.rn-account-tweets-nav-btn {
+  cursor:pointer;
+  width:100%;
+  background:transparent;
+  border:none;
+  border-bottom:1px solid transparent;
+  color:var(--focuscol);
+  font-family:"Roboto";
+  font-weight:600;
+  -webkit-font-smoothing:antialiased;
+  font-size:1em;
+  outline:0;
+  position:relative;
+  transition:.4s;
+}
+
+.rn-account-tweets-nav-btn:before {
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  transition:.3s;
+  opacity:0;
+  background:var(--focuscol);
+}
+
+.rn-account-tweets-nav-btn:hover:before {
+  opacity:.075;
+}
+
+.rn-account-tweets-nav-btn:active:before {
+  transition:.2s;
+  opacity:.1;
+}
+
+.rn-account-tweets-nav-btn.active {
+  border-bottom:1px solid var(--focuscol);
+}

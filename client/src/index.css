@@ -2,6 +2,7 @@
   --uicol: #1b2836;
   --bgcol:#141d26;
   --nav-height:50px;
+  --uisize:570px;
 }
 
 html, body {
@@ -31,14 +32,19 @@ a:active {
   /* overflow-y:hidden; */
 }
 
+.rn-main,
 .rn-tweet {
+  width:var(--uisize);
+  position:relative;
+}
+
+.rn-tweet,
+.rn-tweet-commat,
+.rn-account-info,
+.rn-account-tweets {
   background:var(--uicol);
 }
 
-.rn-tweet-brdt {
-  background:var(--bgcol);
-}
-
-.rn-tweet-commat {
-  background:var(--bgcol);
+.rn-account-controls-avatar {
+  border:3px solid var(--uicol);
 }

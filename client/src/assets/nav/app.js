@@ -78,7 +78,7 @@ class Nav extends Component {
           </div>
           <Link
             // style={{ textDecoration: "none" }}
-            to={ `${ links["ACCOUNT_PAGE"] }?url=${ this.getAPI("url") }` }>
+            to={ links["ACCOUNT_PAGE"] }>
             <div className="mj-nav-muser">
               <img
                 className="mj-nav-muser-mg"
@@ -102,8 +102,7 @@ export default compose(
       user(id: $id, login: $login, password: $password) {
         name,
         id,
-        image,
-        url
+        image
       }
     }
   `, {

@@ -353,6 +353,7 @@ class App extends Component {
     if(!this.state.subscriptionAllowed) return;
 
     let { id, login, password } = cookieControl.get("userdata");
+    client.clearStore(); // reload feed
 
     this.setState(({ tweet }) => {
       return {
