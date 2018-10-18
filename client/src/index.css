@@ -32,7 +32,7 @@ a:active {
   /* overflow-y:hidden; */
 }
 
-.rn-main,
+.rn-main-news,
 .rn-tweet {
   width:var(--uisize);
   position:relative;
@@ -41,7 +41,8 @@ a:active {
 .rn-tweet,
 .rn-tweet-commat,
 .rn-account-info,
-.rn-account-tweets {
+.rn-account-tweets-nav,
+.rn-account-tweets-mat-item {
   background:var(--uicol);
 }
 

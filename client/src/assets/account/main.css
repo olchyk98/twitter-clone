@@ -1,10 +1,11 @@
 :root {
   --focuscol:#34a1f2;
+  --seccol: rgba(255, 255, 255, .45);
 }
 
 .rn-account {
   height:100vh;
-  display:flex;
+  display:block;
   flex-direction:column;
   margin-left:auto;
   margin-right:auto;
@@ -19,7 +20,7 @@
   margin-top:15px;
   overflow:hidden;
   border-radius:3px;
-  margin-bottom:5px;
+  margin-bottom:10px;
 }
 
 .rn-account-bg {
@@ -92,10 +93,6 @@
   width:calc(100% - var(--margin) * 2);
   margin-left:var(--margin);
   margin-right:var(--margin);
-}
-
-:root {
-  --seccol: rgba(255, 255, 255, .45);
 }
 
 .rn-account-info-mat-name {
@@ -174,7 +171,7 @@
 
 .rn-account-tweets {
   width:100%;
-  margin-top:5px;
+  margin-top:10px;
   border-radius:3px;
   overflow:hidden;
   padding-bottom:10px;
@@ -226,4 +223,111 @@
 
 .rn-account-tweets-nav-btn.active {
   border-bottom:1px solid var(--focuscol);
+}
+
+.rn-account-tweets-mat-item {
+  width:100%;
+  padding:15px;
+  border-radius:3px;
+  display:flex;
+  margin-bottom:7.5px;
+  position:relative;
+}
+
+.rn-account-tweets-mat-item > * {
+  height:100%;
+}
+
+.rn-account-tweets-mat-item-mg {
+  width:50px;
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+.rn-account-tweets-mat-item-mg > img {
+  height:50px;
+  width:50px;
+  border-radius:50%;
+  cursor:pointer;
+}
+
+.rn-account-tweets-mat-item-content {
+  width:calc(100% - 90px);
+  padding-left:10px;
+}
+
+.rn-account-tweets-mat-item-content-info {
+  display:flex;
+  align-items:center;
+  color:var(--seccol);
+  font-weight:300;
+  font-family:"Quicksand";
+  font-size:1.05em;
+}
+
+.rn-account-tweets-mat-item-content-info > * {
+  margin-left:2.5px;
+  margin-right:2.5px;
+}
+
+.rn-account-tweets-mat-item-content-info > *:first-child {
+  margin-left:0;
+}
+
+.rn-account-tweets-mat-item-content-info > *:last-child {
+  margin-right:auto;
+}
+
+.rn-account-tweets-mat-item-content-info-name {
+  color:white;
+  font-weight:600;
+  font-family:"Roboto";
+  font-size:1.05em;
+  -webkit-font-smoothing:antialiased;
+}
+
+.rn-account-tweets-mat-item-content-mat {
+  font-weight:200;
+  font-family:"Quicksand";
+  margin-right:15px;
+  color:rgba(255, 255, 255, .95);
+  margin-top:5px;
+  margin-bottom:10px;
+}
+
+.rn-account-tweets-mat-item-content-mat-controls {
+  display:flex;
+  align-items:center;
+  font-size:1.05em;
+}
+
+.rn-account-tweets-mat-item-content-mat-controls-btn {
+  margin-left:10px;
+  margin-right:10px;
+}
+
+.rn-account-tweets-mat-item-content-mat-controls-btn {
+  color:var(--seccol);
+  background:transparent;
+  border:none;
+  font-size:1em;
+  padding:0;
+  cursor:pointer;
+}
+
+.rn-account-tweets-mat-item-content-mat-controls-btn > * {
+  margin-left:2.5px;
+  margin-right:2.5px;
+}
+
+.rn-account-tweets-mat-item-content-mat-controls-btn > *:first-child,
+.rn-account-tweets-mat-item-content-mat-controls-btn:first-child {
+  margin-left:0;
+}
+
+.rn-account-tweets-mat-item-content-mat-controls-btn > *:last-child,
+.rn-account-tweets-mat-item-content-mat-controls-btn:last-child {
+  margin-right:0;
 }

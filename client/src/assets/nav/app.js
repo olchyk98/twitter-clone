@@ -8,6 +8,11 @@ import cookieControl from '../../cookieControl';
 
 import links from '../../links';
 
+function destroySession() {
+  cookieControl.delete("userdata");
+  window.location.reload();
+}
+
 class NavLink extends Component {
   render() {
     return(
@@ -23,13 +28,8 @@ class NavLink extends Component {
 class Nav extends Component {
   componentDidUpdate() {
     if(!this.props.navdata.loading && this.props.navdata.user === null) { // UNSECURE SESSION
-      cookieControl.delete("userdata");
-      window.location.reload();
+      destroySession();
     }
-  }
-
-  componentDidMount() {
-
   }
 
   getAPI = dat => {

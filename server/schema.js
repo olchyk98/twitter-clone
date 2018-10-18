@@ -1,3 +1,5 @@
+// NOTE: All those validations (...User.findOne({...})...) can be optimized by using try/catch statement.
+
 const {
   GraphQLSchema,
   GraphQLObjectType,
@@ -41,15 +43,52 @@ const UserType = new GraphQLObjectType({ // name, login, password, image, subscr
     profileDescription: { type: GraphQLString },
     location: { type: GraphQLString },
     joinedDate: { type: GraphQLString },
-    subscribedTo: {
-      type: new GraphQLList(UserType),
-      async resolve({ id }) {
-        let a = await User.findById(id); // user subscribed to ...
-        return User.find({
-          _id: {
-            $in: a.subscribedTo
+    requesterIsSubscriber: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: GraphQLID },
+        login: { type: GraphQLString },
+        password: { type: GraphQLString }
+      },
+      async resolve({ id }, { id: _id, login, password }) { // XXX
+        let a = await User.findOne({
+          _id,
+          login,
+          password,
+          subscribedTo: {
+            $in: [id]
           }
         });
+
+        return a ? true:false;
+      }
+    },
+    subscribedTo: {
+      type: new GraphQLList(UserType),
+      async resolve({ subscribedTo }) {
+        return User.find({
+          _id: {
+            $in: subscribedTo
+          }
+        });
+      }
+    },
+    subscribedToInt: {
+      type: GraphQLInt,
+      async resolve({ subscribedTo }) {
+        return subscribedTo.length;
+      }
+    },
+    subscribersInt: {
+      type: GraphQLInt,
+      async resolve({ id }) {
+        let a = await User.find({
+          subscribedTo: {
+            $in: [id]
+          }
+        });
+
+        return a.length;
       }
     },
     tweets: {
@@ -184,11 +223,20 @@ const RootQuery = new GraphQLObjectType({
         id: { type: GraphQLID },
         login: { type: GraphQLString },
         password: { type: GraphQLString },
-        targetID: { type: GraphQLID }
+        targetID: { type: GraphQLID },
+        targetUrl: { type: GraphQLString }
       },
-      async resolve(_, { id: _id, login, password, targetID }) {
-        let a = await User.findOne({ _id, login, password }),
-            b = await User.findById(targetID ? targetID : _id);
+      async resolve(_, { id: _id, login, password, targetID, targetUrl }) {
+        let a = await User.findOne({ _id, login, password }); // requester
+
+        // if(targetUrl) {
+        //   b = await User.findOne({ url: targetUrl }); // result
+        // } else if(targetID || _id) {
+        //   b = await User.findById(targetID || _id); // result
+        // } else {
+        //   return null;
+        // }
+        let b = await User[targetUrl ? "findOne" : "findById"](targetUrl ? { url: targetUrl } : (targetID || _id));
 
         return (a && b) ? b : null
       }
@@ -290,11 +338,15 @@ const RootMutation = new GraphQLObjectType({
 
         let a = await new User({
           name, login, password, url,
-          image: hostname + imagePath
+          image: hostname + imagePath,
+          location: "",
+          joinedDate: new Date(),
+          profileDescription: "",
+          profileBackground: ""
         }).save();
 
         await a.updateOne({
-          subscribedTo: [a._id]
+          subscribedTo: [a._id.toString()]
         });
 
         return a;

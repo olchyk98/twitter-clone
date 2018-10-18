@@ -124,7 +124,7 @@ class App extends Component {
 
     this.props.register({
       variables: {
-        login, password, name, image, url
+        login, password, name, image, url: url.replace(/@/g, "")
       }
     }).then(res => {
       if(!res.data.registerUser) {

@@ -5,13 +5,13 @@
   padding-top:35px;
   margin-left:auto;
   margin-right:auto;
+  width:100vw;
 }
 
 .rn-main-news {
   display:flex;
   justify-content:center;
   flex-direction:column;
-  width:100%;
   max-width:100vw;
   height:auto;
   padding-top:20px;
