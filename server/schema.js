@@ -76,7 +76,7 @@ const UserType = new GraphQLObjectType({ // name, login, password, image, subscr
     subscribedToInt: {
       type: GraphQLInt,
       async resolve({ subscribedTo }) {
-        return subscribedTo.length;
+        return subscribedTo.length - 1; // -1: self
       }
     },
     subscribersInt: {
@@ -88,7 +88,7 @@ const UserType = new GraphQLObjectType({ // name, login, password, image, subscr
           }
         });
 
-        return a.length;
+        return a.length - 1; // -1: self
       }
     },
     tweets: {

@@ -5,20 +5,21 @@ import { gql } from 'apollo-boost';
 import { graphql, compose } from 'react-apollo';
 
 import cookieControl from '../../cookieControl';
+import apiPath from '../../apiPath';
 
-const image = "https://pbs.twimg.com/profile_banners/941023810278625280/1537693349/600x200";
-const image2 = "https://pbs.twimg.com/profile_images/1049760543580540932/zIp6Wuz2_200x200.jpg";
+const defaultBg = `${ apiPath }files/backgrounds/default.jpeg`;
+const image2 = "/files/backgrounds/default.jpeg";
 
 class Info extends Component {
   render() {
     return(
       <div className="rn-account-info">
         <div className="rn-account-bg">
-          <img src={ image } alt="asd" />
+          <img src={ this.props.info.profileBackground ? this.props.info.profileBackground : defaultBg } alt="asd" />
         </div>
         <div className="rn-account-controls">
           <div className="rn-account-controls-avatar">
-            <img src={ image2 } alt="" />
+            <img src={ this.props.info.image } alt="" />
           </div>
           <div className="rn-account-controls-mat">
             <button className="rn-account-controls-mat-btn icon">
@@ -28,28 +29,34 @@ class Info extends Component {
           </div>
         </div>
         <div className="rn-account-info-mat">
-          <h1 className="rn-account-info-mat-name">Oles Odynets</h1>
-          <p className="rn-account-info-mat-url">@oles</p>
-          <p className="rn-account-info-mat-desc">
-            Чисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолтуЧисто чиллю по дефолту
-          </p>
+          <h1 className="rn-account-info-mat-name">{ this.props.info.name }</h1>
+          <p className="rn-account-info-mat-url">@{ this.props.info.url }</p>
+          <p className="rn-account-info-mat-desc">{ this.props.info.profileDescription }</p>
           <div className="rn-account-info-mat-addvinfo">
-            <div className="rn-account-info-mat-addvinfo-item">
-              <i className="fas fa-map-marker-alt" />
-              <span className="rn-account-info-mat-follows-item-num">Lviv</span>
-            </div>
-            <div className="rn-account-info-mat-addvinfo-item">
-              <i className="fas fa-calendar-alt" />
-              <span>Joined Dec 2008</span>
-            </div>
+            {
+              (!this.props.info.location) ? null:(
+                <div className="rn-account-info-mat-addvinfo-item">
+                  <i className="fas fa-map-marker-alt" />
+                  <span>{ this.props.info.location }</span>
+                </div>
+              )
+            }
+            {
+              (this.props.info.joinedDate) ? (
+                <div className="rn-account-info-mat-addvinfo-item">
+                  <i className="fas fa-calendar-alt" />
+                  <span>{ this.props.info.joinedDate }</span>
+                </div>
+              ) : null
+            }
           </div>
           <div className="rn-account-info-mat-follows">
             <div className="rn-account-info-mat-follows-item">
-              <span className="rn-account-info-mat-follows-item-num">3</span>
+              <span className="rn-account-info-mat-follows-item-num">{ this.props.info.subscribedToInt }</span>
               <span>Following</span>
             </div>
             <div className="rn-account-info-mat-follows-item">
-              <span className="rn-account-info-mat-follows-item-num">131</span>
+              <span className="rn-account-info-mat-follows-item-num">{ this.props.info.subscribersInt }</span>
               <span>Followers</span>
             </div>
           </div>
@@ -112,10 +119,22 @@ class Tweets extends Component {
 
 class App extends Component {
   render() {
+    if(this.props.userInfo.loading) {
+      return(
+        <div className="rn-account">
+
+        </div>
+      )
+    }
+
     return(
       <div className="rn-account">
-        <Info />
-        <Tweets />
+        <Info
+          info={ this.props.userInfo.user } // XXX: Receives all tweets also.
+        />
+        <Tweets
+          tweets={ this.props.userInfo.user.tweets }
+        />
       </div>
     );
   }
