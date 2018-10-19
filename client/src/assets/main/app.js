@@ -13,6 +13,8 @@ function destroySession() {
   return window.location.reload();
 }
 
+var clearMemory = () => client.clearStore();
+
 class MainNewsNew extends Component {
   constructor(props) {
     super(props);
@@ -42,6 +44,7 @@ class MainNewsNew extends Component {
       }
 
       this.props.onNewTweet(Object.assign({}, addTweet));
+      clearMemory();
     }).catch(destroySession);
   }
 
@@ -146,7 +149,7 @@ class MainNewsItem extends Component {
           likes: likeTweet ? likes + 1 : likes - 1,
           isLikeChangeable: true
         }
-      });
+      }, clearMemory);
     }).catch(destroySession);
   }
 
@@ -216,7 +219,7 @@ class MainNews extends Component {
         isFetchedTweets: true,
         tweets: a
       }
-    })
+    }, clearMemory);
   }
 
   render() {
@@ -295,7 +298,7 @@ export default compose(
         content,
         id,
         time,
-        isLiked,
+        isLiked(id: $id),
         creator {
           image,
           url,
@@ -346,7 +349,7 @@ export default compose(
         likesInt,
         content,
         time,
-        isLiked,
+        isLiked(id: $id),
         creator {
           image,
           url,

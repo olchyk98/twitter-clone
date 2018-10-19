@@ -93,7 +93,7 @@ const UserType = new GraphQLObjectType({ // name, login, password, image, subscr
     },
     tweets: {
       type: new GraphQLList(TweetType),
-      resolve: ({ id }) => Tweet.find({ creatorID: id })
+      resolve: ({ id }) => Tweet.find({ creatorID: id }).sort({ time: -1 })
     }
   })
 });
@@ -165,7 +165,15 @@ const TweetType = new GraphQLObjectType({
     creatorID: { type: GraphQLID },
     time: { type: GraphQLString },
     content: { type: GraphQLString },
-    isLiked: { type: GraphQLBoolean },
+    isLiked: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(parent, args) {
+        return parent.likes.find(io => io.toString() === args.id.toString()) ? true:false;
+      }
+    },
     isSubscribedToCreator: { type: GraphQLBoolean },
     likes: {
       type: new GraphQLList(UserType),

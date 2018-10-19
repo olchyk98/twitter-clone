@@ -19,6 +19,11 @@ a:active {
   text-decoration:none;
 }
 
+button,
+input {
+  outline:0;
+}
+
 .mj-nav {
   height:var(--nav-height);
 }

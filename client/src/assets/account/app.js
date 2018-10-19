@@ -11,6 +11,26 @@ const defaultBg = `${ apiPath }files/backgrounds/default.jpeg`;
 const image2 = "/files/backgrounds/default.jpeg";
 
 class Info extends Component {
+  convertTime = time => {
+    let a = new Date(time),
+        b = [
+          "Jan",
+          "Feb",
+          "March",
+          "Apr",
+          "May",
+          "June",
+          "July",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec"
+        ][a.getMonth()]
+
+    return b + " " + a.getFullYear();
+  }
+
   render() {
     return(
       <div className="rn-account-info">
@@ -25,7 +45,7 @@ class Info extends Component {
             <button className="rn-account-controls-mat-btn icon">
               <i className="far fa-envelope" />
             </button>
-            <button className="rn-account-controls-mat-btn">Follow</button>
+            <button className="rn-account-controls-mat-btn rn-account-controls-mat-subscribe">Follow</button>
           </div>
         </div>
         <div className="rn-account-info-mat">
@@ -42,10 +62,10 @@ class Info extends Component {
               )
             }
             {
-              (this.props.info.joinedDate) ? (
+              (new Date(parseInt(this.props.info.joinedDate)).getHours()) ? (
                 <div className="rn-account-info-mat-addvinfo-item">
                   <i className="fas fa-calendar-alt" />
-                  <span>{ this.props.info.joinedDate }</span>
+                  <span>Joined { this.convertTime(parseInt(this.props.info.joinedDate)) }</span>
                 </div>
               ) : null
             }
@@ -67,30 +87,73 @@ class Info extends Component {
 }
 
 class TweetsTweet extends Component {
+  convertTime(time) { // clf
+    if(!time) return "";
+
+    time /= 1000;
+    let a = (new Date()).getTime() / 1000,
+        c = c1 => a - time < c1,
+        d = Math.round;
+
+    if(c(60)) {
+      return d((a - time)) + "s";
+    } else if(c(3600)) {
+      return d((a - time) / 60) + "m";
+    } else if(c(86400)) {
+      return d((a - time) / 3600) + "h";
+    } else if(c(604800)) {
+      return d((a - time) / 86400) + "d";
+    } else if(c(2419200)) {
+      return d((a - time) / 604800) + "w";
+    } else if(time < 0) {
+      return "";
+    } else {
+      let e = new Date(time * 1000),
+          f = [
+            "Jan",
+            "Feb",
+            "March",
+            "Apr",
+            "May",
+            "June",
+            "July",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ][e.getMonth()];
+      return `${ f } ${ e.getDate() }, ${ e.getFullYear() } ${ e.getHours() }:${ e.getMinutes() }`;
+    }
+  }
+
   render() {
     return(
       <div className="rn-account-tweets-mat-item">
         <div className="rn-account-tweets-mat-item-mg">
-          <img src={ image2 } alt="" />
+          <img src={ this.props.creator.image } alt={ this.props.creator.name } />
         </div>
         <div className="rn-account-tweets-mat-item-content">
           <div className="rn-account-tweets-mat-item-content-info">
-            <span className="rn-account-tweets-mat-item-content-info-name">oles</span>
-            <span className="rn-account-tweets-mat-item-content-info-url">@oles</span>
+            <span className="rn-account-tweets-mat-item-content-info-name">{ this.props.creator.name }</span>
+            <span className="rn-account-tweets-mat-item-content-info-url">@{ this.props.creator.url }</span>
             <span>•</span>
-            <span className="rn-account-tweets-mat-item-content-info-time">12m</span>
+            <span className="rn-account-tweets-mat-item-content-info-time">{ this.convertTime(parseInt(this.props.time)) }</span>
           </div>
-          <p className="rn-account-tweets-mat-item-content-mat">
-            Chill, No Chill without Life Chill, No Chill without Life Chill, No Chill without Life Chill, No Chill without Life Chill, No Chill without Life Chill, No Chill without Life Chill, No Chill without Life Chill, No Chill without Life Chill, No Chill without Life Chill, No Chill without Life
-          </p>
+          <p className="rn-account-tweets-mat-item-content-mat">{ this.props.content }</p>
           <div className="rn-account-tweets-mat-item-content-mat-controls">
             <button className="rn-account-tweets-mat-item-content-mat-controls-btn">
               <i className="far fa-comment" />
-              <span>31</span>
+              <span>{ this.props.comments }</span>
             </button>
-            <button className="rn-account-tweets-mat-item-content-mat-controls-btn">
-              <i className="far fa-heart" />
-              <span>31</span>
+            <button
+              className={ `rn-account-tweets-mat-item-content-mat-controls-btn rn-account-tweets-mat-item-content-mat-controls-like${ (this.props.isLiked) ? " active" : "" }` }
+              key={ (this.props.isLiked) ? "A":"B" }>
+              <i className={ `${ (!this.props.isLiked) ? "far" : "fas" } fa-heart` } />
+              <span>{ this.props.likes }</span>
             </button>
           </div>
         </div>
@@ -107,10 +170,23 @@ class Tweets extends Component {
           <button className="rn-account-tweets-nav-btn active">Tweets</button>
         </div>
         <div className="rn-account-tweets-mat">
-          <TweetsTweet />
-          <TweetsTweet />
-          <TweetsTweet />
-          <TweetsTweet />
+          {
+            this.props.tweets.map(({ id, isLiked, content, likesInt, commentsInt, time, creator }) => {
+              return(
+                <TweetsTweet
+                  key={ id }
+                  id={ id }
+                  content={ content }
+                  likes={ likesInt }
+                  comments={ commentsInt }
+                  time={ time }
+                  creator={ creator }
+                  isLiked={ isLiked }
+                />
+              );
+            })
+          }
+
         </div>
       </div>
     );
@@ -161,6 +237,7 @@ export default compose(
           likesInt,
           commentsInt,
           time,
+          isLiked(id: $id),
           creator {
             id,
             url,

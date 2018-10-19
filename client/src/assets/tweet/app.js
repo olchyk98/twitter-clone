@@ -12,6 +12,8 @@ function destroySession() {
   return window.location.href = links["REGISTER_PAGE"];
 }
 
+var clearMemory = () => client.clearStore();
+
  class Comment extends Component {
    constructor(props) {
      super(props);
@@ -26,8 +28,8 @@ function destroySession() {
      }
    }
 
-   convertTime(time) { // clf
-     if(!time) return "";
+  convertTime(time) { // clf
+    if(!time) return "";
     // minute -- 60
     // hour -- 3600
     // day -- 86400
@@ -73,7 +75,7 @@ function destroySession() {
           ][e.getMonth()];
       return `${ f } ${ e.getDate() }, ${ e.getFullYear() } ${ e.getHours() }:${ e.getMinutes() }`;
     }
-   }
+  }
 
   likeComment = () => {
     if(!this.state.likes.allowed) return;
@@ -112,7 +114,7 @@ function destroySession() {
           allowed: true
         }
       }
-    });
+    }, clearMemory);
   }).catch(destroySession);
    }
 
@@ -197,7 +199,7 @@ class App extends Component {
             time,
             likesInt,
             commentsInt,
-            isLiked,
+            isLiked(id: $id),
             isSubscribedToCreator,
             creator {
               image,
@@ -316,7 +318,7 @@ class App extends Component {
           },
           isLikeAllowed: true
         }
-      });
+      }, clearMemory);
     }).catch(destroySession);
   }
 
@@ -345,7 +347,7 @@ class App extends Component {
             ]
           }
         }
-      });
+      }, clearMemory);
     }).catch(destroySession);
   }
 
@@ -353,7 +355,6 @@ class App extends Component {
     if(!this.state.subscriptionAllowed) return;
 
     let { id, login, password } = cookieControl.get("userdata");
-    client.clearStore(); // reload feed
 
     this.setState(({ tweet }) => {
       return {
@@ -382,7 +383,7 @@ class App extends Component {
           subscriptionAllowed: true
         }
       })
-    });
+    }, clearMemory);
   }
 
   render() {

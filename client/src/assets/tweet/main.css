@@ -69,7 +69,6 @@
   color:var(--color);
   font-family:"Roboto";
   font-weight:600;
-  outline:0;
   font-size:1em;
   line-height:30px;
   cursor:pointer;
@@ -179,7 +178,6 @@
   background:transparent;
   font-size:1.25em;
   cursor:pointer;
-  outline:0;
   transition:.4s;
 }
 
@@ -281,7 +279,6 @@
   cursor:pointer;
   display:flex;
   align-items:center;
-  outline:0;
 }
 
 .rn-tweet-comments-comment-content-control-btn > span {
@@ -303,7 +300,6 @@
 }
 
 .rn-tweet-commat > * {
-  outline:0;
   background:transparent;
   border:none;
 }

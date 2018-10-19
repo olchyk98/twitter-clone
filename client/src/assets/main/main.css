@@ -58,7 +58,6 @@
   background:transparent;
   font-weight:200;
   border:none;
-  outline:0;
   caret-color:var(--drawcol);
   color:var(--drawcol);
   height:100%;
@@ -77,7 +76,6 @@
   border:none;
   font-size:1em;
   cursor:pointer;
-  outline:0;
 }
 
 .rn-main-news-field-submit:active > * {
@@ -212,7 +210,6 @@
 .rn-main-news-mat-item-control-btn {
   border:none;
   background:transparent;
-  outline:0;
   font-size:1.1em;
   padding:0;
   display:flex;

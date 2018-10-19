@@ -79,11 +79,46 @@
   border-radius:45px;
   color:var(--focuscol);
   cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+
+.rn-account-controls-mat-btn.active {
+  background:var(--focuscol);
+  color:white;
+}
+
+.rn-account-controls-mat-btn,
+.rn-account-controls-mat-btn:before {
+  transition:.4s;
 }
 
 .rn-account-controls-mat-btn:not(.icon) {
-  padding-left:15px;
-  padding-right:15px;
+  width:115px;
+}
+
+.rn-account-controls-mat-btn:before {
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  height:100%;
+  width:100%;
+  background:transparent;
+  opacity:0;
+}
+
+.rn-account-controls-mat-btn:not(.active):hover:before {
+  background:var(--focuscol);
+  opacity:.15;
+}
+
+.rn-account-controls-mat-btn.active:hover {
+  background:red;
+}
+
+.rn-account-controls-mat-btn.active:hover {
+  border:1px solid transparent!important;
 }
 
 .rn-account-info-mat {
@@ -195,7 +230,6 @@
   font-weight:600;
   -webkit-font-smoothing:antialiased;
   font-size:1em;
-  outline:0;
   position:relative;
   transition:.4s;
 }
@@ -304,17 +338,37 @@
 }
 
 .rn-account-tweets-mat-item-content-mat-controls-btn {
-  margin-left:10px;
-  margin-right:10px;
-}
-
-.rn-account-tweets-mat-item-content-mat-controls-btn {
   color:var(--seccol);
   background:transparent;
   border:none;
   font-size:1em;
   padding:0;
   cursor:pointer;
+  margin-left:10px;
+  margin-right:10px;
+}
+
+.rn-account-tweets-mat-item-content-mat-controls-like.active {
+  animation:postliked-am .3s ease-in-out;
+  animation-fill-mode:forwards;
+}
+
+@keyframes postliked-am {
+  0% {
+    transform:scale(1);
+    opacity:1;
+    color:rgba(255, 255, 255, .7);
+  }
+  50% {
+    transform:scale(2);
+    opacity:.5;
+    color:rgba(255, 255, 255, .7);
+  }
+  100% {
+    transform:scale(1);
+    opacity:.8;
+    color:rgb(247, 0, 119);
+  }
 }
 
 .rn-account-tweets-mat-item-content-mat-controls-btn > * {
