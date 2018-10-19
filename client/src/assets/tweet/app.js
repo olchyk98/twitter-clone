@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import './main.css';
+
 import { gql } from 'apollo-boost';
 import { compose, graphql } from 'react-apollo';
+import { Link } from 'react-router-dom';
 
 import cookieControl from '../../cookieControl';
 import client from '../../apollo';
@@ -126,35 +128,35 @@ var clearMemory = () => client.clearStore();
      return(
       <React.Fragment>
         <div className="rn-tweet-comments-comment">
-           <div className="rn-tweet-comments-comment-mg">
-             <img src={ this.props.creator.image } alt={ this.props.creator.name } />
-           </div>
-           <div className="rn-tweet-comments-comment-content">
-             <div className="rn-tweet-comments-comment-content-cri">
-               <div className="rn-tweet-comments-comment-content-cri-inf">
-                 <span className="rn-tweet-comments-comment-content-cri-inf-name">{ this.props.creator.name }</span>
-                 <span className="rn-tweet-comments-comment-content-cri-inf-url">@{ this.props.creator.url }</span>
-                 <span>•</span>
-                 <span className="rn-tweet-comments-comment-content-cri-inf-time">{ this.convertTime(this.props.time) }</span>
-               </div>
-               <span className="rn-tweet-comments-comment-content-cri-repl"></span>
-             </div>
-             <p className="rn-tweet-comments-comment-content-mat">
-               { this.props.content }
-             </p>
-             <div className="rn-tweet-comments-comment-content-control">
-                <button
-                  className={ `rn-tweet-comments-comment-content-control-btn rn-tweet-controls-btn like ${ (!this.getLikesSource().isLiked) ? "" : " active" }` }
-                  onClick={ this.likeComment }
-                  key={ (!this.getLikesSource().isLiked) ? "A":"B" }>
-                  {
-                    (!this.getLikesSource().isLiked) ?
-                      <i className="far fa-heart" />
-                    :
-                      <i className="fas fa-heart" />
-                  }
-                  <span>{ this.getLikesSource().likes }</span>
-               </button>
+          <div className="rn-tweet-comments-comment-mg">
+            <img src={ this.props.creator.image } alt={ this.props.creator.name } />
+          </div>
+          <div className="rn-tweet-comments-comment-content">
+            <div className="rn-tweet-comments-comment-content-cri">
+              <div className="rn-tweet-comments-comment-content-cri-inf">
+                <span className="rn-tweet-comments-comment-content-cri-inf-name">{ this.props.creator.name }</span>
+                <span className="rn-tweet-comments-comment-content-cri-inf-url">@{ this.props.creator.url }</span>
+                <span>•</span>
+                <span className="rn-tweet-comments-comment-content-cri-inf-time">{ this.convertTime(this.props.time) }</span>
+              </div>
+              <span className="rn-tweet-comments-comment-content-cri-repl"></span>
+            </div>
+            <p className="rn-tweet-comments-comment-content-mat">
+              { this.props.content }
+            </p>
+            <div className="rn-tweet-comments-comment-content-control">
+              <button
+                className={ `rn-tweet-comments-comment-content-control-btn rn-tweet-controls-btn like ${ (!this.getLikesSource().isLiked) ? "" : " active" }` }
+                onClick={ this.likeComment }
+                key={ (!this.getLikesSource().isLiked) ? "A":"B" }>
+                {
+                  (!this.getLikesSource().isLiked) ?
+                    <i className="far fa-heart" />
+                  :
+                    <i className="fas fa-heart" />
+                }
+                <span>{ this.getLikesSource().likes }</span>
+              </button>
              </div>
            </div>
          </div>
@@ -398,16 +400,21 @@ class App extends Component {
     return(
       <div className="rn-tweet">
         <div className="rn-tweet-creator">
+          {/* <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creator.url }` }> */}
           <div className="rn-tweet-creator-bx">
-            <img
-              className="rn-tweet-creator-mg"
-              alt={ this.getAPI({creator:{name:""}}).creator.name }
-              src={ this.getAPI({creator:{image:""}}).creator.image }
-            />
-            <div className="rn-tweet-creator-info">
-              <p className="rn-tweet-creator-info-name">{ this.getAPI({creator:{name:""}}).creator.name }</p>
-              <span className="rn-tweet-creator-info-url">@{ this.getAPI({creator:{url:""}}).creator.url }</span>
-            </div>
+            <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.getAPI({creator:{url:""}}).creator.url }` }>
+              <img
+                className="rn-tweet-creator-mg"
+                alt={ this.getAPI({creator:{name:""}}).creator.name }
+                src={ this.getAPI({creator:{image:""}}).creator.image }
+              />
+            </Link>
+            <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.getAPI({creator:{url:""}}).creator.url }` }>
+              <div className="rn-tweet-creator-info">
+                <p className="rn-tweet-creator-info-name">{ this.getAPI({creator:{name:""}}).creator.name }</p>
+                <span className="rn-tweet-creator-info-url">@{ this.getAPI({creator:{url:""}}).creator.url }</span>
+              </div>
+            </Link>
           </div>
           <div className="rn-tweet-creator-bx">
             {

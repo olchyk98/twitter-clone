@@ -76,7 +76,7 @@ const UserType = new GraphQLObjectType({ // name, login, password, image, subscr
     subscribedToInt: {
       type: GraphQLInt,
       async resolve({ subscribedTo }) {
-        return subscribedTo.length - 1; // -1: self
+        return subscribedTo.length;
       }
     },
     subscribersInt: {
@@ -88,7 +88,7 @@ const UserType = new GraphQLObjectType({ // name, login, password, image, subscr
           }
         });
 
-        return a.length - 1; // -1: self
+        return a.length;
       }
     },
     tweets: {
@@ -308,7 +308,7 @@ const RootQuery = new GraphQLObjectType({
 
         let a = await Tweet.find({
           creatorID: {
-            $in: user.subscribedTo
+            $in: [...user.subscribedTo, _id]
           }
         }).sort({ time: -1 }); // XXX - XXX
 
@@ -349,13 +349,10 @@ const RootMutation = new GraphQLObjectType({
           image: hostname + imagePath,
           location: "",
           joinedDate: new Date(),
+          subscribedTo: [],
           profileDescription: "",
           profileBackground: ""
         }).save();
-
-        await a.updateOne({
-          subscribedTo: [a._id.toString()]
-        });
 
         return a;
       }

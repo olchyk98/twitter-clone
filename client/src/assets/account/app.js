@@ -12,7 +12,12 @@ import links from '../../links';
 
 const defaultBg = `${ apiPath }files/backgrounds/default.jpeg`;
 
-let clearCache = () => client.resetStore();
+function destroySession() {
+  cookieControl.delete("userdata");
+  return window.location.href = links["REGISTER_PAGE"];
+}
+
+let clearCache = () => client.clearStore();
 
 class Info extends Component {
   constructor(props) {
@@ -76,7 +81,7 @@ class Info extends Component {
             subscriptionAllowed: true
           }
         });
-      });
+      }).catch(destroySession);
     });
   }
 
@@ -91,6 +96,13 @@ class Info extends Component {
             <img src={ this.props.info.image } alt="" />
           </div>
           <div className="rn-account-controls-mat">
+            {
+              (this.props.info.id === cookieControl.get("userdata").id) ? (
+                <button className="rn-account-controls-mat-btn icon">
+                  <i className="fas fa-cog" />
+                </button>
+              ) : null
+            }
             {
               (this.props.info.id !== cookieControl.get("userdata").id) ? (
                 <button className="rn-account-controls-mat-btn icon">
@@ -148,6 +160,19 @@ class Info extends Component {
 }
 
 class TweetsTweet extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      likes: {
+        changable: true,
+        fromState: false,
+        likes: 0,
+        isLiked: false
+      }
+    }
+  }
+
   convertTime(time) { // clf
     if(!time) return "";
 
@@ -191,6 +216,45 @@ class TweetsTweet extends Component {
     }
   }
 
+  likeTweet = () => {
+    const a = (!this.state.likes.fromState) ? Object.assign({}, this.props) : Object.assign({}, this.state.likes),
+          b = cookieControl.get("userdata");
+    this.setState(({ likes }) => {
+      return {
+        likes: {
+          ...likes,
+          likes: (!a.isLiked) ? a.likes + 1 : a.likes - 1,
+          isLiked: !a.isLiked,
+          fromState: true
+        }
+      }
+    });
+
+    this.props.likeTweetMutation({
+      variables: {
+        id: b.id,
+        login: b.login,
+        password: b.password,
+        targetID: this.props.id
+      }
+    }).then(({ data: { likeTweet } }) => {
+      clearCache();
+      this.setState(({ likes }) => {
+        return {
+          likes: {
+            ...likes,
+            likes: likeTweet ? a.likes + 1 : a.likes - 1,
+            isLiked: likeTweet
+          }
+        }
+      })
+    }).catch(destroySession)
+  }
+
+  getLikeSource() {
+    return (!this.state.likes.fromState) ? this.props : this.state.likes;
+  }
+
   render() {
     return(
       <div className="rn-account-tweets-mat-item">
@@ -214,10 +278,11 @@ class TweetsTweet extends Component {
               </button>
             </Link>
             <button
-              className={ `rn-account-tweets-mat-item-content-mat-controls-btn rn-account-tweets-mat-item-content-mat-controls-like${ (this.props.isLiked) ? " active" : "" }` }
-              key={ (this.props.isLiked) ? "A":"B" }>
-              <i className={ `${ (!this.props.isLiked) ? "far" : "fas" } fa-heart` } />
-              <span>{ this.props.likes }</span>
+              className={ `rn-account-tweets-mat-item-content-mat-controls-btn rn-account-tweets-mat-item-content-mat-controls-like${ (this.getLikeSource().isLiked) ? " active" : "" }` }
+              onClick={ this.likeTweet }
+              key={ (this.getLikeSource().isLiked) ? "A":"B" }>
+              <i className={ `${ (!this.getLikeSource().isLiked) ? "far" : "fas" } fa-heart` } />
+              <span>{ this.getLikeSource().likes }</span>
             </button>
           </div>
         </div>
@@ -246,6 +311,7 @@ class Tweets extends Component {
                   time={ time }
                   creator={ creator }
                   isLiked={ isLiked }
+                  likeTweetMutation={ this.props.likeTweetMutation }
                 />
               );
             })
@@ -339,6 +405,7 @@ class App extends Component {
         />
         <Tweets
           tweets={ this.state.user.tweets }
+          likeTweetMutation={ this.props.likeTweetMutation }
         />
       </div>
     );
@@ -352,5 +419,10 @@ export default compose(
     }
   `, {
     name: "subscribeMutation"
-  })
+  }),
+  graphql(gql`
+    mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
+      likeTweet(id: $id, login: $login, password: $password, targetID: $targetID)
+    }
+  `, { name: "likeTweetMutation" })
 )(App);

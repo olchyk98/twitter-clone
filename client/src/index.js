@@ -20,27 +20,6 @@ import apolloClient from './apollo';
 // Get URL Path
 import links from './links';
 
-const pagesInfo = {
-  [links["REGISTER_PAGE"]]: {
-    id: links["REGISTER_PAGE"],
-    loginRequired: false,
-    menu: false
-  },
-  [links["MAIN_PAGE"]]: {
-    id: links["MAIN_PAGE"],
-    loginRequired: true,
-    menu: true
-  },
-  [links["TWEET_PAGE"]]: {
-    id: links["TWEET_PAGE"],
-    loginRequired: true,
-    menu: true
-  }
-}
-
-let pageSession = pagesInfo[window.location.pathname];
-if(!pageSession) pageSession = pagesInfo[links["MAIN_PAGE"]]
-
 const QuaRoute = ({ component: Component, aif, redirect, ...settings }) => (
   <Route
     { ...settings }
@@ -89,6 +68,13 @@ ReactDOM.render(
             <QuaRoute
               exact
               path={ `${ links["ACCOUNT_PAGE"] }/:id?` }
+              component={ Account }
+              aif={ cookieControl.get("userdata") }
+              redirect="/register"
+            />
+            <QuaRoute
+              exact
+              path={ links["SETTINGS_PAGE"] }
               component={ Account }
               aif={ cookieControl.get("userdata") }
               redirect="/register"
