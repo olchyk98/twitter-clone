@@ -93,7 +93,7 @@ ReactDOM.render(
               aif={ cookieControl.get("userdata") }
               redirect="/register"
             />
-            <Redirect to="/home" />
+            <Redirect to="/home" /> {/* 404 */}
           </Switch>
         </div>
       </React.Fragment>

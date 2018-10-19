@@ -3,14 +3,28 @@ import './main.css';
 
 import { gql } from 'apollo-boost';
 import { graphql, compose } from 'react-apollo';
+import { Link } from 'react-router-dom';
 
+import client from '../../apollo';
 import cookieControl from '../../cookieControl';
 import apiPath from '../../apiPath';
+import links from '../../links';
 
 const defaultBg = `${ apiPath }files/backgrounds/default.jpeg`;
-const image2 = "/files/backgrounds/default.jpeg";
+
+let clearCache = () => client.resetStore();
 
 class Info extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      subscriptionFromState: false,
+      subscribedToUser: false,
+      subscriptionAllowed: true
+    }
+  }
+
   convertTime = time => {
     let a = new Date(time),
         b = [
@@ -31,6 +45,41 @@ class Info extends Component {
     return b + " " + a.getFullYear();
   }
 
+  getSubscription = () => (
+    (!this.state.subscriptionFromState) ? this.props.info.requesterIsSubscriber : this.state.subscribedToUser
+  )
+
+  followUser = () => {
+    if(!this.state.subscriptionAllowed) return;
+
+    let a = !this.getSubscription();
+    this.setState(() => {
+      return {
+        subscriptionFromState: true,
+        subscribedToUser: a,
+        subscriptionAllowed: false
+      }
+    }, () => {
+      let { id, login, password } = cookieControl.get("userdata");
+      this.props.subscribeMutation({
+        variables: {
+          id,
+          login,
+          password,
+          targetID: this.props.info.id
+        }
+      }).then(({ data: { subscribeUser } }) => {
+        clearCache();
+        this.setState(() => {
+          return {
+            subscribedToUser: subscribeUser,
+            subscriptionAllowed: true
+          }
+        });
+      });
+    });
+  }
+
   render() {
     return(
       <div className="rn-account-info">
@@ -42,10 +91,22 @@ class Info extends Component {
             <img src={ this.props.info.image } alt="" />
           </div>
           <div className="rn-account-controls-mat">
-            <button className="rn-account-controls-mat-btn icon">
-              <i className="far fa-envelope" />
-            </button>
-            <button className="rn-account-controls-mat-btn rn-account-controls-mat-subscribe">Follow</button>
+            {
+              (this.props.info.id !== cookieControl.get("userdata").id) ? (
+                <button className="rn-account-controls-mat-btn icon">
+                  <i className="far fa-envelope" />
+                </button>
+              ) : null
+            }
+            {
+              (this.props.info.id !== cookieControl.get("userdata").id) ? (
+                <button
+                  className={ `rn-account-controls-mat-btn rn-account-controls-mat-subscribe${ (!this.getSubscription()) ? "" : " active" }` }
+                  onClick={ this.followUser }>
+                  { (!this.getSubscription()) ? "Follow" : " Following" }
+                </button>
+              ) : null
+            }
           </div>
         </div>
         <div className="rn-account-info-mat">
@@ -137,6 +198,7 @@ class TweetsTweet extends Component {
           <img src={ this.props.creator.image } alt={ this.props.creator.name } />
         </div>
         <div className="rn-account-tweets-mat-item-content">
+          <Link className="rn-account-tweets-mat-item-redirect" to={ `${ links["TWEET_PAGE"] }/${ this.props.id }` } />
           <div className="rn-account-tweets-mat-item-content-info">
             <span className="rn-account-tweets-mat-item-content-info-name">{ this.props.creator.name }</span>
             <span className="rn-account-tweets-mat-item-content-info-url">@{ this.props.creator.url }</span>
@@ -145,10 +207,12 @@ class TweetsTweet extends Component {
           </div>
           <p className="rn-account-tweets-mat-item-content-mat">{ this.props.content }</p>
           <div className="rn-account-tweets-mat-item-content-mat-controls">
-            <button className="rn-account-tweets-mat-item-content-mat-controls-btn">
-              <i className="far fa-comment" />
-              <span>{ this.props.comments }</span>
-            </button>
+            <Link to={ `${ links["TWEET_PAGE"] }/${ this.props.id }` }>
+              <button className="rn-account-tweets-mat-item-content-mat-controls-btn">
+                <i className="far fa-comment" />
+                <span>{ this.props.comments }</span>
+              </button>
+            </Link>
             <button
               className={ `rn-account-tweets-mat-item-content-mat-controls-btn rn-account-tweets-mat-item-content-mat-controls-like${ (this.props.isLiked) ? " active" : "" }` }
               key={ (this.props.isLiked) ? "A":"B" }>
@@ -194,11 +258,75 @@ class Tweets extends Component {
 }
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      user: null,
+      userFetched: false
+    }
+  }
+
+  componentDidUpdate() {
+    if(this.state.userFetched && this.state.user === null) {
+      window.location.href = links["NOT_FOUND_PAGE"];
+    }
+  }
+
+  componentDidMount() {
+    client.query({
+      query: gql`
+        query($id: ID!, $login: String!, $password: String!, $targetUrl: String!) {
+          user(id: $id, login: $login, password: $password, targetUrl: $targetUrl) {
+            id,
+            image,
+            name,
+            url,
+            profileDescription,
+            location,
+            joinedDate,
+            subscribedToInt,
+            subscribersInt,
+            requesterIsSubscriber(id: $id, login: $login, password: $password),
+            profileBackground,
+            tweets {
+              id,
+              content,
+              likesInt,
+              commentsInt,
+              time,
+              isLiked(id: $id),
+              creator {
+                id,
+                url,
+                name,
+                image
+              }
+            }
+          }
+        }
+      `,
+      variables: {
+        id: cookieControl.get("userdata").id,
+        login: cookieControl.get("userdata").login,
+        password: cookieControl.get("userdata").password,
+        targetUrl: window.location.pathname.split("/")[2] || ""
+      }
+    }).then(({ data: { user } }) => {
+      this.setState(() => {
+        return {
+          user: user,
+          userFetched: true
+        }
+      });
+    })
+  }
+
   render() {
-    if(this.props.userInfo.loading) {
+    if(!this.state.userFetched || !this.state.user) {
       return(
         <div className="rn-account">
-
+          <div className="rn-account-loader"></div>
         </div>
       )
     }
@@ -206,10 +334,11 @@ class App extends Component {
     return(
       <div className="rn-account">
         <Info
-          info={ this.props.userInfo.user } // XXX: Receives all tweets also.
+          info={ this.state.user } // XXX: Receives all tweets also.
+          subscribeMutation={ this.props.subscribeMutation }
         />
         <Tweets
-          tweets={ this.props.userInfo.user.tweets }
+          tweets={ this.state.user.tweets }
         />
       </div>
     );
@@ -218,44 +347,10 @@ class App extends Component {
 
 export default compose(
   graphql(gql`
-    query($id: ID!, $login: String!, $password: String!, $targetUrl: String!) {
-      user(id: $id, login: $login, password: $password, targetUrl: $targetUrl) {
-        id,
-        image,
-        name,
-        url,
-        profileDescription,
-        location,
-        joinedDate,
-        subscribedToInt,
-        subscribersInt,
-        requesterIsSubscriber(id: $id, login: $login, password: $password),
-        profileBackground,
-        tweets {
-          id,
-          content,
-          likesInt,
-          commentsInt,
-          time,
-          isLiked(id: $id),
-          creator {
-            id,
-            url,
-            name,
-            image
-          }
-        }
-      }
+    mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
+      subscribeUser(id: $id, login: $login, password: $password, targetID: $targetID)
     }
   `, {
-    name: "userInfo",
-    options: {
-      variables: {
-        id: cookieControl.get("userdata").id,
-        login: cookieControl.get("userdata").login,
-        password: cookieControl.get("userdata").password,
-        targetUrl: window.location.pathname.split("/")[2] || ""
-      }
-    }
+    name: "subscribeMutation"
   })
 )(App);

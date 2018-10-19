@@ -1,4 +1,4 @@
-// NOTE: All those validations (...User.findOne({...})...) can be optimized by using try/catch statement.
+// NOTE: All those validations (...User.findOne({...})...) can be optimized by using try/catch statement
 
 const {
   GraphQLSchema,

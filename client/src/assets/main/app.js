@@ -52,7 +52,7 @@ class MainNewsNew extends Component {
     return(
       <form className="rn-main-news-field rn-field" onSubmit={ this.post }>
         <div className="rn-main-news-field-mat">
-          <Link to="/account">
+          <Link to={ `${ links["ACCOUNT_PAGE"] }` }>
             <img className="rn-main-news-field-mat-mg" src={ this.props.userdata ? this.props.userdata.image : "" } alt="" />
           </Link>
           <input
@@ -164,7 +164,7 @@ class MainNewsItem extends Component {
         <div className="rn-main-news-mat-item-mat">
           <Link className="rn-main-news-mat-item-rft" to={ `${ links["TWEET_PAGE"] }/${ this.props.id }` } />
           <div className="rn-main-news-mat-item-mat-tit">
-            <Link to="/account">
+            <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creatorUrl }` }>
               <span className="rn-main-news-mat-item-mat-name">{ this.props.creatorName }</span>
               <span className="rn-main-news-mat-item-mat-url">@{ this.props.creatorUrl }</span>
             </Link>
