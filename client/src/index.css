@@ -55,3 +55,9 @@ input {
 .rn-account-controls-avatar {
   border:3px solid var(--uicol);
 }
+
+.sett_upload_hidden {
+  display:none;
+  opacity:0;
+  visibility:hidden;
+}

@@ -357,55 +357,62 @@ const RootMutation = new GraphQLObjectType({
         return a;
       }
     },
-    setPrfBackground: {
+    updateUserInfo: {
       type: UserType,
       args: {
-        id: { type: GraphQLID },
+        id: { type: new GraphQLNonNull(GraphQLID) },
         login: { type: new GraphQLNonNull(GraphQLString) },
         password: { type: new GraphQLNonNull(GraphQLString) },
-        image: { type: new GraphQLNonNull(GraphQLUpload) }
+        name: { type: GraphQLString },
+        description: { type: GraphQLString },
+        location: { type: GraphQLString },
+        image: { type: GraphQLUpload },
+        background: { type: GraphQLUpload }
       },
-      async resolve(_, { id: _id, login, password, image }) {
+      async resolve(_, { id: _id, login, password, name, description, location, image, background, resetImage, resetBackground }) {
         let user = await User.findOne({ _id, login, password });
         if(user) {
-          let { mimetype, stream } = await image;
-          const imagePath = `/files/backgrounds/${ gen() }.${ mimeprocessor.extension(mimetype) }`;
-          stream.pipe(fs.createWriteStream('.' + imagePath));
+          let deleteImage = false,
+              deleteBackground = false;
 
-          return user.updateOne({
-            profileBackground: hostname + imagePath
-          });
+          // Receive image(avatar)
+          let imagePath = "";
+          {
+            let data = await image;
+            deleteImage = data === "DELETE_CURRENT_IMAGE_ACTION_NO_URL_PROVIDED";
+            if(data && !resetImage && !deleteImage) {
+              imagePath = `/files/avatars/${ gen() }.${ mimeprocessor.extension(data.mimetype) }`;
+              data.stream.pipe(fs.createWriteStream('.' + imagePath));
+            }
+          }
+
+
+          // Receive background
+          let backgroundPath = "";
+          {
+            let data = await background;
+            deleteBackground = data === "DELETE_CURRENT_IMAGE_ACTION_NO_URL_PROVIDED";
+            if(data && !resetBackground && !deleteBackground) {
+              backgroundPath = `/files/backgrounds/${ gen() }.${ mimeprocessor.extension(data.mimetype) }`;
+              data.stream.pipe(fs.createWriteStream('.' + backgroundPath));
+            }
+          }
+
+          // Update document(user)
+          let a = {
+            name: name,
+            profileDescription: description,
+            location: location,
+            profileBackground: (backgroundPath && !deleteBackground) ? (hostname + backgroundPath) : (deleteBackground) ? "" : user.profileBackground,
+            image: (imagePath && !deleteImage) ? (hostname + imagePath) : (deleteImage) ? "" : user.image
+          }
+          await user.updateOne(a);
+
+          // Send response to client
+          return a;
         } else {
           return null;
         }
-      }
-    },
-    setLocation: {
-      type: UserType,
-      args: {
-        id: { type: new GraphQLNonNull(GraphQLID) },
-        login: { type: new GraphQLNonNull(GraphQLString) },
-        password: { type: new GraphQLNonNull(GraphQLString) },
-        location: { type: new GraphQLNonNull(GraphQLString) }
-      },
-      resolve(_, { id: _id, login, password, location }) {
-        return User.findOneAndUpdate({ _id, login, password }, {
-          location
-        });
-      }
-    },
-    setPrfDescription: {
-      type: UserType,
-      args: {
-        id: { type: new GraphQLNonNull(GraphQLID) },
-        login: { type: new GraphQLNonNull(GraphQLString) },
-        password: { type: new GraphQLNonNull(GraphQLString) },
-        description: { type: new GraphQLNonNull(GraphQLString) }
-      },
-      resolve(_, { id: _id, login, password, description: profileDescription }) {
-        return User.findOneAndUpdate({ _id, login, password }, {
-          profileDescription
-        });
       }
     },
     subscribeUser: {

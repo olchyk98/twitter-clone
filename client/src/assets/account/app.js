@@ -74,6 +74,8 @@ class Info extends Component {
           targetID: this.props.info.id
         }
       }).then(({ data: { subscribeUser } }) => {
+        if(subscribeUser === null) destroySession();
+
         clearCache();
         this.setState(() => {
           return {
@@ -98,7 +100,9 @@ class Info extends Component {
           <div className="rn-account-controls-mat">
             {
               (this.props.info.id === cookieControl.get("userdata").id) ? (
-                <button className="rn-account-controls-mat-btn icon">
+                <button
+                  className="rn-account-controls-mat-btn icon"
+                  onClick={ this.props.openSettings }>
                   <i className="fas fa-cog" />
                 </button>
               ) : null
@@ -241,6 +245,8 @@ class TweetsTweet extends Component {
         targetID: this.props.id
       }
     }).then(({ data: { likeTweet } }) => {
+      if(likeTweet === null) destroySession();
+
       clearCache();
       this.setState(({ likes }) => {
         return {
@@ -353,6 +359,7 @@ class SettingsField extends Component {
             type="text"
             ref={ ref => this.activeFiel = ref }
             maxLength={ this.props.limit }
+            defaultValue={ this.props.defaultValue }
           />
         );
       break;
@@ -363,6 +370,7 @@ class SettingsField extends Component {
             onChange={ this.updateValue }
             ref={ ref => this.activeFiel = ref }
             maxLength={ this.props.limit }
+            defaultValue={ this.props.defaultValue }
           />
         );
       break;
@@ -396,40 +404,135 @@ class Settings extends Component {
         name: "",
         description: "",
         location: "",
-        image: "",
-        background: ""
+        image: null,
+        imagePreview: "",
+        background: null,
+        backgroundPreview: ""
       }
+    }
+  }
+
+  componentDidMount() {
+    this.setState(({ data }) => {
+      return {
+        data: {
+          ...data,
+          name: this.props.info.name,
+          description: this.props.info.profileDescription,
+          location: this.props.info.location,
+        }
+      }
+    });
+  }
+
+  setDatValue = (valueName, value, preview = false) => {
+    this.setState(({ data }) => {
+      let a = {
+        ...data,
+        [valueName]: value,
+      };
+      
+      if(preview) {
+        a[{
+          image: "imagePreview",
+          background: "backgroundPreview"
+        }[valueName]] = URL.createObjectURL(value);
+      }
+      if(value === "DELETE_CURRENT_IMAGE_ACTION_NO_URL_PROVIDED") {
+        a[{
+          image: "imagePreview",
+          background: "backgroundPreview"
+        }[valueName]] = " ";
+      }
+
+      return {
+        data: a
+      }
+    });
+  }
+
+  submit = () => {
+    // Clear URL Cache
+    {
+      let a = [
+        "imagePreview",
+        "backgroundPreview"
+      ];
+      a.forEach(io => window.URL.revokeObjectURL(this.state[io]));
+    }
+
+    // Close modal
+    this.props.onClose();
+
+    // Upload to server
+    {
+      let { id, login, password } = cookieControl.get("userdata"),
+          { name, description, location, image, background } = this.state.data;
+      this.props.saveDocument({
+        variables: {
+          id,
+          login,
+          password,
+          name,
+          description,
+          location,
+          image,
+          background
+        }
+      }).then(({ data: { updateUserInfo } }) => {
+        this.props.submitNewData(updateUserInfo);
+      }).catch(destroySession);
     }
   }
 
   render() {
     return(
       <React.Fragment>
-        <div className="rn-account-settingsbg" />
-        <div className="rn-account-settings">
+        <div
+          className={ `rn-account-settingsbg${ (!this.props.inFocus) ? "" : " focus" }` }
+          onClick={ this.props.onClose }
+        />
+        <div className={ `rn-account-settings${ (!this.props.inFocus) ? "" : " focus" }` }>
           <div className="rn-account-settings-nav">
             <div>
-              <button className="rn-account-settings-nav-cltimes">
+              <button
+                className="rn-account-settings-nav-cltimes"
+                onClick={ this.props.onClose }>
                 <i className="fas fa-times" />
               </button>
               <span className="rn-account-settings-nav-title">Edit profile</span>
             </div>
             <div>
-              <button className="rn-account-settings-nav-save">Save</button>
+              <button
+                className="rn-account-settings-nav-save"
+                onClick={ this.submit }>
+                Save
+              </button>
             </div>
           </div>
           <div className="rn-account-settings-content">
             <div className="rn-account-settings-content-bg">
               <img
-                src={ defaultBg }
+                src={ this.state.data.backgroundPreview || this.props.info.profileBackground }
                 alt=""
                 className="rn-account-settings-content-bg-mg"
               />
               <div className="rn-account-settings-content-bg-controls">
-                <button className="rn-account-settings-content-bg-controls-btn">
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="rn-account-settings-content-bg-controls-upload"
+                  className="sett_upload_hidden"
+                  onChange={ ({ target: { files } }) => this.setDatValue("background", files[0], true) }
+                />
+                <label
+                  htmlFor="rn-account-settings-content-bg-controls-upload"
+                  className="rn-account-settings-content-bg-controls-btn">
                   <i className="fas fa-camera" />
-                </button>
-                <button className="rn-account-settings-content-bg-controls-btn">
+                </label>
+                <button
+                  className="rn-account-settings-content-bg-controls-btn"
+                  onClick={ () => this.setDatValue("background", "DELETE_CURRENT_IMAGE_ACTION_NO_URL_PROVIDED") }>
                   <i className="fas fa-times" />
                 </button>
               </div>
@@ -437,14 +540,23 @@ class Settings extends Component {
             <div className="rn-account-settings-content-avatar">
               <div className="rn-account-settings-content-avatar-mat">
                 <img
-                  src={ defaultBg }
+                  src={ this.state.data.imagePreview || this.props.info.image }
                   alt=""
                   className="rn-account-settings-content-avatar-mat-mg"
                 />
                 <div className="rn-account-settings-content-avatar-mat-controls">
-                  <button className="rn-account-settings-content-avatar-mat-controls-btn">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="rn-account-settings-content-avatar-mat-controls-upload"
+                    className="sett_upload_hidden"
+                    onChange={ ({ target: { files } }) => this.setDatValue("image", files[0], true) }
+                  />
+                  <label
+                    htmlFor="rn-account-settings-content-avatar-mat-controls-upload"
+                    className="rn-account-settings-content-avatar-mat-controls-btn">
                     <i className="fas fa-camera" />
-                  </button>
+                  </label>
                 </div>
               </div>
             </div>
@@ -454,28 +566,32 @@ class Settings extends Component {
                   limit: "30",
                   valueName: "name",
                   name: "Name",
-                  type: "text"
+                  type: "text",
+                  defaultValue: this.props.info.name
                 },
                 {
                   limit: "500",
                   valueName: "description",
                   name: "Bio",
-                  type: "textarea"
+                  type: "textarea",
+                  defaultValue: this.props.info.profileDescription
                 },
                 {
                   limit: "30",
                   valueName: "location",
                   name: "Location",
-                  type: "text"
+                  type: "text",
+                  defaultValue: this.props.info.location
                 }
-              ].map(({ limit, valueName, type, name }, index) => {
+              ].map(({ limit, valueName, type, name, defaultValue }, index) => {
                 return(
                   <SettingsField
                     key={ index }
                     type={ type }
                     name={ name }
                     limit={ limit }
-                    submitValue={ value => this.setState(({ data }) => ({ data: {...data, [valueName]: value} })) }
+                    defaultValue={ defaultValue }
+                    submitValue={ value => this.setDatValue(valueName, value) }
                   />
                 );
               })
@@ -493,7 +609,8 @@ class App extends Component {
 
     this.state = {
       user: null,
-      userFetched: false
+      userFetched: false,
+      settingsModal: false
     }
   }
 
@@ -552,6 +669,22 @@ class App extends Component {
     })
   }
 
+  editData = a => {
+    Object.keys(a).forEach(io => {
+      let ia = a[io];
+      if(!ia && typeof ia !== "string") delete a[io];
+    });
+
+    this.setState(({ user }) => {
+      return {
+        user: {
+          ...user,
+          ...a
+        }
+      }
+    });
+  }
+
   render() {
     if(!this.state.userFetched || !this.state.user) {
       return(
@@ -566,12 +699,19 @@ class App extends Component {
         <Info
           info={ this.state.user } // XXX: Receives all tweets also.
           subscribeMutation={ this.props.subscribeMutation }
+          openSettings={ () => this.setState({ settingsModal: true }) }
         />
         <Tweets
           tweets={ this.state.user.tweets }
           likeTweetMutation={ this.props.likeTweetMutation }
         />
-        <Settings />
+        <Settings
+          inFocus={ this.state.settingsModal }
+          info={ this.state.user } // XXX: Receives all tweets also.
+          onClose={ () => this.setState({ settingsModal: false }) }
+          saveDocument={ this.props.saveDocument }
+          submitNewData={ this.editData }
+        />
       </div>
     );
   }
@@ -589,5 +729,17 @@ export default compose(
     mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
       likeTweet(id: $id, login: $login, password: $password, targetID: $targetID)
     }
-  `, { name: "likeTweetMutation" })
+  `, { name: "likeTweetMutation" }),
+  graphql(gql`
+    mutation($id: ID!, $login: String!, $password: String!, $name: String, $description: String, $location: String, $image: Upload, $background: Upload) {
+      updateUserInfo(id: $id, login: $login, password: $password, name: $name, description: $description, location: $location, image: $image, background: $background) {
+        id,
+        name,
+        profileDescription,
+        profileBackground,
+        location,
+        image
+      }
+    }
+  `, { name: "saveDocument" })
 )(App);
