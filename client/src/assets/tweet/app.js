@@ -328,6 +328,9 @@ class App extends Component {
     e.preventDefault();
 
     let { id, login, password } = cookieControl.get("userdata");
+    let a = this.commentRef.value;
+
+    this.commentRef.value = "";
 
     document.getElementById("main").scrollTo({ top: this.commentsBlockRef.getBoundingClientRect().top, behavior: "smooth" });
     this.props.commentTweet({
@@ -336,7 +339,7 @@ class App extends Component {
         login,
         password,
         targetID: this.state.tweet.id,
-        content: this.commentRef.value
+        content: a
       }
     }).then(({ data: { commentTweet: comment } }) => {
       this.setState(({ tweet }) => {
@@ -491,7 +494,7 @@ class App extends Component {
             onFocus={ () => this.setState({ isCommenting: true }) }
             onBlur={ () => this.setState({ isCommenting: false }) }
           />
-          <button><i className="far fa-paper-plane" /></button>
+          <button type="submit"><i className="far fa-paper-plane" /></button>
         </form>
       </div>
     );

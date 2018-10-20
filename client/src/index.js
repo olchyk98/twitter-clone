@@ -1,5 +1,4 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react'; import ReactDOM from 'react-dom';
 import './index.css';
 import './libs/fontawesome';
 import registerServiceWorker from './registerServiceWorker';
@@ -67,7 +66,14 @@ ReactDOM.render(
             />
             <QuaRoute
               exact
-              path={ `${ links["ACCOUNT_PAGE"] }/:id?` }
+              path={ links["ACCOUNT_PAGE"] }
+              component={ Account }
+              aif={ cookieControl.get("userdata") }
+              redirect="/register"
+            />
+            <QuaRoute
+              exact
+              path={ `${ links["ACCOUNT_PAGE"] }/:id` }
               component={ Account }
               aif={ cookieControl.get("userdata") }
               redirect="/register"

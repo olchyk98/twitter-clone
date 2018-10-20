@@ -480,6 +480,7 @@ class Settings extends Component {
           background
         }
       }).then(({ data: { updateUserInfo } }) => {
+        clearCache();
         this.props.submitNewData(updateUserInfo);
       }).catch(destroySession);
     }
@@ -615,12 +616,27 @@ class App extends Component {
   }
 
   componentDidUpdate() {
+    if(
+      this.state.user &&
+      ((window.location.pathname.split("/")[2] && this.state.user.url !== window.location.pathname.split("/")[2]) ||
+      (!window.location.pathname.split("/")[2] && this.state.user.id !== cookieControl.get("userdata").id))
+    ) { // XXX
+      this.setState(() => {
+        return {
+          user: false
+        }
+      }, this.fetchUser);
+    }
     if(this.state.userFetched && this.state.user === null) {
       window.location.href = links["NOT_FOUND_PAGE"];
     }
   }
 
   componentDidMount() {
+    this.fetchUser();
+  }
+
+  fetchUser = () => {
     client.query({
       query: gql`
         query($id: ID!, $login: String!, $password: String!, $targetUrl: String!) {
@@ -666,7 +682,7 @@ class App extends Component {
           userFetched: true
         }
       });
-    })
+    });
   }
 
   editData = a => {
