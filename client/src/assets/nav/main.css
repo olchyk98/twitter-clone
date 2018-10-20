@@ -27,10 +27,10 @@
   height:100%;
   display:flex;
   align-items:center;
-  margin-left:7.5px;
-  margin-right:7.5px;
   padding-left:20px;
   padding-right:20px;
+  margin-left:10px;
+  margin-right:10px;
   color:#8899a6;
   transition:.2s;
   font-size:20px;
@@ -131,4 +131,24 @@
   overflow:hidden;
   white-space:nowrap;
   text-transform:uppercase;
+}
+
+
+@media only screen and (max-width:650px) {
+  .mj-nav-search {
+    display:none;
+  }
+}
+
+@media only screen and (max-width:520px) {
+  .mj-nav-navigation-btn {
+    margin-left:2.5px;
+    margin-right:2.5px;
+  }
+}
+
+@media only screen and (max-width:460px) {
+  .mj-nav-muser-tit {
+    display:none;
+  }
 }

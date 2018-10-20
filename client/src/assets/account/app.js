@@ -7,10 +7,10 @@ import { Link } from 'react-router-dom';
 
 import client from '../../apollo';
 import cookieControl from '../../cookieControl';
-import apiPath from '../../apiPath';
+import { apiPath } from '../../apiPath';
 import links from '../../links';
 
-const defaultBg = `${ apiPath }files/backgrounds/default.jpeg`;
+const defaultBg = "/files/backgrounds/default.jpeg";
 
 function destroySession() {
   cookieControl.delete("userdata");
@@ -91,11 +91,11 @@ class Info extends Component {
     return(
       <div className="rn-account-info">
         <div className="rn-account-bg">
-          <img src={ this.props.info.profileBackground ? this.props.info.profileBackground : defaultBg } alt={ `${ this.props.info.name.split(" ")[0] }'s background` } />
+          <img src={ this.props.info.profileBackground ? apiPath + this.props.info.profileBackground : apiPath + defaultBg } alt={ `${ this.props.info.name.split(" ")[0] }'s background` } />
         </div>
         <div className="rn-account-controls">
           <div className="rn-account-controls-avatar">
-            <img src={ this.props.info.image } alt={ `${ this.props.info.name.split(" ")[0] }'s background` } />
+            <img src={ apiPath + this.props.info.image } alt={ `${ this.props.info.name.split(" ")[0] }'s background` } />
           </div>
           <div className="rn-account-controls-mat">
             {
@@ -269,7 +269,7 @@ class TweetsTweet extends Component {
     return(
       <div className="rn-account-tweets-mat-item">
         <div className="rn-account-tweets-mat-item-mg">
-          <img src={ this.props.creator.image } alt={ this.props.creator.name } />
+          <img src={ apiPath + this.props.creator.image } alt={ this.props.creator.name } />
         </div>
         <div className="rn-account-tweets-mat-item-content">
           <Link className="rn-account-tweets-mat-item-redirect" to={ `${ links["TWEET_PAGE"] }/${ this.props.id }` } />
@@ -514,7 +514,7 @@ class Settings extends Component {
           <div className="rn-account-settings-content">
             <div className="rn-account-settings-content-bg">
               <img
-                src={ this.state.data.backgroundPreview || this.props.info.profileBackground }
+                src={ this.state.data.backgroundPreview ? this.state.data.backgroundPreview : this.props.info.profileBackground ? apiPath + this.props.info.profileBackground : "" }
                 alt=""
                 className="rn-account-settings-content-bg-mg"
               />
@@ -541,7 +541,7 @@ class Settings extends Component {
             <div className="rn-account-settings-content-avatar">
               <div className="rn-account-settings-content-avatar-mat">
                 <img
-                  src={ this.state.data.imagePreview || this.props.info.image }
+                  src={ this.state.data.imagePreview ? this.state.data.imagePreview : this.props.info.image ? apiPath + this.props.info.image : "" }
                   alt=""
                   className="rn-account-settings-content-avatar-mat-mg"
                 />

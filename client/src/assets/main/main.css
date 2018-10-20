@@ -119,7 +119,7 @@
 }
 
 .rn-main-news-mat-item-mg {
-  width:10%;
+  width:50px;
   height:100%;
   position:relative;
   display:flex;
@@ -142,7 +142,7 @@
   justify-content:center;
   flex-direction:column;
   color:white;
-  width:calc(90% - 10px);
+  width:calc(100% - 50px - 10px);
   margin-left:10px;
   position:relative;
 }
@@ -269,5 +269,20 @@
   }
   to {
     transform:rotate(360deg)
+  }
+}
+
+@media only screen and (max-width:350px) {
+  .rn-main-news-mat-item-mg {
+    width:35px;
+  }
+
+  .rn-main-news-mat-item-mg > img {
+    height:35px;
+    width:35px;
+  }
+
+  .rn-main-news-mat-item-mat {
+    width:calc(100% - 35px - 10px);
   }
 }

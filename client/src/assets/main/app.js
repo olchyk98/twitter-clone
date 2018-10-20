@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import links from '../../links';
 import cookieControl from '../../cookieControl';
 import client from '../../apollo';
+import { apiPath } from '../../apiPath';
 
 function destroySession() {
   cookieControl.delete("userdata");
@@ -53,7 +54,7 @@ class MainNewsNew extends Component {
       <form className="rn-main-news-field rn-field" onSubmit={ this.post }>
         <div className="rn-main-news-field-mat">
           <Link to={ `${ links["ACCOUNT_PAGE"] }` }>
-            <img className="rn-main-news-field-mat-mg" src={ this.props.userdata ? this.props.userdata.image : "" } alt="" />
+            <img className="rn-main-news-field-mat-mg" src={ this.props.userdata ? apiPath + this.props.userdata.image : "" } alt="" />
           </Link>
           <input
             type="text"
@@ -159,7 +160,7 @@ class MainNewsItem extends Component {
     return(
       <div className="rn-main-news-mat-item rn-field">
         <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creatorUrl }` } className="rn-main-news-mat-item-mg">
-          <img src={ this.props.creatorImage } alt={ this.props.creatorName } />
+          <img src={ apiPath + this.props.creatorImage } alt={ this.props.creatorName } />
         </Link>
         <div className="rn-main-news-mat-item-mat">
           <Link className="rn-main-news-mat-item-rft" to={ `${ links["TWEET_PAGE"] }/${ this.props.id }` } />

@@ -19,8 +19,6 @@ const User = require('./models/user');
 const Tweet = require('./models/tweet');
 const Comment = require('./models/comment');
 
-const hostname = require('./hostname');
-
 function gen() {
   let a = "",
       b = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
@@ -346,7 +344,7 @@ const RootMutation = new GraphQLObjectType({
 
         let a = await new User({
           name, login, password, url,
-          image: hostname + imagePath,
+          image: "/" + imagePath,
           location: "",
           joinedDate: new Date(),
           subscribedTo: [],
@@ -403,8 +401,8 @@ const RootMutation = new GraphQLObjectType({
             name: name,
             profileDescription: description,
             location: location,
-            profileBackground: (backgroundPath && !deleteBackground) ? (hostname + backgroundPath) : (deleteBackground) ? "" : user.profileBackground,
-            image: (imagePath && !deleteImage) ? (hostname + imagePath) : (deleteImage) ? "" : user.image
+            profileBackground: (backgroundPath && !deleteBackground) ? (backgroundPath) : (deleteBackground) ? "" : user.profileBackground,
+            image: (imagePath && !deleteImage) ? (imagePath) : (deleteImage) ? "" : user.image
           }
           await user.updateOne(a);
 

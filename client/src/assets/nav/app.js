@@ -4,9 +4,10 @@ import './main.css';
 import { Link } from 'react-router-dom';
 import { gql } from 'apollo-boost';
 import { graphql, compose } from 'react-apollo';
-import cookieControl from '../../cookieControl';
 
+import cookieControl from '../../cookieControl';
 import links from '../../links';
+import { apiPath } from '../../apiPath';
 
 function destroySession() {
   cookieControl.delete("userdata");
@@ -82,7 +83,7 @@ class Nav extends Component {
             <div className="mj-nav-muser">
               <img
                 className="mj-nav-muser-mg"
-                src={ this.getAPI("image") }
+                src={ this.getAPI("image") ? apiPath + this.getAPI("image") : "" }
                 alt={ this.getAPI("name") }
               />
               <span className="mj-nav-muser-tit">

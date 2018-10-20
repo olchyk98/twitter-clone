@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import cookieControl from '../../cookieControl';
 import client from '../../apollo';
 import links from '../../links';
+import { apiPath } from '../../apiPath';
 
 function destroySession() {
   cookieControl.delete("userdata");
@@ -129,7 +130,7 @@ var clearMemory = () => client.clearStore();
       <React.Fragment>
         <div className="rn-tweet-comments-comment">
           <div className="rn-tweet-comments-comment-mg">
-            <img src={ this.props.creator.image } alt={ this.props.creator.name } />
+            <img src={ apiPath + this.props.creator.image } alt={ this.props.creator.name } />
           </div>
           <div className="rn-tweet-comments-comment-content">
             <div className="rn-tweet-comments-comment-content-cri">
@@ -409,7 +410,7 @@ class App extends Component {
               <img
                 className="rn-tweet-creator-mg"
                 alt={ this.getAPI({creator:{name:""}}).creator.name }
-                src={ this.getAPI({creator:{image:""}}).creator.image }
+                src={ apiPath + this.getAPI({creator:{image:""}}).creator.image }
               />
             </Link>
             <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.getAPI({creator:{url:""}}).creator.url }` }>
