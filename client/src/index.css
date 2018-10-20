@@ -48,8 +48,13 @@ input {
 .rn-account-info,
 .rn-account-tweets-nav,
 .rn-account-tweets-mat-item,
-.rn-account-settings {
+.rn-account-settings,
+.rn-followers {
   background:var(--uicol);
+}
+
+.rn-followers-split {
+  background:var(--bgcol);
 }
 
 .rn-account-controls-avatar {

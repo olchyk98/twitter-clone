@@ -515,7 +515,7 @@ class Settings extends Component {
             <div className="rn-account-settings-content-bg">
               <img
                 src={ this.state.data.backgroundPreview ? this.state.data.backgroundPreview : this.props.info.profileBackground ? apiPath + this.props.info.profileBackground : "" }
-                alt=""
+                alt={ this.props.info.name }
                 className="rn-account-settings-content-bg-mg"
               />
               <div className="rn-account-settings-content-bg-controls">
@@ -542,7 +542,7 @@ class Settings extends Component {
               <div className="rn-account-settings-content-avatar-mat">
                 <img
                   src={ this.state.data.imagePreview ? this.state.data.imagePreview : this.props.info.image ? apiPath + this.props.info.image : "" }
-                  alt=""
+                  alt={ this.props.info.name }
                   className="rn-account-settings-content-avatar-mat-mg"
                 />
                 <div className="rn-account-settings-content-avatar-mat-controls">

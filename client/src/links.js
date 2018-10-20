@@ -6,6 +6,7 @@ const links = {
   ACCOUNT_PAGE: "/user",
   REGISTER_PAGE: "/register",
   TWEET_PAGE: "/tweet",
+  FOLLOWERS_PAGE: "/followers",
   NOT_FOUND_PAGE: "/404"
 }
 

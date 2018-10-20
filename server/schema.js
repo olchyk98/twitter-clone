@@ -28,7 +28,7 @@ function gen() {
   return a;
 }
 
-const UserType = new GraphQLObjectType({ // name, login, password, image, subscribers
+const UserType = new GraphQLObjectType({
   name: "User",
   fields: () => ({
     id: { type: GraphQLID },
@@ -41,6 +41,7 @@ const UserType = new GraphQLObjectType({ // name, login, password, image, subscr
     profileDescription: { type: GraphQLString },
     location: { type: GraphQLString },
     joinedDate: { type: GraphQLString },
+    isVertificated: { type: GraphQLBoolean },
     requesterIsSubscriber: {
       type: GraphQLBoolean,
       args: {
@@ -63,10 +64,20 @@ const UserType = new GraphQLObjectType({ // name, login, password, image, subscr
     },
     subscribedTo: {
       type: new GraphQLList(UserType),
-      async resolve({ subscribedTo }) {
+      resolve({ subscribedTo }) {
         return User.find({
           _id: {
             $in: subscribedTo
+          }
+        });
+      }
+    },
+    subscribers: {
+      type: new GraphQLList(UserType),
+      resolve({ id }) {
+        return User.find({
+          subscribedTo: {
+            $in: [id]
           }
         });
       }

@@ -236,14 +236,14 @@ class App extends Component {
       this.setState(() => {
         return { tweet }
       });
-    }).catch(destroySession);
+    }).catch(() => this.props.history.push("/404"));
   }
 
   getAPI = (def = []) => {
     if(this.state.tweet === false) return def; // loading
     else if(this.state.tweet) return this.state.tweet;
     else if(this.props.tweet === null) { // unsecure session
-      this.props.history.push("/home");
+      this.props.history.push(links["MAIN_PAGE"]);
       return def;
     }
   }
@@ -350,7 +350,8 @@ class App extends Component {
             comments: [
               comment,
               ...tweet.comments
-            ]
+            ],
+            commentsInt: tweet.commentsInt + 1
           }
         }
       }, clearMemory);

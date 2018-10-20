@@ -1,0 +1,84 @@
+import React, { Component } from 'react';
+import './main.css';
+
+const image = "https://pbs.twimg.com/profile_images/839039769120239616/e2GElXa__bigger.jpg";
+
+class UsersUser extends Component {
+	render() {
+		return(
+			<div className="rn-followers-users-user">
+				<div className="rn-followers-users-user-image">
+					<img
+						className="rn-followers-users-user-image-mat"
+						src={ image }
+						alt=""
+					/>
+				</div>
+				<div className="rn-followers-users-user-content">
+					<div className="rn-followers-users-user-content-name">
+						<div className="rn-followers-users-user-content-mat">
+							<div className="rn-followers-users-user-content-mat-name">
+								<span className="rn-followers-users-user-content-mat-name-mat">Oles Odynets</span>
+								<svg className="rn-followers-users-user-content-mat-name-verf">
+									<g>
+										<path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25a3.606 3.606 0 0 0-1.336-.25c-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5a.749.749 0 0 1-1.041.208l-.115-.094-2.415-2.415a.749.749 0 1 1 1.06-1.06l1.77 1.767 3.825-5.74a.75.75 0 0 1 1.25.833z"></path>
+									</g>
+								</svg>
+							</div>
+							<span className="rn-followers-users-user-content-mat-url">@oles</span>
+						</div>
+						<div className="rn-followers-users-user-content-controls">
+							<button className="rn-followers-users-user-content-controls-btn">Follow</button>
+						</div>
+					</div>
+					<p className="rn-followers-users-user-content-mat">
+						Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life 
+					</p>
+				</div>
+			</div>
+		);
+	}
+}
+
+class Split extends Component {
+	render() {
+		return(
+			<div className="rn-followers-split" />
+		);
+	}
+}
+
+class Users extends Component {
+	render() {
+		return(
+			<div className="rn-followers-users">
+				<UsersUser />
+				<Split />
+			</div>
+		);	
+	}
+}
+
+class App extends Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			reqStage: "FOLLOWERS_STAGE"
+		}
+	}
+
+	render() {
+		return(
+			<div className="rn-followers">
+				<div className="rn-followers-menu">
+					<button className={ `rn-followers-menu-btn${ (this.state.reqStage === "FOLLOWERS_STAGE") ? " active" : "" }` }>Followers</button>
+					<button className={ `rn-followers-menu-btn${ (this.state.reqStage === "FOLLOWING_STAGE") ? " active" : "" }` }>Following</button>
+				</div>
+				<Users />
+			</div>
+		);
+	}
+}
+
+export default App;

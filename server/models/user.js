@@ -11,7 +11,8 @@ const UserSchema = new Schema({
   profileDescription: String,
   location: String,
   joinedDate: Date,
-  subscribedTo: Array
+  subscribedTo: Array,
+  isVertificated: Boolean
 });
 
 module.exports = mongoose.model("User", UserSchema);

@@ -9,6 +9,7 @@ import Main from './assets/main/app';
 import Register from './assets/register/app';
 import Tweet from './assets/tweet/app';
 import Account from './assets/account/app';
+import Followers from './assets/followers/app';
 
 import { BrowserRouter, Redirect, Switch } from 'react-router-dom';
 import { Route } from 'react-router';
@@ -66,8 +67,15 @@ ReactDOM.render(
             />
             <QuaRoute
               exact
-              path={ `${ links["ACCOUNT_PAGE"] }/:id?` }
+              path={ `${ links["ACCOUNT_PAGE"] }/:url?` }
               component={ Account }
+              aif={ cookieControl.get("userdata") }
+              redirect="/register"
+            />
+            <QuaRoute
+              exact
+              path={ `${ links["FOLLOWERS_PAGE"] }/:url` }
+              component={ Followers }
               aif={ cookieControl.get("userdata") }
               redirect="/register"
             />
