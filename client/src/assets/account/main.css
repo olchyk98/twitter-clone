@@ -1,6 +1,7 @@
 :root {
   --focuscol:#34a1f2;
   --seccol: rgba(255, 255, 255, .45);
+  --settings-editcol:rgba(255, 255, 255, .75);;
 }
 
 .rn-account {
@@ -463,7 +464,7 @@
 .rn-account-settings-nav {
   --padding:15px;
 
-  height:50px;
+  height:55px;
   width:calc(100% - var(--padding) * 2);
   display:flex;
   align-items:center;
@@ -471,6 +472,18 @@
   padding-left:var(--padding);
   position:relative;
   padding-right:var(--padding);
+}
+
+.rn-account-settings-content {
+  --paddingbottom:10px;
+
+  height:calc(100% - (55px + var(--paddingbottom)));
+  width:100%;
+  position:relative;
+  padding-bottom:var(--paddingbottom);
+  overflow:scroll;
+  /*overflow-x:hidden;*/
+  /*overflow-y:visible;*/
 }
 
 .rn-account-settings-nav > * {
@@ -483,9 +496,32 @@
   border:none;
   background:transparent;
   font-size:1.5em;
-  color:var(--focuscol);
+  color:rgba(255, 255, 255, .75);
   margin-right:20px;
   cursor:pointer;
+  position:relative;
+  color:var(--focuscol);
+}
+
+.rn-account-settings-nav-cltimes:before {
+  content:'';
+  position:absolute;
+  top:50%;
+  left:50%;
+  margin-right:50%;
+  background:red;
+  height:120%;
+  width:120%;
+  border-radius:50%;
+  background:var(--focuscol);
+  opacity:0;
+  transition:.2s;
+  transform:translate(-50%, -50%) scale(0);
+}
+
+.rn-account-settings-nav-cltimes:hover:before {
+  opacity:.2;
+  transform:translate(-50%, -50%) scale(1);
 }
 
 .rn-account-settings-nav-title {
@@ -496,6 +532,124 @@
 }
 
 .rn-account-settings-nav-save {
-  padding-left:5px;
-  padding-right:5px;
+  padding-left:20px;
+  padding-right:20px;
+  color:white;
+  cursor:pointer;
+  font-size:1em;
+  height:32.5px;
+  background:var(--focuscol);
+  border:none;
+  border-radius:45px;
+  transition:.2s;
+}
+
+.rn-account-settings-nav-save:hover {
+  opacity:.95;
+}
+
+.rn-account-settings-content-bg {
+  height:150px;
+  width:100%;
+  background:red;
+  position:relative;
+}
+
+.rn-account-settings-content-bg-mg {
+  height:100%;
+  width:100%;
+  object-fit:cover;
+  object-position:center; 
+  filter:brightness(75%);
+}
+
+.rn-account-settings-content-avatar {
+  height:50px;
+  width:50px;
+  display:flex;
+  align-items:flex-end;
+  margin-left:10px;
+  position:relative;
+  z-index:2;
+  margin-bottom:30px;
+}
+
+.rn-account-settings-content-avatar-mat,
+.rn-account-settings-content-avatar-mat-mg {
+  width:115px;
+  height:115px;
+}
+
+.rn-account-settings-content-avatar-mat {
+  border:1.5px solid white;
+  border-radius:50%;
+  position:relative;
+}
+
+.rn-account-settings-content-avatar-mat-mg {
+  border-radius:50%;
+  filter:brightness(60%);
+}
+
+.rn-account-settings-content-avatar-mat-controls,
+.rn-account-settings-content-bg-controls {
+  position:absolute;
+  top:50%;
+  left:50%;
+  margin-right:50%;
+  transform:translate(-50%, -50%);
+  display:flex;
+  align-items:center;
+}
+
+.rn-account-settings-content-avatar-mat-controls-btn,
+.rn-account-settings-content-bg-controls-btn {
+  border:none;
+  background:transparent;
+  color:var(--settings-editcol);
+  font-size:1.5em;
+  margin-left:10px;
+  margin-right:10px;
+  cursor:pointer;
+}
+
+.rn-account-settings-content-avatar-field {
+  margin-top:30px;
+  margin-bottom:10px;
+  display:flex;
+  flex-direction:column;
+  width:90%;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.rn-account-settings-content-avatar-field-placeholder {
+  color:rgba(255, 255, 255, .65);
+  font-family:"Quicksand";
+  font-weight:400;
+  font-size:.95em;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.rn-account-settings-content-avatar-field-input {
+  border:none;
+  margin-top:-5px;
+  border-bottom:1px solid var(--focuscol);
+  background:transparent;
+  color:rgba(255, 255, 255, .85);
+  padding:0;
+  font-size:1.3em;
+  outline:0;
+}
+
+.rn-account-settings-content-avatar-field-input.text {
+  height:50px;
+}
+
+.rn-account-settings-content-avatar-field-input.textarea {
+  height:70px;
+  margin-top:5px;
+  resize:none;
 }

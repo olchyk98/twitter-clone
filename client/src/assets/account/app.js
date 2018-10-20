@@ -89,11 +89,11 @@ class Info extends Component {
     return(
       <div className="rn-account-info">
         <div className="rn-account-bg">
-          <img src={ this.props.info.profileBackground ? this.props.info.profileBackground : defaultBg } alt="asd" />
+          <img src={ this.props.info.profileBackground ? this.props.info.profileBackground : defaultBg } alt={ `${ this.props.info.name.split(" ")[0] }'s background` } />
         </div>
         <div className="rn-account-controls">
           <div className="rn-account-controls-avatar">
-            <img src={ this.props.info.image } alt="" />
+            <img src={ this.props.info.image } alt={ `${ this.props.info.name.split(" ")[0] }'s background` } />
           </div>
           <div className="rn-account-controls-mat">
             {
@@ -327,12 +327,78 @@ class Tweets extends Component {
   }
 }
 
+class SettingsField extends Component {
+  constructor(props) {
+    super(props);
+
+    this.activeFiel = React.createRef();
+  }
+
+  updateValue = ({ target: { value } }) => {
+    if(value.length > this.props.limit) {
+      value = this.activeFiel.value = this.activeFiel.value.substr(0, this.props.limit);
+    }
+
+    this.props.submitValue(value);
+  }
+
+  getFieldByType = () => {
+    let a = "";
+    switch(this.props.type) {
+      case 'text':
+        a = (
+          <input
+            className="rn-account-settings-content-avatar-field-input text"
+            onChange={ this.updateValue }
+            type="text"
+            ref={ ref => this.activeFiel = ref }
+            maxLength={ this.props.limit }
+          />
+        );
+      break;
+      case 'textarea':
+        a = (
+          <textarea
+            className="rn-account-settings-content-avatar-field-input textarea"
+            onChange={ this.updateValue }
+            ref={ ref => this.activeFiel = ref }
+            maxLength={ this.props.limit }
+          />
+        );
+      break;
+      default:
+        a = null;
+      break;
+    }
+
+    return a;
+  }
+
+  render() {
+    return(
+      <div className="rn-account-settings-content-avatar-field">
+        <div className="rn-account-settings-content-avatar-field-placeholder">
+          <span>{ this.props.name }</span>
+          <span>{ (this.activeFiel.value) ? this.props.limit - this.activeFiel.value.length : this.props.limit }</span>
+        </div>
+        { this.getFieldByType() }
+      </div>
+    );
+  }
+}
+
 class Settings extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-
+      data: {
+        name: "",
+        description: "",
+        location: "",
+        image: "",
+        background: ""
+      }
     }
   }
 
@@ -344,13 +410,76 @@ class Settings extends Component {
           <div className="rn-account-settings-nav">
             <div>
               <button className="rn-account-settings-nav-cltimes">
-                <i class="fas fa-times" />
+                <i className="fas fa-times" />
               </button>
               <span className="rn-account-settings-nav-title">Edit profile</span>
             </div>
             <div>
               <button className="rn-account-settings-nav-save">Save</button>
             </div>
+          </div>
+          <div className="rn-account-settings-content">
+            <div className="rn-account-settings-content-bg">
+              <img
+                src={ defaultBg }
+                alt=""
+                className="rn-account-settings-content-bg-mg"
+              />
+              <div className="rn-account-settings-content-bg-controls">
+                <button className="rn-account-settings-content-bg-controls-btn">
+                  <i className="fas fa-camera" />
+                </button>
+                <button className="rn-account-settings-content-bg-controls-btn">
+                  <i className="fas fa-times" />
+                </button>
+              </div>
+            </div>
+            <div className="rn-account-settings-content-avatar">
+              <div className="rn-account-settings-content-avatar-mat">
+                <img
+                  src={ defaultBg }
+                  alt=""
+                  className="rn-account-settings-content-avatar-mat-mg"
+                />
+                <div className="rn-account-settings-content-avatar-mat-controls">
+                  <button className="rn-account-settings-content-avatar-mat-controls-btn">
+                    <i className="fas fa-camera" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            {
+              [
+                {
+                  limit: "30",
+                  valueName: "name",
+                  name: "Name",
+                  type: "text"
+                },
+                {
+                  limit: "500",
+                  valueName: "description",
+                  name: "Bio",
+                  type: "textarea"
+                },
+                {
+                  limit: "30",
+                  valueName: "location",
+                  name: "Location",
+                  type: "text"
+                }
+              ].map(({ limit, valueName, type, name }, index) => {
+                return(
+                  <SettingsField
+                    key={ index }
+                    type={ type }
+                    name={ name }
+                    limit={ limit }
+                    submitValue={ value => this.setState(({ data }) => ({ data: {...data, [valueName]: value} })) }
+                  />
+                );
+              })
+            }
           </div>
         </div>
       </React.Fragment>
