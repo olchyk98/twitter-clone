@@ -217,6 +217,8 @@ class TweetsTweet extends Component {
   }
 
   likeTweet = () => {
+    if(!this.state.likes.changable) return;
+
     const a = (!this.state.likes.fromState) ? Object.assign({}, this.props) : Object.assign({}, this.state.likes),
           b = cookieControl.get("userdata");
     this.setState(({ likes }) => {
@@ -225,7 +227,8 @@ class TweetsTweet extends Component {
           ...likes,
           likes: (!a.isLiked) ? a.likes + 1 : a.likes - 1,
           isLiked: !a.isLiked,
-          fromState: true
+          fromState: true,
+          changable: false
         }
       }
     });
@@ -244,7 +247,8 @@ class TweetsTweet extends Component {
           likes: {
             ...likes,
             likes: likeTweet ? a.likes + 1 : a.likes - 1,
-            isLiked: likeTweet
+            isLiked: likeTweet,
+            changable: true
           }
         }
       })
@@ -319,6 +323,37 @@ class Tweets extends Component {
 
         </div>
       </div>
+    );
+  }
+}
+
+class Settings extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+
+    }
+  }
+
+  render() {
+    return(
+      <React.Fragment>
+        <div className="rn-account-settingsbg" />
+        <div className="rn-account-settings">
+          <div className="rn-account-settings-nav">
+            <div>
+              <button className="rn-account-settings-nav-cltimes">
+                <i class="fas fa-times" />
+              </button>
+              <span className="rn-account-settings-nav-title">Edit profile</span>
+            </div>
+            <div>
+              <button className="rn-account-settings-nav-save">Save</button>
+            </div>
+          </div>
+        </div>
+      </React.Fragment>
     );
   }
 }
@@ -407,6 +442,7 @@ class App extends Component {
           tweets={ this.state.user.tweets }
           likeTweetMutation={ this.props.likeTweetMutation }
         />
+        <Settings />
       </div>
     );
   }

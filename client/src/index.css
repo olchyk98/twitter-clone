@@ -47,7 +47,8 @@ input {
 .rn-tweet-commat,
 .rn-account-info,
 .rn-account-tweets-nav,
-.rn-account-tweets-mat-item {
+.rn-account-tweets-mat-item,
+.rn-account-settings {
   background:var(--uicol);
 }
 

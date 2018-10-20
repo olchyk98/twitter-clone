@@ -72,14 +72,7 @@ ReactDOM.render(
               aif={ cookieControl.get("userdata") }
               redirect="/register"
             />
-            <QuaRoute
-              exact
-              path={ links["SETTINGS_PAGE"] }
-              component={ Account }
-              aif={ cookieControl.get("userdata") }
-              redirect="/register"
-            />
-            <Redirect to="/home" /> {/* 404 */}
+            <Redirect to={ links["MAIN_PAGE"] } /> {/* 404 */}
           </Switch>
         </div>
       </React.Fragment>
