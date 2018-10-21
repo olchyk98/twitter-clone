@@ -81,7 +81,9 @@ class MainNewsItem extends Component {
       isLiked: false,
       likes: 0,
       isLikeFetched: false,
-      isLikeChangeable: true
+      isLikeChangeable: true,
+      deleteInFocus: false,
+      isDeleted: false
     }
   }
 
@@ -158,7 +160,27 @@ class MainNewsItem extends Component {
 
   getLikeState = () => (this.state.isLikeFetched) ? this.state : this.props;
 
+  deleteTweet = () => {
+    if(!this.state.deleteInFocus) return;
+
+    this.setState(() => {
+      return {
+        isDeleted: true
+      }
+    });
+
+    let { id, login, password } = cookieControl.get("userdata");
+    this.props.deleteTweet({
+      variables: {
+        id, login, password,
+        targetID: this.props.id
+      }
+    });
+  }
+
   render() {
+    if(this.state.isDeleted) return null;
+
     return(
       <div className="rn-main-news-mat-item rn-field">
         <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creatorUrl }` } className="rn-main-news-mat-item-mg">
@@ -198,6 +220,15 @@ class MainNewsItem extends Component {
               <i className={ `${ !this.getLikeState().isLiked ? "far" : "fas" } fa-heart` } />
               <span>{ this.getLikeState().likes }</span>
             </button>
+            {
+              (this.props.creatorID === cookieControl.get("userdata").id) ? (
+                <button
+                  className={ `rn-main-news-mat-item-control-btn delete${ (!this.state.deleteInFocus) ? "" : " active" }` }
+                  onDoubleClick={ alert }>
+                  <i className="fas fa-times" />
+                </button>
+              ) : null
+            }
           </div>
         </div>
       </div>
@@ -206,44 +237,18 @@ class MainNewsItem extends Component {
 }
 
 class MainNews extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isFetchedTweets: false,
-      tweets: []
-    }
-  }
-
-  getTweetsSource = () => {
-    let a = this.props.data;
-    return !this.state.isFetchedTweets ? (a) ? a : [] : this.state.tweets;
-  }
-
-  addCTweet = ({ addTweet }) => {
-    let a = Array.from(this.getTweetsSource());
-    a.unshift(addTweet);
-
-    this.setState(() => {
-      return {
-        isFetchedTweets: true,
-        tweets: a
-      }
-    }, clearMemory);
-  }
-
   render() {
     return(
       <div className="rn-main-news">
         <MainNewsNew
           userdata={ this.props.userdata }
           tweetMutation={ this.props.tweetMutation }
-          onNewTweet={ this.addCTweet }
+          onNewTweet={ this.props.addCTweet }
         />
         <div className={ `loading-icon${ (this.props.loading) ? " visible" : "" }` }></div>
         <div className={ `rn-main-news-mat${ (this.props.loading) ? " hidden" : "" }` }>
           {
-            this.getTweetsSource().map(({ id, time, isLiked, content, creator, likesInt: likes, commentsInt: comments }) => {
+            this.props.data.map(({ id, time, isLiked, content, creator, likesInt: likes, commentsInt: comments }) => {
               return(
                 <MainNewsItem
                   key={ id }
@@ -259,6 +264,7 @@ class MainNews extends Component {
                   creatorID={ creator.id }
                   creatorVertificated={ creator.isVertificated }
                   likePost={ this.props.likePostMut }
+                  deleteTweet={ this.props.deleteTweet }
                 />
               );
             })
@@ -270,30 +276,85 @@ class MainNews extends Component {
 }
 
 class Main extends Component {
-  componentDidUpdate() {
-    if(!this.props.feed.loading && this.props.feed.networkStatus === 8) client.resetStore();
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      feed: false,
+      feedFetching: true
+    }
   }
 
-  getFeedData = () => {
-    let a = this.props.feed;
-    if(a.loading) return [];
+  componentDidMount() {
+    this.fetchFeed();
+  }
 
-    if(!a.loading && a.fetchFeed) {
-      return a.fetchFeed;
-    } else if(!a.loading && !a.fetchFeed && a.networkStatus !== 8) { // XXX
-      destroySession();
-    }
+  fetchFeed = () => {
+    this.setState(() => {
+      return {
+        feedFetching: true
+      }
+    });
+
+    client.query({
+      query: gql`
+        query($id: ID!, $login: String!, $password: String!) {
+          fetchFeed(id: $id, login: $login, password: $password) {
+            commentsInt,
+            likesInt,
+            content,
+            id,
+            time,
+            isLiked(id: $id),
+            creator {
+              id,
+              image,
+              url,
+              name,
+              isVertificated
+            }
+          }
+        }
+      `,
+      variables: {
+        id: cookieControl.get("userdata").id,
+        login: cookieControl.get("userdata").login,
+        password: cookieControl.get("userdata").password
+      }
+    }).then(({ data: { fetchFeed } }) => {
+      if(fetchFeed === null) return destroySession();
+
+      this.setState(() => {
+        return {
+          feed: fetchFeed,
+          feedFetching: false
+        }
+      });
+    });
+  }
+
+  addCTweet = ({ addTweet }) => {
+    let a = Array.from(this.state.feed);
+    a.unshift(addTweet);
+
+    this.setState(() => {
+      return {
+        feed: a
+      }
+    }, clearMemory);
   }
 
   render() {
     return(
       <div className="rn-main">
         <MainNews
-          loading={ this.props.feed.loading }
-          data={ this.getFeedData() }
+          loading={ this.state.feedFetching }
+          data={ this.state.feed || [] }
           userdata={ this.props.useracc.user }
           likePostMut={ this.props.likePost }
           tweetMutation={ this.props.tweetMutation }
+          deleteTweet={ this.props.deleteTweet }
+          addCTweet={ this.addCTweet }
         />
       </div>
     );
@@ -301,34 +362,6 @@ class Main extends Component {
 }
 
 export default compose(
-  graphql(gql`
-    query($id: ID!, $login: String!, $password: String!) {
-      fetchFeed(id: $id, login: $login, password: $password) {
-        commentsInt,
-        likesInt,
-        content,
-        id,
-        time,
-        isLiked(id: $id),
-        creator {
-          image,
-          url,
-          name,
-          isVertificated
-        }
-      }
-    }
-  `, {
-      name: "feed",
-      options: {
-        variables: {
-          id: cookieControl.get("userdata").id,
-          login: cookieControl.get("userdata").login,
-          password: cookieControl.get("userdata").password
-        }
-      }
-    }
-  ),
   graphql(gql`
     query($id: ID!, $login: String!, $password: String!) {
       user(id: $id, login: $login, password: $password) {
@@ -363,11 +396,20 @@ export default compose(
         time,
         isLiked(id: $id),
         creator {
+          id,
           image,
           url,
-          name
+          name,
+          isVertificated
         }
       }
     }
-  `, { name: "tweetMutation" })
+  `, { name: "tweetMutation" }),
+  graphql(gql`
+    mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
+      deleteTweet(id: $id, login: $login, password: $password, targetID: $targetID) {
+        id
+      }
+    }
+  `, { name: "deleteTweet" })
 )(Main);

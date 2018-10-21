@@ -7,6 +7,7 @@
 	--border-radius:3px;
 
 	height:100vh;
+	/* or height:100% if you don't need to hide BACK_BAR */
 	width:650px;
 	max-width:100vw;
 	position:relative;

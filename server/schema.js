@@ -486,6 +486,25 @@ const RootMutation = new GraphQLObjectType({
         }
       }
     },
+    deleteTweet: {
+      type: TweetType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        targetID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(_, { id: _id, login, password, targetID }) {
+        let user = await User.find({ _id, login, password });
+        let tweet = await Tweet.findById(targetID);
+
+        if(user && tweet) {
+          return tweet.remove();
+        } else {
+          return null;
+        }
+      }
+    },
     commentTweet: {
       type: CommentType,
       args: {

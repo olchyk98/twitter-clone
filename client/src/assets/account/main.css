@@ -5,7 +5,7 @@
 }
 
 .rn-account {
-  height:100vh;
+  height:100%;
   display:block;
   flex-direction:column;
   margin-left:auto;

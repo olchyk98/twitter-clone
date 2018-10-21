@@ -33,7 +33,7 @@ input {
   position:relative;
   top:var(--nav-height);
   height:calc(100vh - var(--nav-height));
-  overflow:scroll;
+  /*overflow:scroll; XXX*/
   /* overflow-x:hidden; */
   /* overflow-y:hidden; */
 }
@@ -55,7 +55,8 @@ input {
 .rn-account-tweets-nav,
 .rn-account-tweets-mat-item,
 .rn-account-settings,
-.rn-followers {
+.rn-followers,
+.rn-nfp {
   background:var(--uicol);
 }
 

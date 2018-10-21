@@ -10,6 +10,7 @@ import Register from './assets/register/app';
 import Tweet from './assets/tweet/app';
 import Account from './assets/account/app';
 import Followers from './assets/followers/app';
+import NFP404 from './assets/nfp404/app';
 
 import { BrowserRouter, Redirect, Switch } from 'react-router-dom';
 import { Route } from 'react-router';
@@ -44,42 +45,56 @@ ReactDOM.render(
         }
         <div id="main">
           <Switch>
-            <QuaRoute
+          <QuaRoute
               exact
               path={ links["REGISTER_PAGE"] }
               component={ Register }
               aif={ !cookieControl.get("userdata") }
-              redirect="/home"
+              redirect={ links["MAIN_PAGE"] }
+            />
+            <QuaRoute
+              exact
+              path="/"
+              component={ Register }
+              aif={ cookieControl.get("userdata") }
+              redirect={ links["REGISTER_PAGE"] }
             />
             <QuaRoute
               exact
               path={ links["MAIN_PAGE"] }
               component={ Main }
               aif={ cookieControl.get("userdata") }
-              redirect="/register"
+              redirect={ links["REGISTER_PAGE"] }
             />
             <QuaRoute
               exact
               path={ `${ links["TWEET_PAGE"] }/:id` }
               component={ Tweet }
               aif={ cookieControl.get("userdata") }
-              redirect="/register"
+              redirect={ links["REGISTER_PAGE"] }
             />
             <QuaRoute
               exact
               path={ `${ links["ACCOUNT_PAGE"] }/:url?` }
               component={ Account }
               aif={ cookieControl.get("userdata") }
-              redirect="/register"
+              redirect={ links["REGISTER_PAGE"] }
             />
             <QuaRoute
               exact
               path={ `${ links["FOLLOWERS_PAGE"] }/:url/:direct?` }
               component={ Followers }
               aif={ cookieControl.get("userdata") }
-              redirect="/register"
+              redirect={ links["REGISTER_PAGE"] }
             />
-            <Redirect to={ links["MAIN_PAGE"] } /> {/* 404 */}
+            <QuaRoute
+              exact
+              path={ `${ links["NOT_FOUND_PAGE"] }/:referral?` }
+              component={ NFP404 }
+              aif={ cookieControl.get("userdata") }
+              redirect={ links["REGISTER_PAGE"] }
+            />
+            <Redirect to={ links["NOT_FOUND_PAGE"] } />
           </Switch>
         </div>
       </React.Fragment>
