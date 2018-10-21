@@ -18,13 +18,5 @@ Full List:
     Main transporter for client.
   # GraphQL Subscriptions
     Messages, live updates.
-  # SocketIO
-    Live Tests, ADX Controls (GITHUB_EXCEPTION)
-  # Mocha
-    Main library for tests. (GITHUB_EXCEPTION)
-  # Chai
-    - (GITHUB_EXCEPTION)
-  # Redux
-    - (GITHUB_EXCEPTION)
 
 # GITHUB TEST
