@@ -152,6 +152,18 @@
   z-index:4;
 }
 
+.rn-main-news-mat-item-mat-tit {
+  display:flex;
+}
+
+.rn-main-news-mat-item-mat-tit-mninfo {
+  display:flex;
+}
+
+.rn-main-news-mat-item-mat-tit > * {
+  margin-right:5px;
+}
+
 .rn-main-news-mat-item-rft {
   z-index:1;
   width:100%;
@@ -165,8 +177,10 @@
 .rn-main-news-mat-item-mat-name {
   font-family:"Quicksand";
   font-weight:500;
-  margin-right:10px;
+  margin-right:7.5px;
   color:rgba(255, 255, 255, .9);
+  display:flex;
+  align-items:center;
 }
 
 .rn-main-news-mat-item-mat-url,

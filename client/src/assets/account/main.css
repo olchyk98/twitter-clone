@@ -155,13 +155,19 @@
 }
 
 .rn-account-info-mat-name {
+  margin-top:15px;
+  margin-bottom:2.5px;
+  display:flex;
+  align-items:center;
+}
+
+.rn-account-info-mat-name > h1 {
   color:white;
   font-family:"Roboto";
   -webkit-font-smoothing:antialiased;
   font-weight:600;
   font-size:1.1em;
-  margin-top:15px;
-  margin-bottom:2.5px;
+  margin:0;
 }
 
 .rn-account-info-mat-url {

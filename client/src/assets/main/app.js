@@ -9,6 +9,8 @@ import cookieControl from '../../cookieControl';
 import client from '../../apollo';
 import { apiPath } from '../../apiPath';
 
+import VertificatedStar from '../__forall__/vertificated/app';
+
 function destroySession() {
   cookieControl.delete("userdata");
   return window.location.reload();
@@ -165,8 +167,15 @@ class MainNewsItem extends Component {
         <div className="rn-main-news-mat-item-mat">
           <Link className="rn-main-news-mat-item-rft" to={ `${ links["TWEET_PAGE"] }/${ this.props.id }` } />
           <div className="rn-main-news-mat-item-mat-tit">
-            <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creatorUrl }` }>
-              <span className="rn-main-news-mat-item-mat-name">{ this.props.creatorName }</span>
+            <Link className="rn-main-news-mat-item-mat-tit-mninfo" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creatorUrl }` }>
+              <div className="rn-main-news-mat-item-mat-name">
+                <span>{ this.props.creatorName }</span>
+                {
+                  (!this.props.creatorVertificated) ? null : (
+                    <VertificatedStar />
+                  )
+                }
+              </div>
               <span className="rn-main-news-mat-item-mat-url">@{ this.props.creatorUrl }</span>
             </Link>
             <span className="rn-main-news-mat-item-mat-splitdot"> • </span>
@@ -248,6 +257,7 @@ class MainNews extends Component {
                   creatorName={ creator.name }
                   creatorUrl={ creator.url }
                   creatorID={ creator.id }
+                  creatorVertificated={ creator.isVertificated }
                   likePost={ this.props.likePostMut }
                 />
               );
@@ -303,7 +313,8 @@ export default compose(
         creator {
           image,
           url,
-          name
+          name,
+          isVertificated
         }
       }
     }

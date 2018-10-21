@@ -198,16 +198,6 @@
 	color:rgba(255, 255, 255, .95);
 }
 
-.rn-followers-users-user-content-mat-name-verf {
-	height:1.5rem;
-	width:1.5rem;
-	fill:white;
-	display:flex;
-	align-items:center;
-	justify-content:center;
-	margin-left:5px;
-}
-
 .rn-followers-users-user-content-mat-url {
 	margin-top:10px;
 	color:rgba(255, 255, 255, .5);

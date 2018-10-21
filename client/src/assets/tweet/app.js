@@ -10,6 +10,8 @@ import client from '../../apollo';
 import links from '../../links';
 import { apiPath } from '../../apiPath';
 
+import VertificatedStar from '../__forall__/vertificated/app';
+
 function destroySession() {
   cookieControl.delete("userdata");
   return window.location.href = links["REGISTER_PAGE"];
@@ -129,13 +131,20 @@ var clearMemory = () => client.clearStore();
      return(
       <React.Fragment>
         <div className="rn-tweet-comments-comment">
-          <div className="rn-tweet-comments-comment-mg">
+          <Link className="rn-tweet-comments-comment-mg" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creator.url }` }>
             <img src={ apiPath + this.props.creator.image } alt={ this.props.creator.name } />
-          </div>
+          </Link>
           <div className="rn-tweet-comments-comment-content">
             <div className="rn-tweet-comments-comment-content-cri">
               <div className="rn-tweet-comments-comment-content-cri-inf">
-                <span className="rn-tweet-comments-comment-content-cri-inf-name">{ this.props.creator.name }</span>
+                <Link className="rn-tweet-comments-comment-content-cri-inf-name" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creator.url }` }>
+                  <span>{ this.props.creator.name }</span>
+                  {
+                    (!this.props.creator.isVertificated) ? null : (
+                      <VertificatedStar />
+                    )
+                  }
+                </Link>
                 <span className="rn-tweet-comments-comment-content-cri-inf-url">@{ this.props.creator.url }</span>
                 <span>•</span>
                 <span className="rn-tweet-comments-comment-content-cri-inf-time">{ this.convertTime(this.props.time) }</span>
@@ -208,7 +217,8 @@ class App extends Component {
               image,
               id,
               url,
-              name
+              name,
+              isVertificated
             },
             comments {
               id,
@@ -220,7 +230,8 @@ class App extends Component {
                 image,
                 name,
                 url,
-                id
+                id,
+                isVertificated
               }
             }
           }
@@ -404,7 +415,6 @@ class App extends Component {
     return(
       <div className="rn-tweet">
         <div className="rn-tweet-creator">
-          {/* <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creator.url }` }> */}
           <div className="rn-tweet-creator-bx">
             <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.getAPI({creator:{url:""}}).creator.url }` }>
               <img
@@ -415,7 +425,14 @@ class App extends Component {
             </Link>
             <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.getAPI({creator:{url:""}}).creator.url }` }>
               <div className="rn-tweet-creator-info">
-                <p className="rn-tweet-creator-info-name">{ this.getAPI({creator:{name:""}}).creator.name }</p>
+                <div className="rn-tweet-creator-info-name">
+                  <span>{ this.getAPI({creator:{name:""}}).creator.name }</span>
+                  {
+                    (!this.getAPI({creator:{isVertificated:false}}).creator.isVertificated) ? null: (
+                      <VertificatedStar />
+                    )
+                  }
+                </div>
                 <span className="rn-tweet-creator-info-url">@{ this.getAPI({creator:{url:""}}).creator.url }</span>
               </div>
             </Link>

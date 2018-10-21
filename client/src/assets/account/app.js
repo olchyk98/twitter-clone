@@ -10,6 +10,8 @@ import cookieControl from '../../cookieControl';
 import { apiPath } from '../../apiPath';
 import links from '../../links';
 
+import VertificatedStar from '../__forall__/vertificated/app';
+
 const defaultBg = "/files/backgrounds/default.jpeg";
 
 function destroySession() {
@@ -126,7 +128,14 @@ class Info extends Component {
           </div>
         </div>
         <div className="rn-account-info-mat">
-          <h1 className="rn-account-info-mat-name">{ this.props.info.name }</h1>
+          <div className="rn-account-info-mat-name">
+            <h1>{ this.props.info.name }</h1>
+            {
+              (!this.props.info.isVertificated) ? null : (
+                <VertificatedStar />
+              )
+            }
+          </div>
           <p className="rn-account-info-mat-url">@{ this.props.info.url }</p>
           <p className="rn-account-info-mat-desc">{ this.props.info.profileDescription }</p>
           <div className="rn-account-info-mat-addvinfo">
@@ -652,6 +661,7 @@ class App extends Component {
             subscribersInt,
             requesterIsSubscriber(id: $id, login: $login, password: $password),
             profileBackground,
+            isVertificated,
             tweets {
               id,
               content,
