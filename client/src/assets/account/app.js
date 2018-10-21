@@ -148,14 +148,14 @@ class Info extends Component {
             }
           </div>
           <div className="rn-account-info-mat-follows">
-            <div className="rn-account-info-mat-follows-item">
+            <Link className="rn-account-info-mat-follows-item" to={ `${ links["FOLLOWERS_PAGE"] }/${ this.props.info.url }/following?b=true` }>
               <span className="rn-account-info-mat-follows-item-num">{ this.props.info.subscribedToInt }</span>
               <span>Following</span>
-            </div>
-            <div className="rn-account-info-mat-follows-item">
+            </Link>
+            <Link className="rn-account-info-mat-follows-item" to={ `${ links["FOLLOWERS_PAGE"] }/${ this.props.info.url }/followers?b=true` }>
               <span className="rn-account-info-mat-follows-item-num">{ this.props.info.subscribersInt }</span>
               <span>Followers</span>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
@@ -618,8 +618,8 @@ class App extends Component {
   componentDidUpdate() {
     if(
       this.state.user &&
-      ((window.location.pathname.split("/")[2] && this.state.user.url !== window.location.pathname.split("/")[2]) ||
-      (!window.location.pathname.split("/")[2] && this.state.user.id !== cookieControl.get("userdata").id))
+      ((this.props.match.params.url && this.state.user.url !== this.props.match.params.url) ||
+      (!this.props.match.params.url && this.state.user.id !== cookieControl.get("userdata").id))
     ) { // XXX
       this.setState(() => {
         return {
@@ -673,7 +673,7 @@ class App extends Component {
         id: cookieControl.get("userdata").id,
         login: cookieControl.get("userdata").login,
         password: cookieControl.get("userdata").password,
-        targetUrl: window.location.pathname.split("/")[2] || ""
+        targetUrl: this.props.match.params.url || ""
       }
     }).then(({ data: { user } }) => {
       this.setState(() => {

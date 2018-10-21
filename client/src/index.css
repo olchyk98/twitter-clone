@@ -1,4 +1,5 @@
 :root {
+  --navcol:#243447;
   --uicol: #1b2836;
   --bgcol:#141d26;
   --nav-height:50px;
@@ -35,6 +36,11 @@ input {
   overflow:scroll;
   /* overflow-x:hidden; */
   /* overflow-y:hidden; */
+}
+
+.rn-followers-backnav,
+.mj-nav {
+  background:var(--navcol);
 }
 
 .rn-main-news,

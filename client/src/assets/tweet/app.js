@@ -236,7 +236,7 @@ class App extends Component {
       this.setState(() => {
         return { tweet }
       });
-    }).catch(() => this.props.history.push("/404"));
+    }).catch(() => this.props.history.push(links["NOT_FOUND_PAGE"]));
   }
 
   getAPI = (def = []) => {
@@ -350,8 +350,7 @@ class App extends Component {
             comments: [
               comment,
               ...tweet.comments
-            ],
-            commentsInt: tweet.commentsInt + 1
+            ]
           }
         }
       }, clearMemory);

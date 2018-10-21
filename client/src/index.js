@@ -74,7 +74,7 @@ ReactDOM.render(
             />
             <QuaRoute
               exact
-              path={ `${ links["FOLLOWERS_PAGE"] }/:url` }
+              path={ `${ links["FOLLOWERS_PAGE"] }/:url/:direct?` }
               component={ Followers }
               aif={ cookieControl.get("userdata") }
               redirect="/register"
