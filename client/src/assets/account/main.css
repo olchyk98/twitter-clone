@@ -1,5 +1,4 @@
 :root {
-  --focuscol:#34a1f2;
   --seccol: rgba(255, 255, 255, .45);
   --settings-editcol:rgba(255, 255, 255, .75);;
 }
@@ -99,16 +98,13 @@
   margin-right:5px;
   font-size:1em;
   background:transparent;
-  border:1px solid var(--focuscol);
   border-radius:45px;
-  color:var(--focuscol);
   cursor:pointer;
   position:relative;
   overflow:hidden;
 }
 
 .rn-account-controls-mat-btn.active {
-  background:var(--focuscol);
   color:white;
 }
 
@@ -133,7 +129,6 @@
 }
 
 .rn-account-controls-mat-btn:not(.active):hover:before {
-  background:var(--focuscol);
   opacity:.15;
 }
 
@@ -259,7 +254,6 @@
   background:transparent;
   border:none;
   border-bottom:1px solid transparent;
-  color:var(--focuscol);
   font-family:"Roboto";
   font-weight:600;
   -webkit-font-smoothing:antialiased;

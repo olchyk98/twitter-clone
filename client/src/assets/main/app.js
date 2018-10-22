@@ -256,6 +256,15 @@ class App extends Component {
     this.fetchFeed();
   }
 
+  componentDidUpdate(a) {
+    // Feed Subscription Data
+    {
+      let a = this.props.feedUpdated;
+      // if(a.)
+      console.log(a);
+    }
+  }
+
   fetchFeed = () => {
     this.setState(() => {
       return {
@@ -378,5 +387,31 @@ export default compose(
         id
       }
     }
-  `, { name: "deleteTweet" })
+  `, { name: "deleteTweet" }),
+  graphql(gql`
+    subscription($id: ID!) {
+      addedTweet(id: $id) {
+        id,
+        commentsInt,
+        likesInt,
+        content,
+        time,
+        isLiked(id: $id),
+        creator {
+          id,
+          image,
+          url,
+          name,
+          isVertificated
+        }
+      }
+    }
+  `, {
+    name: "feedUpdated",
+    options: {
+      variables: {
+        id: cookieControl.get("userdata").id
+      }
+    }
+  })
 )(App);

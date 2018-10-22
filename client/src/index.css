@@ -4,6 +4,7 @@
   --bgcol:#141d26;
   --nav-height:50px;
   --uisize:570px;
+  --focuscol:#34a1f2;
 }
 
 html, body {
@@ -73,4 +74,41 @@ input {
   display:none;
   opacity:0;
   visibility:hidden;
+}
+
+.rn-search-mat-search.focus > .rn-search-mat-search-mat,
+.rn-search-mat-search.focus > .rn-search-mat-search-icon,
+.rn-search-block-title-status:hover,
+.rn-search-block-title:hover > .rn-search-block-title-status,
+.rn-search-block-disp-item-content-creator-flbtn,
+.rn-account-controls-mat-btn,
+.rn-account-tweets-nav-btn,
+.rn-followers-backnav-btn,
+.rn-followers-menu-btn.active,
+.rn-followers-users-user-content-controls-btn,
+.mj-nav-navigation-btn:hover {
+  color:var(--focuscol);
+}
+
+.rn-search-block-title-status:before,
+.rn-search-block-disp-item-content-creator-flbtn.active,
+.rn-account-controls-mat-btn.active,
+.rn-account-controls-mat-btn:not(.active):hover:before,
+.rn-followers-backnav-btn:before,
+.rn-followers-menu-btn:before,
+.rn-followers-users-user-content-controls-btn:before,
+.rn-followers-users-user-content-controls-btn.active,
+.mj-nav-navigation-btn:before,
+.mj-nav-navigation-btn:after {
+  background:var(--focuscol);
+}
+
+.rn-search-block-disp-item-content-creator-flbtn,
+.rn-account-controls-mat-btn,
+.rn-followers-users-user-content-controls-btn {
+  border:1px solid var(--focuscol);
+}
+
+.rn-followers-menu-btn.active {
+  border-bottom:var(--borderth) solid var(--focuscol);
 }

@@ -1,5 +1,4 @@
 :root {
-	--focuscol:rgb(27, 149, 224);
 	--navheight:45px;
 }
 
@@ -42,7 +41,6 @@
 .rn-followers-backnav-btn {
 	background:transparent;
 	border:none;
-	color:var(--focuscol);
 	font-size:1em;
 	position:relative;
 	cursor:pointer;
@@ -56,7 +54,6 @@
 	margin-right:50%;
 	height:30px;
 	width:30px;
-	background:var(--focuscol);
 	opacity:0;
 	border-radius:50%;
 	transition:.2s;
@@ -111,11 +108,6 @@
     transition:.2s;
 }
 
-.rn-followers-menu-btn.active {
-	border-bottom:var(--borderth) solid var(--focuscol);
-	color:var(--focuscol);
-}
-
 .rn-followers-menu-btn:before {
 	content:'';
 	position:absolute;
@@ -123,7 +115,6 @@
 	left:0;
 	width:100%;
 	height:100%;
-	background:var(--focuscol);
 	opacity:0;
 	transition:.2s;
 }
@@ -211,9 +202,7 @@
 	height:32.5px;
     width:105px;
     border-radius:45px;
-    border:1px solid var(--focuscol);
     background:transparent;
-    color:var(--focuscol);
     font-family:"Roboto";
     font-weight:600;
     font-size:1em;
@@ -231,7 +220,6 @@
 	left:0;
 	height:100%;
 	width:100%;
-	background:var(--focuscol);
 	opacity:0;
 }
 
@@ -245,7 +233,6 @@
 }
 
 .rn-followers-users-user-content-controls-btn.active {
-	background:var(--focuscol);
 	color:white;
 }
 

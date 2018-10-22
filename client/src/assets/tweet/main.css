@@ -181,10 +181,15 @@
   font-size:1.25em;
   cursor:pointer;
   transition:.4s;
+  position:relative;
 }
 
-.rn-tweet-controls-btn.active {
+.rn-tweet-controls-btn.like.active {
   color:rgb(247, 0, 119);
+}
+
+.rn-tweet-controls-btn.comment.active {
+  color:lime;
 }
 
 .rn-tweet-controls-btn.delete.active {
@@ -211,6 +216,55 @@
   100% {
     transform:scale(1);
   }
+}
+
+.rn-tweet-controls-btn.main,
+.rn-tweet-controls-btn.main:before {
+  transition:.2s;
+}
+
+.rn-tweet-controls-btn.main:before {
+  content:'';
+  top:50%;
+  left:50%;
+  position:absolute;
+  margin-right:50%;
+  opacity:0;
+  height:40px;
+  width:40px;
+  border-radius:50%;
+  transform:translate(-50%, -50%) scale(.75);
+}
+
+.rn-tweet-controls-btn.main:hover:before {
+  transform:translate(-50%, -50%) scale(1);
+  opacity:.125;
+}
+
+.rn-tweet-controls-btn.main.like:hover {
+  /*color:rgb(247, 0, 119);*/
+  color:red;
+}
+
+.rn-tweet-controls-btn.main.like:before {
+  /*background:rgb(247, 0, 119);*/
+  background:red;
+}
+
+.rn-tweet-controls-btn.main.comment:hover {
+  color:lime;
+}
+
+.rn-tweet-controls-btn.main.comment:before {
+  background:lime;
+}
+
+.rn-tweet-controls-btn.main.delete:hover {
+  color:red;
+}
+
+.rn-tweet-controls-btn.main.delete:before {
+  background:red;
 }
 
 .rn-tweet-comments-comment {

@@ -10,7 +10,9 @@ const {
   GraphQLInt,
   GraphQLBoolean
 } = require('graphql');
-const { GraphQLUpload } = require('apollo-server');
+const { GraphQLUpload, PubSub, withFilter } = require('apollo-server');
+
+const pubsub = new PubSub();
 
 const mimeprocessor = require('mime-types');
 const fs = require('fs');
@@ -118,9 +120,9 @@ const CommentType = new GraphQLObjectType({
     isLiked: {
       type: GraphQLBoolean,
       args: {
-        id: { type: GraphQLID },
-        login: { type: GraphQLString },
-        password: { type: GraphQLString }
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) }
       },
       async resolve(parent, args) {
         let user = await User.findOne({ _id: args.id, login: args.login, password: args.password });
@@ -539,13 +541,15 @@ const RootMutation = new GraphQLObjectType({
       async resolve(_, { id: _id, login, password, content }) {
         let user = await User.findOne({ _id, login, password });
         if(user) {
-          let a = new Tweet({
+          let a = await new Tweet({
             content,
             creatorID: user.id,
             time: new Date()
           }).save();
 
-          // ...pubsub...
+          pubsub.publish('addedTweet', {
+            addedTweet: a
+          });
 
           return a;
         } else {
@@ -598,7 +602,7 @@ const RootMutation = new GraphQLObjectType({
             time: new Date()
           }).save();
 
-          // ...pubsub...
+          // pubsub
 
           return model;
         } else {
@@ -669,7 +673,38 @@ const RootMutation = new GraphQLObjectType({
   }
 });
 
+const RootSubscription = new GraphQLObjectType({
+  name: "subscription",
+  fields: {
+    addedTweet: {
+      type: TweetType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ addedTweet }) => {
+        return addedTweet;
+      },
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('addedTweet'),
+        async ({ addedTweet: tweet }, { id: _id }) => {
+          if(tweet.creatorID === _id) return false;
+
+          let a = await User.findOne({
+            _id,
+            subscribedTo: {
+             $in: [tweet.creatorID]
+            }
+          });
+
+          return (a ? true:false);
+        }
+      )
+    }
+  }
+})
+
 module.exports = new GraphQLSchema({
   query: RootQuery,
-  mutation: RootMutation
+  mutation: RootMutation,
+  subscription: RootSubscription
 });

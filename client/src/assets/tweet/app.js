@@ -486,7 +486,7 @@ class App extends Component {
         <div className="rn-tweet-brdt" />
         <div className="rn-tweet-controls">
           <button
-            className={ `rn-tweet-controls-btn like${ (!this.state.tweet.isLiked) ? "" : " active" }` }
+            className={ `rn-tweet-controls-btn main like${ (!this.state.tweet.isLiked) ? "" : " active" }` }
             key={ (!this.state.tweet.isLiked) ? "A":"B" }
             onClick={ this.likeTweet }>
             {
@@ -497,14 +497,14 @@ class App extends Component {
             }
           </button>
           <button
-            className={ `rn-tweet-controls-btn${ !this.state.isCommenting ? "" : " active" }` }
+            className={ `rn-tweet-controls-btn main comment${ !this.state.isCommenting ? "" : " active" }` }
             onClick={ this.commentFillFocus }>
             <i className="far fa-comment" />
           </button>
           {
             (this.getAPI({creator:{id:""}}).creator.id !== cookieControl.get("userdata").id) ? null : (
               <button
-                className={ `rn-tweet-controls-btn delete${ !this.state.deleteInFocus ? "" : " active" }` }
+                className={ `rn-tweet-controls-btn main delete${ !this.state.deleteInFocus ? "" : " active" }` }
                 onClick={ () => this.setState({ deleteInFocus: true }) }
                 onBlur={ () => this.setState({ deleteInFocus: false }) }
                 onDoubleClick={ this.deleteTweet }>
