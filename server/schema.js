@@ -325,6 +325,73 @@ const RootQuery = new GraphQLObjectType({
 
         return a;
       }
+    },
+    searchTweets: {
+      type: new GraphQLList(TweetType),
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        request: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      async resolve(_, { id: _id, login, password, request: req }) {
+        let user = await User.findOne({ _id, login, password });
+
+        if(user) {
+          return Tweet.find({
+            // $or: [
+
+            // ]
+            content: {
+              $in: [(new RegExp(req, "i"))]
+            },
+            creatorID: {
+              $ne: _id
+            }
+          });
+        } else {
+          return null;
+        }
+      }
+    },
+    searchUsers: {
+      type: new GraphQLList(UserType),
+      args: {
+        id: { type: GraphQLID },
+        login: { type: GraphQLString },
+        password: { type: GraphQLString },
+        request: { type: GraphQLString }
+      },
+      async resolve(_, { id: _id, login, password, request: req }) {
+        let user = await User.findOne({ _id, login, password });
+
+        if(user) {
+          return User.find({
+            $or: [
+              {
+                name: {
+                  $in: [(new RegExp(req, "i"))]
+                }
+              },
+              {
+                url: {
+                  $in: [(new RegExp(req, "i"))]
+                }
+              },
+              {
+                location: {
+                  $in: [(new RegExp(req, "i"))]
+                }
+              }
+            ],
+            _id: { // dont search yourself :)
+              $ne: _id
+            }
+          });
+        } else {
+          return null;
+        }
+      }
     }
   }
 });

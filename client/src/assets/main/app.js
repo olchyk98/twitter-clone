@@ -8,6 +8,7 @@ import links from '../../links';
 import cookieControl from '../../cookieControl';
 import client from '../../apollo';
 import { apiPath } from '../../apiPath';
+import { convertTime } from '../../timeConvertor';
 
 import VertificatedStar from '../__forall__/vertificated/app';
 
@@ -85,40 +86,6 @@ class MainNewsItem extends Component {
       deleteInFocus: false,
       isDeleted: false
     }
-  }
-
-  convertTime = unxtime => {
-    let a = new Date(unxtime),
-        b = b1 => b1.toString(),
-        c = c1 => b(c1).length === 1 ? "0" + c1 : b(c1);
-
-    // Date type in mongoDB Schema provides String.
-    // String -> Integer => new Date(Integer);
-
-    // 86400000 - one unix day
-
-    let months = [
-      "Jan",
-      "Feb",
-      "March",
-      "Apr",
-      "May",
-      "June",
-      "July",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
-    ];
-
-    return (
-      (new Date().getTime() - unxtime >= 86400000) ? ( // more than one day
-        `${ c(a.getDate()) } ${ months[a.getMonth() + 1] } ${ c(a.getHours()) }:${ c(a.getMinutes()) }`
-      ) : (
-        `${ c(a.getHours()) }:${ c(a.getMinutes()) }`
-      )
-    );
   }
 
   likeTweet = () => {
@@ -199,7 +166,7 @@ class MainNewsItem extends Component {
               <span className="rn-main-news-mat-item-mat-url">@{ this.props.creatorUrl }</span>
             </Link>
             <span className="rn-main-news-mat-item-mat-splitdot"> • </span>
-            <span className="rn-main-news-mat-item-mat-time">{ this.convertTime(parseInt(this.props.time)) }</span>
+            <span className="rn-main-news-mat-item-mat-time">{ convertTime(this.props.time) }</span>
           </div>
           <p className="rn-main-news-mat-item-content">
             { this.props.content }

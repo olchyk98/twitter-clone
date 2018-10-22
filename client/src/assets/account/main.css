@@ -399,6 +399,7 @@
   cursor:pointer;
   margin-left:10px;
   margin-right:10px;
+  transition:.4s;
 }
 
 .rn-account-tweets-mat-item-content-mat-controls-like.active {
