@@ -499,6 +499,11 @@ const RootMutation = new GraphQLObjectType({
         let tweet = await Tweet.findById(targetID);
 
         if(user && tweet) {
+          await Comment.remove({
+            sendedToID: {
+              $in: [targetID]
+            }
+          });
           return tweet.remove();
         } else {
           return null;

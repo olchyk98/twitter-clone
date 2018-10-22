@@ -159,11 +159,11 @@ class Info extends Component {
           <div className="rn-account-info-mat-follows">
             <Link className="rn-account-info-mat-follows-item" to={ `${ links["FOLLOWERS_PAGE"] }/${ this.props.info.url }/following?b=true` }>
               <span className="rn-account-info-mat-follows-item-num">{ this.props.info.subscribedToInt }</span>
-              <span>Following</span>
+              <span className="rn-account-info-mat-follows-hvk">Following</span>
             </Link>
             <Link className="rn-account-info-mat-follows-item" to={ `${ links["FOLLOWERS_PAGE"] }/${ this.props.info.url }/followers?b=true` }>
               <span className="rn-account-info-mat-follows-item-num">{ this.props.info.subscribersInt }</span>
-              <span>Followers</span>
+              <span className="rn-account-info-mat-follows-hvk">Followers</span>
             </Link>
           </div>
         </div>
@@ -181,7 +181,9 @@ class TweetsTweet extends Component {
         changable: true,
         fromState: false,
         likes: 0,
-        isLiked: false
+        isLiked: false,
+        deleteInFocus: false,
+        isDeleted: false
       }
     }
   }
@@ -274,7 +276,25 @@ class TweetsTweet extends Component {
     return (!this.state.likes.fromState) ? this.props : this.state.likes;
   }
 
+  deleteTweet = () => {
+    this.setState(() => {
+      return {
+        isDeleted: true
+      }
+    });
+
+    let { id, login, password } = cookieControl.get("userdata");
+    this.props.deleteTweet({
+      variables: {
+        id, login, password,
+        targetID: this.props.id
+      }
+    });
+  }
+
   render() {
+    if(this.state.isDeleted) return null;
+
     return(
       <div className="rn-account-tweets-mat-item">
         <div className="rn-account-tweets-mat-item-mg">
@@ -302,6 +322,13 @@ class TweetsTweet extends Component {
               key={ (this.getLikeSource().isLiked) ? "A":"B" }>
               <i className={ `${ (!this.getLikeSource().isLiked) ? "far" : "fas" } fa-heart` } />
               <span>{ this.getLikeSource().likes }</span>
+            </button>
+            <button
+              className={ `rn-account-tweets-mat-item-content-mat-controls-btn delete${ (!this.state.deleteInFocus) ? "" : " active" }` }
+              onClick={ () => this.setState({ deleteInFocus: true }) }
+              onBlur={ () => this.setState({ deleteInFocus: false }) }
+              onDoubleClick={ this.deleteTweet }>
+              <i className="fas fa-times" />
             </button>
           </div>
         </div>
@@ -331,6 +358,7 @@ class Tweets extends Component {
                   creator={ creator }
                   isLiked={ isLiked }
                   likeTweetMutation={ this.props.likeTweetMutation }
+                  deleteTweet={ this.props.deleteTweet }
                 />
               );
             })
@@ -730,6 +758,7 @@ class App extends Component {
         <Tweets
           tweets={ this.state.user.tweets }
           likeTweetMutation={ this.props.likeTweetMutation }
+          deleteTweet={ this.props.deleteTweet }
         />
         <Settings
           inFocus={ this.state.settingsModal }
@@ -767,5 +796,12 @@ export default compose(
         image
       }
     }
-  `, { name: "saveDocument" })
+  `, { name: "saveDocument" }),
+  graphql(gql`
+    mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
+      deleteTweet(id: $id, login: $login, password: $password, targetID: $targetID) {
+        id
+      }
+    }
+  `, { name: "deleteTweet" })
 )(App);

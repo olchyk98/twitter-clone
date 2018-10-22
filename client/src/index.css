@@ -33,9 +33,6 @@ input {
   position:relative;
   top:var(--nav-height);
   height:calc(100vh - var(--nav-height));
-  /*overflow:scroll; XXX*/
-  /* overflow-x:hidden; */
-  /* overflow-y:hidden; */
 }
 
 .rn-followers-backnav,
@@ -56,11 +53,15 @@ input {
 .rn-account-tweets-mat-item,
 .rn-account-settings,
 .rn-followers,
-.rn-nfp {
+.rn-nfp,
+.rn-search-mat,
+.rn-search-users {
   background:var(--uicol);
 }
 
-.rn-followers-split {
+.rn-followers-split,
+.rn-search-mat-search,
+.rn-search-users-split {
   background:var(--bgcol);
 }
 

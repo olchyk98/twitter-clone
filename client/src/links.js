@@ -1,6 +1,6 @@
 const links = {
   MAIN_PAGE: "/home",
-  EXPLORE_PAGE: "/explore",
+  EXPLORE_PAGE: "/search",
   EVENTS_PAGE: "/notf",
   CHAT_PAGE: "/chat",
   ACCOUNT_PAGE: "/user",

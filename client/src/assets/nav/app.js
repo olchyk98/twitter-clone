@@ -26,7 +26,7 @@ class NavLink extends Component {
   }
 }
 
-class Nav extends Component {
+class App extends Component {
   componentDidUpdate() {
     if(!this.props.navdata.loading && this.props.navdata.user === null) { // UNSECURE SESSION
       destroySession();
@@ -116,4 +116,4 @@ export default compose(
       }
     }
   })
-)(Nav);
+)(App);

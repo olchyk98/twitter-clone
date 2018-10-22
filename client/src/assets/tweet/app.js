@@ -184,7 +184,8 @@ class App extends Component {
       tweet: false,
       isLikeAllowed: true,
       isCommenting: false,
-      subscriptionAllowed: true
+      subscriptionAllowed: true,
+      deleteInFocus: false
     }
 
     this.commentRef = React.createRef();
@@ -403,6 +404,24 @@ class App extends Component {
     }, clearMemory);
   }
 
+  deleteTweet = () => {
+    if(this.getAPI({id:"-1"}) === "-1") return; // page was not loaded
+
+    this.setState(() => {
+      return {
+        isDeleted: true
+      }
+    });
+
+    let { id, login, password } = cookieControl.get("userdata");
+    this.props.deleteTweet({
+      variables: {
+        id, login, password,
+        targetID: this.getAPI(null).id
+      }
+    }).then(() => this.props.history.push(links["MAIN_PAGE"]));
+  }
+
   render() {
     if(this.state.tweet === false) {
       return(
@@ -482,6 +501,17 @@ class App extends Component {
             onClick={ this.commentFillFocus }>
             <i className="far fa-comment" />
           </button>
+          {
+            (this.getAPI({creator:{id:""}}).creator.id !== cookieControl.get("userdata").id) ? null : (
+              <button
+                className={ `rn-tweet-controls-btn delete${ !this.state.deleteInFocus ? "" : " active" }` }
+                onClick={ () => this.setState({ deleteInFocus: true }) }
+                onBlur={ () => this.setState({ deleteInFocus: false }) }
+                onDoubleClick={ this.deleteTweet }>
+                <i className="fas fa-times" />
+              </button>
+            )
+          }
         </div>
         <div className="rn-tweet-brdt big" />
         <div className="rn-tweet-comments" ref={ ref => this.commentsBlockRef = ref }>
@@ -551,5 +581,12 @@ export default compose(
     mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
       subscribeUser(id: $id, login: $login, password: $password, targetID: $targetID)
     }
-  `, { name: "subscribeCreator" })
+  `, { name: "subscribeCreator" }),
+  graphql(gql`
+    mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
+      deleteTweet(id: $id, login: $login, password: $password, targetID: $targetID) {
+        id
+      }
+    }
+  `, { name: "deleteTweet" })
 )(App);

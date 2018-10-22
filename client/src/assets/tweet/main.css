@@ -187,6 +187,10 @@
   color:rgb(247, 0, 119);
 }
 
+.rn-tweet-controls-btn.delete.active {
+  color:red;
+}
+
 .rn-tweet-controls-btn.like.active {
   animation:rn-tweet-like-am .4s linear;
 }

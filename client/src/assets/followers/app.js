@@ -167,12 +167,12 @@ class Topics extends Component {
 				{
 					[
 						{
-							focusName: "Followers",
-							focusStage: "FOLLOWERS_STAGE"
-						},
-						{
 							focusName: "Following",
 							focusStage: "FOLLOWING_STAGE"
+						},
+						{
+							focusName: "Followers",
+							focusStage: "FOLLOWERS_STAGE"
 						}
 					].map(({ focusName, focusStage }, index) => {
 						return(

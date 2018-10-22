@@ -11,6 +11,7 @@ import Tweet from './assets/tweet/app';
 import Account from './assets/account/app';
 import Followers from './assets/followers/app';
 import NFP404 from './assets/nfp404/app';
+import Search from './assets/search/app';
 
 import { BrowserRouter, Redirect, Switch } from 'react-router-dom';
 import { Route } from 'react-router';
@@ -91,6 +92,13 @@ ReactDOM.render(
               exact
               path={ `${ links["NOT_FOUND_PAGE"] }/:referral?` }
               component={ NFP404 }
+              aif={ cookieControl.get("userdata") }
+              redirect={ links["REGISTER_PAGE"] }
+            />
+            <QuaRoute
+              exact
+              path={ links["EXPLORE_PAGE"] }
+              component={ Search }
               aif={ cookieControl.get("userdata") }
               redirect={ links["REGISTER_PAGE"] }
             />

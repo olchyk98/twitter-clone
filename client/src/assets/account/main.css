@@ -194,6 +194,10 @@
   margin-top:15px;
 }
 
+.rn-account-info-mat-follows-hvk:hover {
+  text-decoration:underline;
+}
+
 .rn-account-info-mat-addvinfo-item,
 .rn-account-info-mat-follows-item {
   --margin:7.5px;
@@ -418,6 +422,16 @@
     opacity:.8;
     color:rgb(247, 0, 119);
   }
+}
+
+.rn-account-tweets-mat-item-content-mat-controls-btn.delete {
+  margin-left:0;
+  position:relative;
+  bottom:-1px;
+}
+
+.rn-account-tweets-mat-item-content-mat-controls-btn.delete.active {
+  color:red;
 }
 
 .rn-account-tweets-mat-item-content-mat-controls-btn > * {

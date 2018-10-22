@@ -161,8 +161,6 @@ class MainNewsItem extends Component {
   getLikeState = () => (this.state.isLikeFetched) ? this.state : this.props;
 
   deleteTweet = () => {
-    if(!this.state.deleteInFocus) return;
-
     this.setState(() => {
       return {
         isDeleted: true
@@ -224,7 +222,9 @@ class MainNewsItem extends Component {
               (this.props.creatorID === cookieControl.get("userdata").id) ? (
                 <button
                   className={ `rn-main-news-mat-item-control-btn delete${ (!this.state.deleteInFocus) ? "" : " active" }` }
-                  onDoubleClick={ alert }>
+                  onClick={ () => this.setState({ deleteInFocus: true }) }
+                  onBlur={ () => this.setState({ deleteInFocus: false }) }
+                  onDoubleClick={ this.deleteTweet }>
                   <i className="fas fa-times" />
                 </button>
               ) : null
@@ -275,7 +275,7 @@ class MainNews extends Component {
   }
 }
 
-class Main extends Component {
+class App extends Component {
   constructor(props) {
     super(props);
 
@@ -412,4 +412,4 @@ export default compose(
       }
     }
   `, { name: "deleteTweet" })
-)(Main);
+)(App);
