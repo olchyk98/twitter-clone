@@ -34,28 +34,28 @@ class Search extends Component {
 	}
 }
 
-class UsersUser extends Component {
+class BlockUser extends Component {
 	render() {
 		return(
 			<React.Fragment>
-				<div className="rn-search-users-disp-item">
-					<div className="rn-search-users-disp-item-image">
+				<div className="rn-search-block-disp-item">
+					<div className="rn-search-block-disp-item-image">
 						<img src={ image } alt="" />
 					</div>
-					<div className="rn-search-users-disp-item-content">
-						<div className="rn-search-users-disp-item-content-creator">
+					<div className="rn-search-block-disp-item-content">
+						<div className="rn-search-block-disp-item-content-creator">
 							<div>
-								<div className="rn-search-users-disp-item-content-creator-name">
+								<div className="rn-search-block-disp-item-content-creator-name">
 									<span>Oles Odynets</span>
 									<VertificatedStar />
 								</div>
-								<span className="rn-search-users-disp-item-content-creator-url">@oles</span>
+								<span className="rn-search-block-disp-item-content-creator-url">@oles</span>
 							</div>
 							<div>
-								<button className="rn-search-users-disp-item-content-creator-flbtn">Follow</button>
+								<button className="rn-search-block-disp-item-content-creator-flbtn">Follow</button>
 							</div>
 						</div>
-						<p className="rn-search-users-disp-item-content-mat">
+						<p className="rn-search-block-disp-item-content-mat">
 							Chill the net Chill the net Chill the net Chill the net Chill the net Chill the net Chill the net Chill the net Chill the net Chill the net 
 						</p>
 					</div>
@@ -66,32 +66,49 @@ class UsersUser extends Component {
 	}
 }
 
-class UsersSplit extends Component {
+class BlockTweet extends Component {
 	render() {
 		return(
-			<div className="rn-search-users-split"></div>
+			<React.Fragment>
+				<div className="rn-search-block-disp-titem">
+					
+				</div>
+				<UsersSplit />
+			</React.Fragment>
 		);
 	}
 }
 
-class Users extends Component {
+class UsersSplit extends Component {
 	render() {
 		return(
-			<div className="rn-search-users">
-				<div className="rn-search-users-title">
-					<span>Users</span>
-					<div>
+			<div className="rn-search-block-split" />
+		);
+	}
+}
+
+class Block extends Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			// opened: true
+			opened: this.props.title !== "Users"
+		}
+	}
+
+	render() {
+		return(
+			<div className="rn-search-block">
+				<div className="rn-search-block-title" onClick={ () => this.setState(({ opened }) => ({ opened: !opened })) }>
+					<span className="rn-search-block-title-mat">{ this.props.title }</span>
+					<div className={ `rn-search-block-title-status${ (this.state.opened) ? " opened" : "" }` }>
 						<i className="fas fa-angle-up" />
 					</div>
 				</div>
 				<UsersSplit />
-				<div className="rn-search-users-disp">
-					<UsersUser />
-					<UsersUser />
-					<UsersUser />
-					<UsersUser />
-					<UsersUser />
-
+				<div className={ `rn-search-block-disp${ (this.state.opened) ? " opened" : "" }` }>
+					<BlockTweet />
 				</div>
 			</div>
 		);
@@ -103,7 +120,12 @@ class App extends Component {
 		return(
 			<div className="rn-search">
 				<Search />
-				<Users />
+				<Block
+					title="Users"
+				/>
+				<Block
+					title="Tweets"
+				/>
 			</div>
 		);
 	}

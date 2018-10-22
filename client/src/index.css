@@ -55,13 +55,13 @@ input {
 .rn-followers,
 .rn-nfp,
 .rn-search-mat,
-.rn-search-users {
+.rn-search-block {
   background:var(--uicol);
 }
 
 .rn-followers-split,
 .rn-search-mat-search,
-.rn-search-users-split {
+.rn-search-block-split {
   background:var(--bgcol);
 }
 
