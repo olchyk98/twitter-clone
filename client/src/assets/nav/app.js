@@ -27,6 +27,12 @@ class NavLink extends Component {
 }
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.searchInp = React.createRef();
+  }
+
   componentDidUpdate() {
     if(!this.props.navdata.loading && this.props.navdata.user === null) { // UNSECURE SESSION
       destroySession();
@@ -73,12 +79,19 @@ class App extends Component {
               })
             }
           </div>
-          <div onClick={ () => cookieControl.delete("userdata") } className="mj-nav-search">
-            <div className="mj-nav-search-icon"><i className="fas fa-search" /></div>
-            <input className="mj-nav-search-input" type="text" placeholder="Search" />
-          </div>
           <Link
-            // style={{ textDecoration: "none" }}
+            className="mj-nav-search"
+            to={ links["EXPLORE_PAGE"] }>
+            <div className="mj-nav-search-icon"><i className="fas fa-search" /></div>
+            <input
+              className="mj-nav-search-input"
+              type="text"
+              placeholder="Search"
+              ref={ ref => this.searchInp = ref }
+              disabled
+            />
+          </Link>
+          <Link
             to={ links["ACCOUNT_PAGE"] }>
             <div className="mj-nav-muser">
               <img

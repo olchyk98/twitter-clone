@@ -26,6 +26,11 @@ class Search extends Component {
 		}
 
 		this.searchIN = null;
+		this.inpSearch = React.createRef();
+	}
+
+	componentDidMount() {
+		this.inpSearch.focus();
 	}
 
 	validateRequest = ({ target: { value } }) => {
@@ -49,6 +54,7 @@ class Search extends Component {
 						onFocus={ () => this.setState({ inFocus: true }) }
 						onBlur={ () => this.setState({ inFocus: false }) }
 						value={ this.state.reqValue }
+						ref={ ref => this.inpSearch = ref }
 						onChange={ this.validateRequest }
 					/>
 				</div>
