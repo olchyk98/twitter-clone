@@ -56,7 +56,7 @@ ReactDOM.render(
             <QuaRoute
               exact
               path="/"
-              component={ Register }
+              component={ Main }
               aif={ cookieControl.get("userdata") }
               redirect={ links["REGISTER_PAGE"] }
             />

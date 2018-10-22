@@ -372,7 +372,6 @@ class App extends Component {
 		if(this.state[this.stages[this.state.reqStage]] === false) { // loading
 			return(
 				<div className={ `rn-followers${ (this.backUrl) ? " backable" : "" }` }>
-					{ (this.backUrl) ? <BackNav /> : null }
 					<Topics 
 						reqStage={ this.state.reqStage }
 						setStage={ this.setStage }
