@@ -235,3 +235,107 @@
 	color:rgba(255, 255, 255, .85);
 	font-size:.975em;
 }
+
+.rn-search-block-disp-titem-mg,
+.rn-search-block-disp-titem-mg > img {
+	width:45px;
+}
+
+.rn-search-block-disp-titem-mg > img {
+	height:45px;
+	object-fit:cover;
+	object-position:center;
+	border-radius:50%;
+}
+
+.rn-search-block-disp-titem-mg-content {
+	width:calc(100% - 45px - 10px);
+	padding-left:10px;
+	display:flex;
+	position:relative;
+	justify-content:flex-start;
+	align-items:flex-start;
+	flex-direction:column;
+}
+
+.rn-search-block-disp-titem-mg-content > * {
+	position:relative;
+	z-index:4;
+}
+
+.rn-search-block-disp-titem-mg-content-redirect {
+	height:100%;
+	width:100%;
+	cursor:pointer;
+	z-index:2;
+	position:absolute;
+	top:0;
+	left:0;
+}
+
+.rn-search-block-disp-titem-mg-content-creatorinf {
+	display:flex;
+	align-items:center;
+	color:rgba(255, 255, 255, .5);
+	font-family:"Quicksand";
+	font-weight:300;
+}
+
+.rn-search-block-disp-titem-mg-content-creatorinf > * {
+	margin-right:5px;
+}
+
+.rn-search-block-disp-titem-mg-content-creatorinf-name {
+	color:white;
+	font-family:"Quicksand";
+	font-weight:400;
+	display:flex;
+	align-items:center;
+}
+
+.rn-search-block-disp-titem-mg-content-mat {
+	font-weight:200;
+	font-family:"Quicksand";
+	color:rgba(255, 255, 255, .95);
+	margin-bottom:5px;
+	margin-top:5px;
+}
+
+.rn-search-block-disp-titem-mg-content-controls {
+	display:flex;
+	margin-top:5px;
+	margin-bottom:3px;
+	align-items:center;
+}
+
+.rn-search-block-disp-titem-mg-content-controls-btn {
+	color:rgba(255, 255, 255, .6);
+	background:transparent;
+	border:none;
+	font-size:1.1em;
+	display:flex;
+	align-items:center;
+	padding:0;
+	margin-right:20px;
+	cursor:pointer;
+}
+
+.rn-search-block-disp-titem-mg-content-controls-btn > span {
+	margin-left:6px;
+	font-size:.9em;
+	font-family:"Quicksand";
+	font-weight:100;
+}
+
+.rn-search-block-disp-titem-mg-content-controls-btn.like.active {
+	color:red;
+}
+
+.rn-search-block-disp-titem-mg-content-controls-btn.delete {
+	position:relative;
+	bottom:-1px;
+}
+
+.rn-search-block-disp-titem-mg-content-controls-btn.delete.active {
+	color:red;
+}

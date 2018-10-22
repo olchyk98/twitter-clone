@@ -46,19 +46,13 @@ ReactDOM.render(
         }
         <div id="main">
           <Switch>
-          <QuaRoute
+            <Redirect exact from="/" to="/home" />
+            <QuaRoute
               exact
               path={ links["REGISTER_PAGE"] }
               component={ Register }
               aif={ !cookieControl.get("userdata") }
               redirect={ links["MAIN_PAGE"] }
-            />
-            <QuaRoute
-              exact
-              path="/"
-              component={ Main }
-              aif={ cookieControl.get("userdata") }
-              redirect={ links["REGISTER_PAGE"] }
             />
             <QuaRoute
               exact

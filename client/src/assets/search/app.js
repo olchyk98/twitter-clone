@@ -71,7 +71,37 @@ class BlockTweet extends Component {
 		return(
 			<React.Fragment>
 				<div className="rn-search-block-disp-titem">
-					
+					<div className="rn-search-block-disp-titem-mg">
+						<img src={ image } alt="" />
+					</div>
+					<div className="rn-search-block-disp-titem-mg-content">
+						<div className="rn-search-block-disp-titem-mg-content-redirect" />
+						<div className="rn-search-block-disp-titem-mg-content-creatorinf">
+							<div className="rn-search-block-disp-titem-mg-content-creatorinf-name">
+								<span>Oles Odynets</span>
+								<VertificatedStar />
+							</div>
+							<span>@oles</span>
+							<span>•</span>
+							<span>23:32</span>
+						</div>
+						<p className="rn-search-block-disp-titem-mg-content-mat">
+							Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life 
+						</p>
+						<div className="rn-search-block-disp-titem-mg-content-controls">
+							<button className="rn-search-block-disp-titem-mg-content-controls-btn">
+								<i className="far fa-comment" />
+								<span>3</span>
+							</button>
+							<button className="rn-search-block-disp-titem-mg-content-controls-btn like">
+								<i className="far fa-heart" />
+								<span>3</span>
+							</button>
+							<button className="rn-search-block-disp-titem-mg-content-controls-btn delete">
+								<i className="fas fa-times" />
+							</button>
+						</div>
+					</div>
 				</div>
 				<UsersSplit />
 			</React.Fragment>
