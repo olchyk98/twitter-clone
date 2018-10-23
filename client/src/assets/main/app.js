@@ -277,8 +277,6 @@ class App extends Component {
           }
         });
       }
-      console.log(!isLoading, addedTweet, (!pProps.addedTweet || pProps.addedTweet.id !== addedTweet.id))
-      console.log(this.props.feedUpdated);
     }
   }
 
