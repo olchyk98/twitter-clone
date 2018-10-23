@@ -761,5 +761,6 @@ export default compose(
         id
       }
     }
-  `, { name: "deleteTweet" })
+  `, { name: "deleteTweet" }),
+  // graphql
 )(App);
