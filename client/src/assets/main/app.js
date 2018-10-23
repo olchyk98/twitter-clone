@@ -115,6 +115,14 @@ class MainNewsItem extends Component {
         targetID: this.props.id
       }
     }).then(({ data: { likeTweet } }) => {
+      if(likeTweet === null) {
+        this.setState(() => {
+          return {
+            isDeleted: true
+          }
+        })
+      }
+
       this.setState(() => {
         return {
           isLiked: likeTweet,
@@ -122,7 +130,7 @@ class MainNewsItem extends Component {
           isLikeChangeable: true
         }
       }, clearMemory);
-    }).catch(destroySession);
+    });
   }
 
   getLikeState = () => (this.state.isLikeFetched) ? this.state : this.props;
@@ -256,12 +264,21 @@ class App extends Component {
     this.fetchFeed();
   }
 
-  componentDidUpdate(a) {
-    // Feed Subscription Data
-    {
-      let a = this.props.feedUpdated;
-      // if(a.)
-      console.log(a);
+  componentDidUpdate(pProps) {
+    { // Subscription > New tweet in the feed :)
+      let { isLoading, addedTweet } = this.props.feedUpdated;
+      if(!isLoading && addedTweet && (!pProps.feedUpdated.addedTweet || pProps.feedUpdated.addedTweet.id !== addedTweet.id)) { // new tweet
+        this.setState(({ feed }) => {
+          return {
+            feed: [
+              addedTweet,
+              ...feed
+            ]
+          }
+        }, () => console.log(this.state.feed));
+      }
+      console.log(!isLoading, addedTweet, (!pProps.addedTweet || pProps.addedTweet.id !== addedTweet.id))
+      console.log(this.props.feedUpdated);
     }
   }
 
