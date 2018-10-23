@@ -275,7 +275,7 @@ class App extends Component {
               ...feed
             ]
           }
-        }, () => console.log(this.state.feed));
+        });
       }
       console.log(!isLoading, addedTweet, (!pProps.addedTweet || pProps.addedTweet.id !== addedTweet.id))
       console.log(this.props.feedUpdated);
