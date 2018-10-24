@@ -220,7 +220,7 @@
 
 .rn-tweet-controls-btn.main,
 .rn-tweet-controls-btn.main:before {
-  transition:.2s;
+  transition:.3s;
 }
 
 .rn-tweet-controls-btn.main:before {
@@ -341,6 +341,10 @@
   cursor:pointer;
   display:flex;
   align-items:center;
+}
+
+.rn-tweet-comments-comment-content-control-btn.delete.active {
+  color:red;
 }
 
 .rn-tweet-comments-comment-content-control-btn > span {

@@ -105,6 +105,9 @@
   position:relative;
   margin-top:5px;
   margin-bottom:5px;
+}
+
+.rn-main-news-mat-item:not(.new) {
   animation:rnmain-tweet-init-am .5s ease-in-out;
 }
 
@@ -116,6 +119,22 @@
   to {
     transform:scale(1);
     opacity:1;
+  }
+}
+
+.rn-main-news-mat-item.new {
+  animation:rnmain-tweet-sub-am .5s ease-out;
+}
+
+@keyframes rnmain-tweet-sub-am {
+  0% {
+    filter:brightness(100%);
+  }
+  50% {
+    filter:brightness(150%);
+  }
+  100% {
+    filter:brightness(100%);
   }
 }
 

@@ -321,7 +321,7 @@ const RootQuery = new GraphQLObjectType({
           creatorID: {
             $in: [...user.subscribedTo, _id]
           }
-        }).sort({ time: -1 }); // XXX - XXX
+        }).sort({ time: -1 });
 
         a.forEach(io => io.isLiked = io.likes.find(ic => ic.toString() === user._id.toString()) ? true:false);
 
@@ -575,7 +575,14 @@ const RootMutation = new GraphQLObjectType({
               $in: [targetID]
             }
           });
-          return tweet.remove();
+
+          tweet = await tweet.remove();
+
+          pubsub.publish("deletedTweet", {
+            deletedTweet: tweet
+          });
+
+          return tweet;
         } else {
           return null;
         }
@@ -602,7 +609,17 @@ const RootMutation = new GraphQLObjectType({
             time: new Date()
           }).save();
 
-          // pubsub
+          tweet.commentsInt = (await Comment.find({
+            sendedToID: tweet.id
+          })).length;
+
+          pubsub.publish("commentedTweet", {
+            tweet: {
+              id: tweet.id,
+              commentsInt: tweet.commentsInt,
+              creatorID: tweet.creatorID
+            }
+          });
 
           return model;
         } else {
@@ -624,20 +641,73 @@ const RootMutation = new GraphQLObjectType({
 
         if(user && tweet) {
           let str = st => st.toString();
-          let isLiked = tweet.likes.find(io => str(io) === str(user._id)) ? true:false;
-          if(!isLiked) {
-            await Tweet.findOneAndUpdate({ _id: tweet.id }, {
-              $push: { likes: user._id }
-            });
-            return true;
-          } else {
-            await Tweet.findOneAndUpdate({ _id: tweet.id }, {
-              $pull: { likes: user._id }
-            });
-            return false;
-          }
+          let isLiked = tweet.likes.find(io => str(io) === str(user._id)) ? true:false
+
+          // if(!isLiked) {
+          //   await tweet.update({
+          //     $push: { likes: user._id }
+          //   });
+
+          //   pubsub.publish("likedTweet", {
+          //     tweet: {
+          //       id: tweet.id,
+          //       likesInt: tweet.likes.length + 1
+          //     },
+          //     likerID: _id
+          //   });
+
+          //   return true;
+          // } else {
+          //   await tweet.update({
+          //     $pull: { likes: user._id }
+          //   });
+
+
+          //   pubsub.publish("likedTweet", {
+          //     tweet: {
+          //       id: tweet.id,
+          //       likesInt: tweet.likes.length - 1
+          //     },
+          //     likerID: _id
+          //   });
+
+          //   return false;
+          // }
+
+          await tweet.update({
+            [ !isLiked ? "$push" : "$pull" ]: { likes: user._id }
+          });
+
+          pubsub.publish("likedTweet", {
+            tweet: {
+              id: tweet.id,
+              likesInt: tweet.likes.length + (!isLiked ? 1 : -1),
+              creatorID: tweet.creatorID
+            },
+            likerID: _id
+          });
+
+          return !isLiked;
         } else {
           return false;
+        }
+      }
+    },
+    deleteComment: {
+      type: CommentType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        targetID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(_, { id: _id, login, password, targetID }) {
+        let user = await User.find({ _id, login, password });
+
+        if(user) {
+          return Comment.findByIdAndRemove(targetID);
+        } else {
+          return null;
         }
       }
     },
@@ -676,14 +746,12 @@ const RootMutation = new GraphQLObjectType({
 const RootSubscription = new GraphQLObjectType({
   name: "subscription",
   fields: {
-    addedTweet: {
+    addedFeedTweet: {
       type: TweetType,
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) }
       },
-      resolve: ({ addedTweet }) => {
-        return addedTweet;
-      },
+      resolve: ({ addedTweet }) => addedTweet,
       subscribe: withFilter(
         () => pubsub.asyncIterator('addedTweet'),
         async ({ addedTweet: tweet }, { id: _id }) => {
@@ -695,6 +763,87 @@ const RootSubscription = new GraphQLObjectType({
              $in: [tweet.creatorID]
             }
           });
+
+          return (a ? true:false);
+        }
+      )
+    },
+    deletedFeedTweet: {
+      type: TweetType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ deletedTweet }) => deletedTweet,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator("deletedTweet"),
+        async ({ deletedTweet: tweet }, { id: _id }) => {
+          if(tweet.creatorID === _id) return false;
+
+          let a = await User.findOne({
+            _id,
+            subscribedTo: {
+             $in: [tweet.creatorID]
+            }
+          });
+
+          return (a ? true:false);
+        }
+      )
+    },
+    updatedFeedTweetLikes: {
+      type: TweetType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ tweet }) => tweet,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('likedTweet'),
+        async ({ tweet, likerID }, { id: _id }) => {
+          if(_id === likerID) return false;
+
+          let a = false;
+          if(tweet.creatorID === _id) { // creator
+            a = true;
+          } else { // check by subscription
+            a = await User.findOne({
+              _id,
+              subscribedTo: {
+               $in: [tweet.creatorID]
+              }
+            });
+          }
+
+          return (a ? true:false);
+        }
+      )
+    },
+    updatedFeedTweetComments: {
+      type: TweetType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ tweet }) => tweet,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('commentedTweet'),
+        async ({ tweet }, { id }) => {
+
+          // try {
+          //   tweet.creatorID.toString() === _id.toString()
+          // } catch(err) {
+          //   console.log(err);
+          // }
+
+          let a = false;
+          if(tweet.creatorID === id) {
+            a = true;
+          } else {
+            a = await User.findOne({
+              _id,
+              subscribedTo: {
+               $in: [tweet.creatorID]
+              }
+            });
+          }
 
           return (a ? true:false);
         }

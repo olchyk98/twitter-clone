@@ -12,11 +12,6 @@ import { apiPath } from '../../apiPath';
 
 import VertificatedStar from '../__forall__/vertificated/app';
 
-function destroySession() {
-  cookieControl.delete("userdata");
-  return window.location.href = links["REGISTER_PAGE"];
-}
-
 var clearMemory = () => client.clearStore();
 
  class Comment extends Component {
@@ -29,7 +24,9 @@ var clearMemory = () => client.clearStore();
         fromState: false,
         isLiked: false,
         likes: 0
-       }
+       },
+       deleteInFocus: false,
+       isDeleted: false
      }
    }
 
@@ -120,15 +117,35 @@ var clearMemory = () => client.clearStore();
         }
       }
     }, clearMemory);
-  }).catch(destroySession);
+  });
    }
 
-   getLikesSource = () => {
-     return (!this.state.likes.fromState) ? this.props : this.state.likes;
-   }
+  getLikesSource = () => {
+   return (!this.state.likes.fromState) ? this.props : this.state.likes;
+  }
 
-   render() {
-     return(
+  deleteComment = () => {
+    console.log("EXECUTE 2x");
+
+    this.setState(() => {
+      return {
+        deleteInFocus: false,
+        isDeleted: true
+      }
+    });
+
+    let { id, login, password } = cookieControl.get("userdata");
+
+    this.props.deleteMutation({
+      variables: {
+        id, login, password,
+        targetID: this.props.id
+      }
+    });
+  }
+
+  render() {
+    return(
       <React.Fragment>
         <div className="rn-tweet-comments-comment">
           <Link className="rn-tweet-comments-comment-mg" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creator.url }` }>
@@ -167,6 +184,17 @@ var clearMemory = () => client.clearStore();
                 }
                 <span>{ this.getLikesSource().likes }</span>
               </button>
+              {
+                (this.props.creator.id !== cookieControl.get("userdata").id) ? null : (
+                  <button
+                    className={ `rn-tweet-comments-comment-content-control-btn rn-tweet-controls-btn delete${ (!this.state.deleteInFocus) ? "" : " active" }` }
+                    onFocus={ () => this.setState({ deleteInFocus: true }) }
+                    onBlur={ () => this.setState({ deleteInFocus: false }) }
+                    onDoubleClick={ this.deleteComment }>
+                    <i className="fas fa-times" />
+                  </button>
+                )
+              }
              </div>
            </div>
          </div>
@@ -334,7 +362,7 @@ class App extends Component {
           isLikeAllowed: true
         }
       }, clearMemory);
-    }).catch(destroySession);
+    });
   }
 
   commentTweet = e => {
@@ -366,7 +394,7 @@ class App extends Component {
           }
         }
       }, clearMemory);
-    }).catch(destroySession);
+    });
   }
 
   followCreator = () => {
@@ -527,6 +555,7 @@ class App extends Component {
                   likes={ likesInt }
                   creator={ creator }
                   likeMutation={ this.props.likeComment }
+                  deleteMutation={ this.props.deleteComment }
                 />
               );
             })
@@ -588,5 +617,12 @@ export default compose(
         id
       }
     }
-  `, { name: "deleteTweet" })
+  `, { name: "deleteTweet" }),
+  graphql(gql`
+    mutation($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
+      deleteComment(id: $id, login: $login, password: $password, targetID: $targetID) {
+        id
+      }
+    }
+  `, { name: "deleteComment" })
 )(App);

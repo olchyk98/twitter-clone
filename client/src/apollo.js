@@ -9,11 +9,12 @@ import { apiPath, wssPath } from './apiPath';
 
 const client = new ApolloClient({
 	link: new RetryLink().split( // YOHOOOOOO!!! FIXED
-		sys => {
-			let { operation } = getMainDefinition(sys.query);
-			console.log(operation);
-			return operation === "subscription";
-		},
+		// sys => {
+		// 	let { operation } = getMainDefinition(sys.query);
+		// 	console.log(operation);
+		// 	return operation === "subscription";
+		// },
+		sys => getMainDefinition(sys.query).operation === "subscription",
 		new WebSocketLink({
      		uri: `${ wssPath }/graphql`,
       		options: { reconnect: true }

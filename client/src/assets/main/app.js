@@ -155,7 +155,7 @@ class MainNewsItem extends Component {
     if(this.state.isDeleted) return null;
 
     return(
-      <div className="rn-main-news-mat-item rn-field">
+      <div className={ `rn-main-news-mat-item rn-field${ (!this.props.customAdded) ? "" : " new"}` }>
         <Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.creatorUrl }` } className="rn-main-news-mat-item-mg">
           <img src={ apiPath + this.props.creatorImage } alt={ this.props.creatorName } />
         </Link>
@@ -223,7 +223,7 @@ class MainNews extends Component {
         <div className={ `loading-icon${ (this.props.loading) ? " visible" : "" }` }></div>
         <div className={ `rn-main-news-mat${ (this.props.loading) ? " hidden" : "" }` }>
           {
-            this.props.data.map(({ id, time, isLiked, content, creator, likesInt: likes, commentsInt: comments }) => {
+            this.props.data.map(({ id, time, isLiked, customAdded, content, creator, likesInt: likes, commentsInt: comments }) => {
               return(
                 <MainNewsItem
                   key={ id }
@@ -238,6 +238,7 @@ class MainNews extends Component {
                   creatorUrl={ creator.url }
                   creatorID={ creator.id }
                   creatorVertificated={ creator.isVertificated }
+                  customAdded={ customAdded ? true:false }
                   likePost={ this.props.likePostMut }
                   deleteTweet={ this.props.deleteTweet }
                 />
@@ -266,17 +267,86 @@ class App extends Component {
 
   componentDidUpdate(pProps) {
     { // Subscription > New tweet in the feed :)
-      let { isLoading, addedTweet } = this.props.feedUpdated;
-      if(!isLoading && addedTweet && (!pProps.feedUpdated.addedTweet || pProps.feedUpdated.addedTweet.id !== addedTweet.id)) { // new tweet
+      let { isLoading, addedFeedTweet } = this.props.feedAdded;
+      if(!isLoading && addedFeedTweet && (!pProps.feedAdded.addedFeedTweet || pProps.feedAdded.addedFeedTweet.id !== addedFeedTweet.id)) { // added new tweet
         this.setState(({ feed }) => {
           return {
             feed: [
-              addedTweet,
+              {
+                ...addedFeedTweet,
+                customAdded: true
+              },
               ...feed
             ]
           }
         });
       }
+    }
+    { // Subscription > Delete tweet in the feed
+      let { isLoading, deletedFeedTweet } = this.props.feedDeleted;
+      if(!isLoading && deletedFeedTweet && (!pProps.feedDeleted.deletedFeedTweet || pProps.feedDeleted.deletedFeedTweet.id !== deletedFeedTweet.id)) { // deleted tweet
+        let a = Array.from(this.state.feed);
+        a = a.filter(({ id }) => id !== deletedFeedTweet.id); // That's weird... why javascript doesn't have remove function for array protype?
+        this.setState(({ feed }) => {
+          return {
+            feed: a
+          }
+        });
+      }
+    }
+    { // Subscription > Update likes counter in the feed
+      let a = this.props.feedLikeUp,
+          b = pProps.feedLikeUp;
+      if(
+          (b.loading && !a.loading && a.updatedFeedTweetLikes) ||
+          (
+            b.updatedFeedTweetLikes &&
+            (
+              (b.updatedFeedTweetLikes.likesInt !== a.updatedFeedTweetLikes.likesInt) ||
+              (b.updatedFeedTweetLikes.id !== a.updatedFeedTweetLikes.id)
+            )
+          )
+        ) {
+        let a = Array.from(this.state.feed);
+        let b = a.find(({ id }) => id === this.props.feedLikeUp.updatedFeedTweetLikes.id);
+
+        if(!b) return; // tweet was not received
+        b.likesInt = this.props.feedLikeUp.updatedFeedTweetLikes.likesInt;
+
+        this.setState(() => {
+          return {
+            feed: a
+          }
+        });
+      } 
+    }
+    { // Subscription > Update comments counter in the feed
+      let a = this.props.feedCommentUp,
+          b = pProps.feedCommentUp;
+      if(
+          (b.loading && !a.loading && a.updatedFeedTweetComments) ||
+          (
+            b.updatedFeedTweetComments &&
+            (
+              (b.updatedFeedTweetComments.commentsInt !== a.updatedFeedTweetComments.commentsInt) ||
+              (b.updatedFeedTweetComments.id !== a.updatedFeedTweetComments.id)
+            )
+          )
+        ) {
+        console.log(this.props.feedCommentUp.updatedFeedTweetComments);
+
+        let a = Array.from(this.state.feed);
+        let b = a.find(({ id }) => id === this.props.feedCommentUp.updatedFeedTweetComments.id);
+
+        if(!b) return; // tweet was not received
+        b.commentsInt = this.props.feedCommentUp.updatedFeedTweetComments.commentsInt;
+
+        this.setState(() => {
+          return {
+            feed: a
+          }
+        });
+      } 
     }
   }
 
@@ -326,7 +396,10 @@ class App extends Component {
 
   addCTweet = ({ addTweet }) => {
     let a = Array.from(this.state.feed);
-    a.unshift(addTweet);
+    a.unshift({
+      ...addTweet,
+      customAdded: true
+    });
 
     this.setState(() => {
       return {
@@ -405,7 +478,7 @@ export default compose(
   `, { name: "deleteTweet" }),
   graphql(gql`
     subscription($id: ID!) {
-      addedTweet(id: $id) {
+      addedFeedTweet(id: $id) {
         id,
         commentsInt,
         likesInt,
@@ -422,11 +495,67 @@ export default compose(
       }
     }
   `, {
-    name: "feedUpdated",
+    name: "feedAdded",
     options: {
       variables: {
         id: cookieControl.get("userdata").id
       }
     }
-  })
+  }),
+  graphql(gql`
+    subscription($id: ID!) {
+      deletedFeedTweet(id: $id) {
+        id,
+        commentsInt,
+        likesInt,
+        content,
+        time,
+        isLiked(id: $id),
+        creator {
+          id,
+          image,
+          url,
+          name,
+          isVertificated
+        }
+      }
+    }
+  `, {
+    name: "feedDeleted",
+    options: {
+      variables: {
+        id: cookieControl.get("userdata").id
+      }
+    }
+  }),
+  graphql(gql`
+      subscription($id: ID!) {
+        updatedFeedTweetLikes(id: $id) {
+          id,
+          likesInt
+        }
+      }
+    `, {
+    name: "feedLikeUp",
+    options: {
+      variables: {
+        id: cookieControl.get("userdata").id
+      }
+    }
+  }),
+  graphql(gql`
+      subscription($id: ID!) {
+        updatedFeedTweetComments(id: $id) {
+          id
+          commentsInt
+        }
+      }
+    `, {
+    name: "feedCommentUp",
+    options: {
+      variables: {
+        id: cookieControl.get("userdata").id
+      }
+    }
+})
 )(App);
