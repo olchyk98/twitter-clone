@@ -858,6 +858,28 @@ const RootSubscription = new GraphQLObjectType({
           return (a ? true:false);
         }
       )
+    },
+    updatedTweetLikes: {
+      type: TweetType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ tweet }) => tweet,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('likedTweet'),
+        ({ tweet: { id } }, { id: _id }) => id === _id
+      )
+    },
+    updatedTweetComments: {
+      type: TweetType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ tweet }) => tweet,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('commentedTweet'),
+        ({ tweet: { id } }, { id: _id }) => id === _id
+      )
     }
   }
 })

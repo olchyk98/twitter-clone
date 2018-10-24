@@ -125,8 +125,6 @@ var clearMemory = () => client.clearStore();
   }
 
   deleteComment = () => {
-    console.log("EXECUTE 2x");
-
     this.setState(() => {
       return {
         deleteInFocus: false,
@@ -224,6 +222,44 @@ class App extends Component {
 
   componentDidMount() {
     this.fetchAPI();
+  }
+
+  componentDidUpdate(a) {
+    // updatedTweetLikes
+// likesUpdated
+    let b = this.props;
+
+    console.log(b.likesUpdated);
+
+    // FIXME: Subscription data was received, but processed in wrong way.
+    // TODO: Debug if-validate-statement
+
+    if(b.likesUpdated.updatedTweetLikes) {
+      console.log(
+        a.likesUpdated.updatedTweetLikes,
+        a.likesUpdated.updatedTweetLikes.likes, b.likesUpdated.updatedTweetLikes.likes,
+        a.likesUpdated.updatedTweetLikes.id, b.likesUpdated.updatedTweetLikes.id
+      );
+    }
+
+    { // Subscriptions > likesUpdated
+      if(
+        (!a.likesUpdated.updatedTweetLikes && b.likesUpdated.updatedTweetLikes) ||
+        (
+          a.likesUpdated.updatedTweetLikes &&
+          (
+            (
+              a.likesUpdated.updatedTweetLikes.likes !== b.likesUpdated.updatedTweetLikes.likes
+            ) ||
+            (
+              a.likesUpdated.updatedTweetLikes.id !== b.likesUpdated.updatedTweetLikes.id
+            )
+          )
+        )
+      ) {
+        alert("LIKE was submited!");
+      }
+    }
   }
 
   fetchAPI = async () => {
@@ -626,5 +662,39 @@ export default compose(
         id
       }
     }
-  `, { name: "deleteComment" })
+  `, { name: "deleteComment" }),
+  graphql(gql`
+    subscription($id: ID!) {
+      updatedTweetLikes(
+        id: $id
+      ) {
+        id,
+        likesInt
+      }
+    }
+  `, {
+    name: "likesUpdated",
+    options: {
+      variables: {
+        id: window.location.pathname.split("/")[2]
+      }
+    }
+  }),
+  graphql(gql`
+    subscription($id: ID!) {
+      updatedTweetComments(
+        id: $id
+      ) {
+        id,
+        commentsInt
+      }
+    }
+  `, {
+    name: "commentsUpdated",
+    options: {
+      variables: {
+        id: window.location.pathname.split("/")[2]
+      }
+    }
+  })
 )(App);
