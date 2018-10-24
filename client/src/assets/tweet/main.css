@@ -189,7 +189,7 @@
 }
 
 .rn-tweet-controls-btn.comment.active {
-  color:lime;
+  color:#4FB14E;
 }
 
 .rn-tweet-controls-btn.delete.active {
@@ -238,7 +238,7 @@
 
 .rn-tweet-controls-btn.main:hover:before {
   transform:translate(-50%, -50%) scale(1);
-  opacity:.125;
+  opacity:.175;
 }
 
 .rn-tweet-controls-btn.main.like:hover {
@@ -252,11 +252,11 @@
 }
 
 .rn-tweet-controls-btn.main.comment:hover {
-  color:lime;
+  color:#4FB14E;
 }
 
 .rn-tweet-controls-btn.main.comment:before {
-  background:lime;
+  background:#4FB14E;
 }
 
 .rn-tweet-controls-btn.main.delete:hover {

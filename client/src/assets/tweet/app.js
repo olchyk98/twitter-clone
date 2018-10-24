@@ -12,7 +12,11 @@ import { apiPath } from '../../apiPath';
 
 import VertificatedStar from '../__forall__/vertificated/app';
 
-var clearMemory = () => client.clearStore();
+function destroySession() {
+  cookieControl.delete("userdata");
+  window.location.href = links["REGISTER_PAGE"];
+}
+let clearMemory = () => client.clearStore();
 
  class Comment extends Component {
    constructor(props) {
@@ -225,39 +229,99 @@ class App extends Component {
   }
 
   componentDidUpdate(a) {
-    // updatedTweetLikes
-// likesUpdated
     let b = this.props;
 
-    console.log(b.likesUpdated);
+    // FIXME: Subscription data (data from the subscription) was received, but processed in wrong way.
+    // TODO: Debug if statement
 
-    // FIXME: Subscription data was received, but processed in wrong way.
-    // TODO: Debug if-validate-statement
-
-    if(b.likesUpdated.updatedTweetLikes) {
-      console.log(
-        a.likesUpdated.updatedTweetLikes,
-        a.likesUpdated.updatedTweetLikes.likes, b.likesUpdated.updatedTweetLikes.likes,
-        a.likesUpdated.updatedTweetLikes.id, b.likesUpdated.updatedTweetLikes.id
-      );
-    }
-
-    { // Subscriptions > likesUpdated
+    { // Subscriptions > likesIntUpdated
       if(
-        (!a.likesUpdated.updatedTweetLikes && b.likesUpdated.updatedTweetLikes) ||
         (
-          a.likesUpdated.updatedTweetLikes &&
-          (
-            (
-              a.likesUpdated.updatedTweetLikes.likes !== b.likesUpdated.updatedTweetLikes.likes
-            ) ||
-            (
-              a.likesUpdated.updatedTweetLikes.id !== b.likesUpdated.updatedTweetLikes.id
-            )
-          )
+          !a.likesUpdated.updatedTweetLikes &&
+          b.likesUpdated.updatedTweetLikes
+        ) ||
+        (
+          a.likesUpdated.updatedTweetLikes && b.likesUpdated.updatedTweetLikes &&
+          a.likesUpdated.updatedTweetLikes.likesInt !== b.likesUpdated.updatedTweetLikes.likesInt
         )
       ) {
-        alert("LIKE was submited!");
+        let c = Object.assign({}, this.state.tweet);
+        c.likesInt = b.likesUpdated.updatedTweetLikes.likesInt;
+        this.setState(() => {
+          return {
+            tweet: c
+          }
+        });
+      }
+    }
+
+    { // Subscriptions > commentsIntUpdated
+      if(
+        (
+          !a.commentsUpdated.updatedTweetComments &&
+          b.commentsUpdated.updatedTweetComments
+        ) ||
+        (
+          a.commentsUpdated.updatedTweetComments && b.commentsUpdated.updatedTweetComments &&
+          a.commentsUpdated.updatedTweetComments.commentsInt !== b.commentsUpdated.updatedTweetComments.commentsInt
+        )
+      ) {
+        let c = Object.assign({}, this.state.tweet);
+        c.commentsInt = b.commentsUpdated.updatedTweetComments.commentsInt;
+        this.setState(() => {
+          return {
+            tweet: c
+          }
+        });
+      }
+    }
+    // addedTweetComment
+// commentAdded
+    { // Subscriptions > comment deleted
+      if(
+        (
+          !a.commentAdded.addedTweetComment &&
+          b.commentAdded.addedTweetComment
+        ) ||
+        (
+          a.commentAdded.addedTweetComment && b.commentAdded.addedTweetComment &&
+          a.commentAdded.addedTweetComment.id !== b.commentAdded.addedTweetComment.id
+        )
+      ) {
+        let c = Array.from(this.state.tweet.comments);
+        c.unshift(b.commentAdded.addedTweetComment);
+        alert();
+        this.setState(({ tweet }) => {
+          return {
+            tweet: {
+              ...tweet,
+              comments: c
+            }
+          }
+        });
+      }
+    }
+    { // Subscriptions > comment deleted
+      if(
+        (
+          !a.commentDeleted.deletedTweetComment &&
+          b.commentDeleted.deletedTweetComment
+        ) ||
+        (
+          a.commentDeleted.deletedTweetComment && b.commentDeleted.deletedTweetComment &&
+          a.commentDeleted.deletedTweetComment.id !== b.commentDeleted.deletedTweetComment.id
+        )
+      ) {
+        let c = Array.from(this.state.tweet.comments);
+        c = c.filter(({ id }) => id !== b.commentDeleted.deletedTweetComment.id);
+        this.setState(({ tweet }) => {
+          return {
+            tweet: {
+              ...tweet,
+              comments: c
+            }
+          }
+        });
       }
     }
   }
@@ -421,17 +485,8 @@ class App extends Component {
         content: a
       }
     }).then(({ data: { commentTweet: comment } }) => {
-      this.setState(({ tweet }) => {
-        return {
-          tweet: {
-            ...tweet,
-            comments: [
-              comment,
-              ...tweet.comments
-            ]
-          }
-        }
-      }, clearMemory);
+      if(comment === null) return destroySession();
+      clearMemory();
     });
   }
 
@@ -694,6 +749,47 @@ export default compose(
     options: {
       variables: {
         id: window.location.pathname.split("/")[2]
+      }
+    }
+  }),
+  graphql(gql`
+    subscription($tweetID: ID!, $id: ID!, $login: String!, $password: String!) {
+      addedTweetComment(tweetID: $tweetID) {
+        id,
+        content,
+        time,
+        likesInt,
+        isLiked(id: $id, login: $login, password: $password),
+        creator {
+          image,
+          name,
+          url,
+          id
+        }
+      }
+    }
+  `, {
+    name: "commentAdded",
+    options: {
+      variables: {
+        tweetID: window.location.pathname.split("/")[2],
+        id: cookieControl.get("userdata").id,
+        login: cookieControl.get("userdata").login,
+        password: cookieControl.get("userdata").password
+      }
+    }
+  }),
+  graphql(gql`
+    subscription($tweetID: ID!) {
+      deletedTweetComment(tweetID: $tweetID) {
+        id
+      }
+    }
+  `, {
+    name: "commentDeleted",
+    options: {
+      variables: {
+        tweetID: window.location.pathname.split("/")[2]
       }
     }
   })

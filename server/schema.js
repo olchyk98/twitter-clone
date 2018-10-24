@@ -601,12 +601,12 @@ const RootMutation = new GraphQLObjectType({
             tweet = await Tweet.findById(targetID);
 
         if(user && tweet) {
-          let model = new Comment({
+          let model = await (new Comment({
             content,
             sendedToID: tweet.id,
             creatorID: user.id,
             time: new Date()
-          }).save();
+          }).save());
 
           tweet.commentsInt = (await Comment.find({
             sendedToID: tweet.id
@@ -618,6 +618,9 @@ const RootMutation = new GraphQLObjectType({
               commentsInt: tweet.commentsInt,
               creatorID: tweet.creatorID
             }
+          });
+          pubsub.publish("addedComment", {
+            comment: model
           });
 
           return model;
@@ -719,6 +722,12 @@ const RootMutation = new GraphQLObjectType({
 
           pubsub.publish("commentedTweet", {
             tweet
+          });
+          pubsub.publish("deletedComment", {
+            comment: {
+              id: comment.id,
+              sendedToID: comment.sendedToID
+            }
           });
 
           return comment.remove();
@@ -879,6 +888,28 @@ const RootSubscription = new GraphQLObjectType({
       subscribe: withFilter(
         () => pubsub.asyncIterator('commentedTweet'),
         ({ tweet: { id } }, { id: _id }) => id === _id
+      )
+    },
+    addedTweetComment: {
+      type: CommentType,
+      args: {
+        tweetID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ comment }) => comment,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('addedComment'),
+        ({ comment: { sendedToID } }, { tweetID }) => sendedToID === tweetID
+      )
+    },
+    deletedTweetComment: {
+      type: CommentType,
+      args: {
+        tweetID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ comment }) => comment,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('deletedComment'),
+        ({ comment: { sendedToID } }, { tweetID }) => sendedToID === tweetID
       )
     }
   }
