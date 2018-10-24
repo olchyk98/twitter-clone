@@ -145,6 +145,8 @@ var clearMemory = () => client.clearStore();
   }
 
   render() {
+    if(this.state.isDeleted) return null;
+
     return(
       <React.Fragment>
         <div className="rn-tweet-comments-comment">

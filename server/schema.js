@@ -464,7 +464,6 @@ const RootMutation = new GraphQLObjectType({
             }
           }
 
-
           // Receive background
           let backgroundPath = "";
           {
@@ -702,10 +701,27 @@ const RootMutation = new GraphQLObjectType({
         targetID: { type: new GraphQLNonNull(GraphQLID) }
       },
       async resolve(_, { id: _id, login, password, targetID }) {
-        let user = await User.find({ _id, login, password });
+        let user = await User.find({ _id, login, password }),
+            comment = await Comment.findById(targetID);
 
         if(user) {
-          return Comment.findByIdAndRemove(targetID);
+          // let tweet = await Tweet.findById(comment.sendedToID);
+
+          let tweet = {
+            id: comment.sendedToID,
+            commentsInt: 0,
+            creatorID: _id // XXX: Share control access
+          }
+
+          tweet.commentsInt = (await Comment.find({
+            sendedToID: comment.sendedToID
+          })).length - 1;
+
+          pubsub.publish("commentedTweet", {
+            tweet
+          });
+
+          return comment.remove();
         } else {
           return null;
         }
@@ -825,16 +841,10 @@ const RootSubscription = new GraphQLObjectType({
       resolve: ({ tweet }) => tweet,
       subscribe: withFilter(
         () => pubsub.asyncIterator('commentedTweet'),
-        async ({ tweet }, { id }) => {
-
-          // try {
-          //   tweet.creatorID.toString() === _id.toString()
-          // } catch(err) {
-          //   console.log(err);
-          // }
-
+        async ({ tweet }, { id: _id }) => {
           let a = false;
-          if(tweet.creatorID === id) {
+
+          if(tweet.creatorID === _id) {
             a = true;
           } else {
             a = await User.findOne({

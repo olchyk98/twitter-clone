@@ -103,7 +103,7 @@ class UsersUser extends Component {
 						</div>
 					</div>
 					<p className="rn-followers-users-user-content-mat">
-						Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life 
+						{ this.props.profileDescription }
 					</p>
 				</div>
 			</div>

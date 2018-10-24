@@ -333,7 +333,6 @@ class App extends Component {
             )
           )
         ) {
-        console.log(this.props.feedCommentUp.updatedFeedTweetComments);
 
         let a = Array.from(this.state.feed);
         let b = a.find(({ id }) => id === this.props.feedCommentUp.updatedFeedTweetComments.id);
