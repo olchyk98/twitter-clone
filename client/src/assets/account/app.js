@@ -639,8 +639,8 @@ class App extends Component {
           b = this.props.tweetUpdatedLikes.updatedAccountTweetLikes;
 
       if((!a && b) || (a && b && (a.id !== b.id || a.likesInt !== b.likesInt))) {
-        let c = Array.from(this.state.user.tweets),
-            d = c.find(({ id }) => id === b.id).likesInt = b.likesInt;
+        let c = Array.from(this.state.user.tweets);
+        c.find(({ id }) => id === b.id).likesInt = b.likesInt;
         this.setState(({ user }) => {
           return {
             user: {
@@ -656,8 +656,8 @@ class App extends Component {
           b = this.props.tweetUpdatedComments.updatedAccountTweetComments;
 
       if((!a && b) || (a && b && (a.id !== b.id || a.commentsInt !== b.commentsInt))) {
-        let c = Array.from(this.state.user.tweets),
-            d = c.find(({ id }) => id === b.id).commentsInt = b.commentsInt;
+        let c = Array.from(this.state.user.tweets);
+        c.find(({ id }) => id === b.id).commentsInt = b.commentsInt;
         this.setState(({ user }) => {
           return {
             user: {
