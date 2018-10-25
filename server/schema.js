@@ -483,7 +483,15 @@ const RootMutation = new GraphQLObjectType({
             profileBackground: (backgroundPath && !deleteBackground) ? (backgroundPath) : (deleteBackground) ? "" : user.profileBackground,
             image: (imagePath && !deleteImage) ? (imagePath) : (deleteImage) ? "" : user.image
           }
-          await user.updateOne(a);
+          user.updateOne(a);
+
+          // Send response to page subscribers
+          pubsub.publish("accountInfoUpdated", {
+            user: {
+              ...user._doc,
+              ...a
+            }
+          });
 
           // Send response to client
           return a;
@@ -513,17 +521,23 @@ const RootMutation = new GraphQLObjectType({
             }
           });
 
-          if(!subscribed) { // subscribe
-            await User.findOneAndUpdate({ _id: mainUser._id }, {
-              $push: { subscribedTo: targetID }
-            });
-            return true;
-          } else { // unsubscribe
-            await User.findOneAndUpdate({ _id: mainUser._id }, {
-              $pull: { subscribedTo: targetID }
-            });
-            return false;
-          }
+          // if(!subscribed) { // subscribe
+          //   await User.findOneAndUpdate({ _id: mainUser._id }, {
+          //     $push: { subscribedTo: targetID }
+          //   });
+          //   return true;
+          // } else { // unsubscribe
+          //   await User.findOneAndUpdate({ _id: mainUser._id }, {
+          //     $pull: { subscribedTo: targetID }
+          //   });
+          //   return false;
+          // }
+
+          await User.findOneAndUpdate({ _id: mainUser._id }, {
+            [ (!subscribed) ? "$push" : "$pull" ]: { subscribedTo: targetID }
+          });
+
+          return (!subscribed) ? true:false;
         } else {
           return false;
         }
@@ -712,13 +726,7 @@ const RootMutation = new GraphQLObjectType({
         if(user._id.toString() !== comment.creatorID.toString()) return null; // OWNER_VALIDATION
 
         if(user) {
-          // let tweet = await Tweet.findById(comment.sendedToID);
-
-          let tweet = {
-            id: comment.sendedToID,
-            commentsInt: 0,
-            creatorID: _id // XXX: Share control access
-          }
+          let tweet = await Tweet.findById(comment.sendedToID);
 
           tweet.commentsInt = (await Comment.find({
             sendedToID: comment.sendedToID
@@ -935,23 +943,58 @@ const RootSubscription = new GraphQLObjectType({
     updatedAccountTweetLikes: {
       type: TweetType,
       args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
         url: { type: new GraphQLNonNull(GraphQLString) }
       },
       resolve: ({ tweet }) => tweet,
       subscribe: withFilter(
         () => pubsub.asyncIterator('likedTweet'),
-        async ({ tweet: { creatorID: _id } }, { url }) => (await User.findOne({ _id })).url === url
+        async ({ tweet: { creatorID: _id } }, { id, url }) => {
+          if(url) {
+            return (await User.findOne({ _id })).url === url;
+          } else if(id) {
+            return _id === id;
+          } else {
+            return false;
+          }
+        }
       )
     },
     updatedAccountTweetComments: {
       type: TweetType,
       args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
         url: { type: new GraphQLNonNull(GraphQLString) }
       },
       resolve: ({ tweet }) => tweet,
       subscribe: withFilter(
         () => pubsub.asyncIterator('commentedTweet'),
-        async ({ tweet: { creatorID: _id } }, { url }) => (await User.findOne({ _id })).url === url
+        async ({ tweet: { creatorID: _id } }, { id, url }) => {
+          if(url) {
+            return (await User.findOne({ _id })).url === url;
+          } else if(id) {
+            return _id === id;
+          } else {
+            return false;
+          }
+        }
+      )
+    },
+    updatedAccountInformation: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        url: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      resolve: ({ user }) => user,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('accountInfoUpdated'),
+        ({ user }, { id, url }) => {
+          return (
+            user.id !== id &&
+            user.url && url && user.url === url
+          );
+        }
       )
     }
   }

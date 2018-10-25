@@ -614,20 +614,72 @@ class App extends Component {
     }
   }
 
-  componentDidUpdate() {
-    if(
-      this.state.user &&
-      ((this.props.match.params.url && this.state.user.url !== this.props.match.params.url) ||
-      (!this.props.match.params.url && this.state.user.id !== cookieControl.get("userdata").id))
-    ) { // XXX
-      this.setState(() => {
-        return {
-          user: false
-        }
-      }, this.fetchUser);
+  componentDidUpdate(pProps) {
+    { // Validate page transition
+      if(
+        this.state.user &&
+        ((this.props.match.params.url && this.state.user.url !== this.props.match.params.url) ||
+        (!this.props.match.params.url && this.state.user.id !== cookieControl.get("userdata").id))
+      ) { // XXX
+        this.setState(() => {
+          return {
+            user: false
+          }
+        }, this.fetchUser);
+      }
+
+      if(this.state.userFetched && this.state.user === null) {
+        window.location.href = links["NOT_FOUND_PAGE"];
+      }
     }
-    if(this.state.userFetched && this.state.user === null) {
-      window.location.href = links["NOT_FOUND_PAGE"];
+    { // Subscription > Likes counter was updated
+      let a = pProps.tweetUpdatedLikes.updatedAccountTweetLikes,
+          b = this.props.tweetUpdatedLikes.updatedAccountTweetLikes;
+
+      if((!a && b) || (a && b && (a.id !== b.id || a.likesInt !== b.likesInt))) {
+        let c = Array.from(this.state.user.tweets),
+            d = c.find(({ id }) => id === b.id).likesInt = b.likesInt;
+        this.setState(({ user }) => {
+          return {
+            user: {
+              ...user,
+              tweets: c
+            }
+          }
+        })
+      }
+    }
+    { // Subscription > Comments counter was updated
+      let a = pProps.tweetUpdatedComments.updatedAccountTweetComments,
+          b = this.props.tweetUpdatedComments.updatedAccountTweetComments;
+
+      if((!a && b) || (a && b && (a.id !== b.id || a.commentsInt !== b.commentsInt))) {
+        let c = Array.from(this.state.user.tweets),
+            d = c.find(({ id }) => id === b.id).commentsInt = b.commentsInt;
+        this.setState(({ user }) => {
+          return {
+            user: {
+              ...user,
+              tweets: c
+            }
+          }
+        })
+      }
+    }
+    { // Subscription > Account information was updated
+      let a = pProps.accountUpdatedInformation.updatedAccountInformation,
+          b = this.props.accountUpdatedInformation.updatedAccountInformation;
+
+      if((!a && b) || (a && b && (a.id !== b.id || a.commentsInt !== b.commentsInt))) {
+        this.setState(({ user }) => {
+          return {
+            user: {
+              ...user,
+              ...b
+            }
+          }
+        });
+      }
     }
   }
 
@@ -767,8 +819,8 @@ export default compose(
     }
   `, { name: "deleteTweet" }),
   graphql(gql`
-    subscription($url: String!) {
-      updatedAccountTweetLikes(url: $url) {
+    subscription($id: ID!, $url: String!) {
+      updatedAccountTweetLikes(id: $id, url: $url) {
         id,
         likesInt
       }
@@ -783,14 +835,36 @@ export default compose(
     }
   }),
   graphql(gql`
-    subscription($url: String!) {
-      updatedAccountTweetComments(url: $url) {
+    subscription($id: ID!, $url: String!) {
+      updatedAccountTweetComments(id: $id, url: $url) {
         id,
         commentsInt
       }
     }
   `, {
     name: "tweetUpdatedComments",
+    options: {
+      variables: {
+        url: window.location.pathname.split("/")[2] || "",
+        id: cookieControl.get("userdata").id
+      }
+    }
+  }),
+  graphql(gql`
+    subscription($id: ID!, $url: String!) {
+      updatedAccountInformation(
+        url: $url,
+        id: $id
+      ) {
+        name,
+        profileDescription,
+        location,
+        profileBackground,
+        image
+      }
+    }
+  `, {
+    name: "accountUpdatedInformation",
     options: {
       variables: {
         url: window.location.pathname.split("/")[2] || "",

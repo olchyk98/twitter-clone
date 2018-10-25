@@ -341,10 +341,10 @@ class App extends Component {
         }
       `,
       variables: {
-        id: cookieControl.get("userdata").id,
-        login: cookieControl.get("userdata").login,
-        password: cookieControl.get("userdata").password,
-        targetID: window.location.pathname.split("/")[2] // XXX
+        id: cookieControl.get("userdata").id || "",
+        login: cookieControl.get("userdata").login || "",
+        password: cookieControl.get("userdata").password || "",
+        targetID: window.location.pathname.split("/")[2] || ""
       }
     }).then(({ data: { tweet } }) => {
       this.setState(() => {
@@ -731,7 +731,7 @@ export default compose(
         tweetID: window.location.pathname.split("/")[2]
       }
     }
-  })
+  }),
   graphql(gql`
     subscription($tweetID: ID!, $id: ID!, $login: String!, $password: String!) {
       addedTweetComment(id: $id, tweetID: $tweetID) {
@@ -753,9 +753,9 @@ export default compose(
     options: {
       variables: {
         tweetID: window.location.pathname.split("/")[2],
-        id: cookieControl.get("userdata").id,
-        login: cookieControl.get("userdata").login,
-        password: cookieControl.get("userdata").password
+        id: cookieControl.get("userdata").id || "",
+        login: cookieControl.get("userdata").login || "",
+        password: cookieControl.get("userdata").password || ""
       }
     }
   }),

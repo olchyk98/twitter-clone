@@ -96,7 +96,7 @@ ReactDOM.render(
               aif={ cookieControl.get("userdata") }
               redirect={ links["REGISTER_PAGE"] }
             />
-            <Redirect to={ links["NOT_FOUND_PAGE"] } />
+            <Route path="/" component={ NFP404 } />
           </Switch>
         </div>
       </React.Fragment>
