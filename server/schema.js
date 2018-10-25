@@ -755,17 +755,32 @@ const RootMutation = new GraphQLObjectType({
         if(user && comment) {
           let str = st => st.toString();
           let isLiked = comment.likes.find(io => str(io) === str(user._id)) ? true:false;
-          if(!isLiked) {
-            await Comment.findOneAndUpdate({ _id: comment.id }, {
-              $push: { likes: user._id }
-            });
-            return true;
-          } else {
-            await Comment.findOneAndUpdate({ _id: comment.id }, {
-              $pull: { likes: user._id }
-            });
-            return false;
-          }
+
+          // if(!isLiked) {
+          //   await Comment.findOneAndUpdate({ _id: comment.id }, {
+          //     $push: { likes: user._id }
+          //   });
+          //   return true;
+          // } else {
+          //   await Comment.findOneAndUpdate({ _id: comment.id }, {
+          //     $pull: { likes: user._id }
+          //   });
+          //   return false;
+          // }
+
+          await Comment.findOneAndUpdate({ _id: comment.id }, {
+            [!isLiked ? "$push" : "$pull"]: { likes: user._id }
+          });
+
+          pubsub.publish("likedComment", {
+            comment: {
+              id: comment.id,
+              sendedToID: comment.sendedToID,
+              likesInt: (!isLiked) ? comment.likesInt + 1 : comment.likesInt
+            }
+          });
+
+          return !isLiked;
         }
       }
     }
@@ -903,6 +918,17 @@ const RootSubscription = new GraphQLObjectType({
       resolve: ({ comment }) => comment,
       subscribe: withFilter(
         () => pubsub.asyncIterator('deletedComment'),
+        ({ comment: { sendedToID } }, { tweetID }) => sendedToID === tweetID
+      )
+    },
+    likedTweetComment: {
+      type: CommentType,
+      args: {
+        tweetID: { type: GraphQLID }
+      },
+      resolve: ({ comment }) => comment,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('likedComment'),
         ({ comment: { sendedToID } }, { tweetID }) => sendedToID === tweetID
       )
     },

@@ -91,38 +91,38 @@ let clearMemory = () => client.clearStore();
         c = (!b) ? this.props.likes : this.state.likes.likes,
         d = (!b) ? !this.props.isLiked : !this.state.likes.isLiked;
 
-   this.setState(({ likes }) => {
-     return {
-       likes: {
-         ...likes,
-         fromState: true,
-         isLiked: d,
-         likes: d ? c + 1 : c - 1,
-         allowed: false
-       }
-     }
-   });
-
-  this.props.likeMutation({
-    variables: {
-      id: a.id,
-      login: a.login,
-      password: a.password,
-      targetID: this.props.id
-    }
-   }).then(({ data: { likeComment: liked } }) => {
     this.setState(({ likes }) => {
       return {
         likes: {
           ...likes,
-          isLiked: liked,
-          likes: liked ? c + 1 : c - 1,
-          allowed: true
+          fromState: true,
+          isLiked: d,
+          likes: d ? c + 1 : c - 1,
+          allowed: false
         }
       }
-    }, clearMemory);
-  });
-   }
+    });
+
+    this.props.likeMutation({
+      variables: {
+        id: a.id,
+        login: a.login,
+        password: a.password,
+        targetID: this.props.id
+      }
+     }).then(({ data: { likeComment: liked } }) => {
+      this.setState(({ likes }) => {
+        return {
+          likes: {
+            ...likes,
+            isLiked: liked,
+            likes: liked ? c + 1 : c - 1,
+            allowed: true
+          }
+        }
+      }, clearMemory);
+    });
+  }
 
   getLikesSource = () => {
    return (!this.state.likes.fromState) ? this.props : this.state.likes;
@@ -270,10 +270,7 @@ class App extends Component {
         c.commentsInt++;
         this.setState(({ tweet }) => {
           return {
-            tweet: {
-              ...tweet,
-              comments: c
-            }
+            tweet: c
           }
         });
       }
@@ -289,15 +286,12 @@ class App extends Component {
           a.commentDeleted.deletedTweetComment.id !== b.commentDeleted.deletedTweetComment.id
         )
       ) {
-        let c = Array.from(this.state.tweet);
+        let c = Object.assign({}, this.state.tweet);
         c.comments = c.comments.filter(({ id }) => id !== b.commentDeleted.deletedTweetComment.id);
         c.commentsInt--;
         this.setState(({ tweet }) => {
           return {
-            tweet: {
-              ...tweet,
-              comments: c
-            }
+            tweet: c
           }
         });
       }
@@ -723,6 +717,21 @@ export default compose(
       }
     }
   }),
+  graphql(gql`
+    subscription($tweetID: ID!) {
+      likedTweetComment(tweetID: $tweetID) {
+        id,
+        likesInt
+      }
+    }
+  `, {
+    name: "commentLiked",
+    options: {
+      variables: {
+        tweetID: window.location.pathname.split("/")[2]
+      }
+    }
+  })
   graphql(gql`
     subscription($tweetID: ID!, $id: ID!, $login: String!, $password: String!) {
       addedTweetComment(id: $id, tweetID: $tweetID) {
