@@ -17,7 +17,7 @@ class App extends Component {
 			<div className="rn-nfp">
 				<Link className="rn-nfp-content" to={ links["MAIN_PAGE"] }>
 					<h1 className="rn-nfp-content-title">Something wrong.</h1>
-					<p className="rn-nfp-content-tip">Try open something else.</p>
+					<p className="rn-nfp-content-tip">Try to open something else.</p>
 					<button className="rn-nfp-content-tip-logout" onClick={ this.destroySession }>Logout</button>
 				</Link>
 			</div>

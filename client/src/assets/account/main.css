@@ -288,7 +288,7 @@
 }
 
 .rn-account-tweets-mat-item {
-  width:100%;
+  width:calc(100% - 30px);
   padding:15px;
   border-radius:3px;
   display:flex;

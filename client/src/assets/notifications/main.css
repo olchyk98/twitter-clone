@@ -1,0 +1,91 @@
+.rn-notifications {
+	width:500px;
+	max-width:100vw;
+	display:flex;
+	margin-left:auto;
+	margin-right:auto;
+	border-radius:3px;
+	flex-direction:column;
+	margin-top:15px;
+	position:relative;
+}
+
+.rn-notifications-br {
+	width:100%;
+	height:2px;
+	opacity:.75;
+}
+
+.rn-notifications-title {
+	--paddinglr:12.5px;
+	--paddingtb:10px;
+
+	padding-top:var(--paddingtb);
+	padding-bottom:var(--paddingtb);
+	padding-left:var(--paddinglr);
+	padding-left:var(--paddinglr);
+	width:calc(100% - 20px);
+	display:flex;
+	justify-content:space-between;
+}
+
+.rn-notifications-title-mat {
+	font-weight:500;
+	font-size:1.25em;
+	font-family:"Roboto";
+	margin:0;
+	color:rgba(255, 255, 255, .95);
+}
+
+.rn-notifications-nav {
+	width:100%;
+	height:45px;
+	display:flex;
+	align-items:stretch;
+	position:relative;
+}
+
+.rn-notifications-nav-btn {
+	flex-grow:1;
+	height:100%;
+	background:transparent;
+	border:none;
+	position:relative;
+	color:white;
+	cursor:pointer;
+	font-size:.95em;
+	transition:.2s;
+	font-family:"Quicksand";
+	font-weight:500;
+}
+
+.rn-notifications-nav-btn:before {
+	content:'';
+	position:absolute;
+	top:0;
+	left:0;
+	height:100%;
+	width:100%;
+	transition:.3s;
+	opacity:0;
+}
+
+.rn-notifications-nav-btn:hover:before {
+	opacity:.1;
+}
+
+.rn-notifications-nav-btn:active:before {
+	transition:.2s;
+	opacity:.2;
+}
+
+.rn-notifications-mat {
+	--padding:10px;
+
+	display:flex;
+	flex-direction:column;
+	padding-left:var(--padding);
+	padding-right:var(--padding);
+	width:calc(100% - var(--padding) * 2);
+	position:relative;
+}

@@ -616,10 +616,12 @@ class App extends Component {
 
   componentDidUpdate(pProps) {
     { // Validate page transition
+      let a = this.props.match.params.url,
+          b = this.state.user;
       if(
-        this.state.user &&
-        ((this.props.match.params.url && this.state.user.url !== this.props.match.params.url) ||
-        (!this.props.match.params.url && this.state.user.id !== cookieControl.get("userdata").id))
+        b &&
+        ((a && b.url !== a) ||
+        (!a && b.id !== cookieControl.get("userdata").id))
       ) { // XXX
         this.setState(() => {
           return {
@@ -628,7 +630,7 @@ class App extends Component {
         }, this.fetchUser);
       }
 
-      if(this.state.userFetched && this.state.user === null) {
+      if(this.state.userFetched && b === null) {
         window.location.href = links["NOT_FOUND_PAGE"];
       }
     }

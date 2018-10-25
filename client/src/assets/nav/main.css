@@ -60,6 +60,10 @@
   opacity:.15;
 }
 
+.mj-nav-navigation-btn:active:after {
+  opacity:.25;
+}
+
 .mj-nav-navigation-btn:before {
   content:'';
   position:absolute;

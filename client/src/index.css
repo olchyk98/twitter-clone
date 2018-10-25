@@ -56,13 +56,15 @@ input {
 .rn-followers,
 .rn-nfp,
 .rn-search-mat,
-.rn-search-block {
+.rn-search-block,
+.rn-notifications {
   background:var(--uicol);
 }
 
 .rn-followers-split,
 .rn-search-mat-search,
-.rn-search-block-split {
+.rn-search-block-split,
+.rn-notifications-br {
   background:var(--bgcol);
 }
 
@@ -86,7 +88,8 @@ input {
 .rn-followers-backnav-btn,
 .rn-followers-menu-btn.active,
 .rn-followers-users-user-content-controls-btn,
-.mj-nav-navigation-btn:hover {
+.mj-nav-navigation-btn:hover,
+.rn-notifications-nav-btn.active {
   color:var(--focuscol);
 }
 
@@ -99,7 +102,9 @@ input {
 .rn-followers-users-user-content-controls-btn:before,
 .rn-followers-users-user-content-controls-btn.active,
 .mj-nav-navigation-btn:before,
-.mj-nav-navigation-btn:after {
+.mj-nav-navigation-btn:after,
+.rn-notifications-nav-btn:before,
+.rn-notifications-nav-btn:before {
   background:var(--focuscol);
 }
 
@@ -109,6 +114,7 @@ input {
   border:1px solid var(--focuscol);
 }
 
-.rn-followers-menu-btn.active {
-  border-bottom:var(--borderth) solid var(--focuscol);
+.rn-followers-menu-btn.active,
+.rn-notifications-nav-btn.active {
+  border-bottom:2px solid var(--focuscol);
 }
