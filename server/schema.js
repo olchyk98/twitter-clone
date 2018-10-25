@@ -883,26 +883,16 @@ const RootSubscription = new GraphQLObjectType({
         ({ tweet: { id } }, { id: _id }) => id === _id
       )
     },
-    updatedTweetComments: {
-      type: TweetType,
-      args: {
-        id: { type: new GraphQLNonNull(GraphQLID) }
-      },
-      resolve: ({ tweet }) => tweet,
-      subscribe: withFilter(
-        () => pubsub.asyncIterator('commentedTweet'),
-        ({ tweet: { id } }, { id: _id }) => id === _id
-      )
-    },
     addedTweetComment: {
       type: CommentType,
       args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
         tweetID: { type: new GraphQLNonNull(GraphQLID) }
       },
       resolve: ({ comment }) => comment,
       subscribe: withFilter(
         () => pubsub.asyncIterator('addedComment'),
-        ({ comment: { sendedToID } }, { tweetID }) => sendedToID === tweetID
+        ({ comment: { creatorID, sendedToID } }, { id, tweetID }) => (sendedToID === tweetID && creatorID !== id)
       )
     },
     deletedTweetComment: {
@@ -914,6 +904,28 @@ const RootSubscription = new GraphQLObjectType({
       subscribe: withFilter(
         () => pubsub.asyncIterator('deletedComment'),
         ({ comment: { sendedToID } }, { tweetID }) => sendedToID === tweetID
+      )
+    },
+    updatedAccountTweetLikes: {
+      type: TweetType,
+      args: {
+        url: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      resolve: ({ tweet }) => tweet,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('likedTweet'),
+        async ({ tweet: { creatorID: _id } }, { url }) => (await User.findOne({ _id })).url === url
+      )
+    },
+    updatedAccountTweetComments: {
+      type: TweetType,
+      args: {
+        url: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      resolve: ({ tweet }) => tweet,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('commentedTweet'),
+        async ({ tweet: { creatorID: _id } }, { url }) => (await User.findOne({ _id })).url === url
       )
     }
   }

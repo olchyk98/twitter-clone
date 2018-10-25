@@ -254,30 +254,7 @@ class App extends Component {
         });
       }
     }
-
-    { // Subscriptions > commentsIntUpdated
-      if(
-        (
-          !a.commentsUpdated.updatedTweetComments &&
-          b.commentsUpdated.updatedTweetComments
-        ) ||
-        (
-          a.commentsUpdated.updatedTweetComments && b.commentsUpdated.updatedTweetComments &&
-          a.commentsUpdated.updatedTweetComments.commentsInt !== b.commentsUpdated.updatedTweetComments.commentsInt
-        )
-      ) {
-        let c = Object.assign({}, this.state.tweet);
-        c.commentsInt = b.commentsUpdated.updatedTweetComments.commentsInt;
-        this.setState(() => {
-          return {
-            tweet: c
-          }
-        });
-      }
-    }
-    // addedTweetComment
-// commentAdded
-    { // Subscriptions > comment deleted
+    { // Subscriptions > comment added
       if(
         (
           !a.commentAdded.addedTweetComment &&
@@ -288,9 +265,9 @@ class App extends Component {
           a.commentAdded.addedTweetComment.id !== b.commentAdded.addedTweetComment.id
         )
       ) {
-        let c = Array.from(this.state.tweet.comments);
-        c.unshift(b.commentAdded.addedTweetComment);
-        alert();
+        let c = Object.assign({}, this.state.tweet);
+        c.comments.unshift(b.commentAdded.addedTweetComment);
+        c.commentsInt++;
         this.setState(({ tweet }) => {
           return {
             tweet: {
@@ -312,8 +289,9 @@ class App extends Component {
           a.commentDeleted.deletedTweetComment.id !== b.commentDeleted.deletedTweetComment.id
         )
       ) {
-        let c = Array.from(this.state.tweet.comments);
-        c = c.filter(({ id }) => id !== b.commentDeleted.deletedTweetComment.id);
+        let c = Array.from(this.state.tweet);
+        c.comments = c.comments.filter(({ id }) => id !== b.commentDeleted.deletedTweetComment.id);
+        c.commentsInt--;
         this.setState(({ tweet }) => {
           return {
             tweet: {
@@ -486,7 +464,17 @@ class App extends Component {
       }
     }).then(({ data: { commentTweet: comment } }) => {
       if(comment === null) return destroySession();
-      clearMemory();
+
+      let a = Array.from(this.state.tweet.comments);
+      a.unshift(comment);
+      this.setState(({ tweet }) => {
+        return {
+          tweet: {
+            ...tweet,
+            comments: a
+          }
+        }
+      }, clearMemory);
     });
   }
 
@@ -736,25 +724,8 @@ export default compose(
     }
   }),
   graphql(gql`
-    subscription($id: ID!) {
-      updatedTweetComments(
-        id: $id
-      ) {
-        id,
-        commentsInt
-      }
-    }
-  `, {
-    name: "commentsUpdated",
-    options: {
-      variables: {
-        id: window.location.pathname.split("/")[2]
-      }
-    }
-  }),
-  graphql(gql`
     subscription($tweetID: ID!, $id: ID!, $login: String!, $password: String!) {
-      addedTweetComment(tweetID: $tweetID) {
+      addedTweetComment(id: $id, tweetID: $tweetID) {
         id,
         content,
         time,

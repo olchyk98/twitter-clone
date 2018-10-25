@@ -766,5 +766,36 @@ export default compose(
       }
     }
   `, { name: "deleteTweet" }),
-  // graphql
+  graphql(gql`
+    subscription($url: String!) {
+      updatedAccountTweetLikes(url: $url) {
+        id,
+        likesInt
+      }
+    }
+  `, {
+    name: "tweetUpdatedLikes",
+    options: {
+      variables: {
+        url: window.location.pathname.split("/")[2] || "",
+        id: cookieControl.get("userdata").id
+      }
+    }
+  }),
+  graphql(gql`
+    subscription($url: String!) {
+      updatedAccountTweetComments(url: $url) {
+        id,
+        commentsInt
+      }
+    }
+  `, {
+    name: "tweetUpdatedComments",
+    options: {
+      variables: {
+        url: window.location.pathname.split("/")[2] || "",
+        id: cookieControl.get("userdata").id
+      }
+    }
+  })
 )(App);
