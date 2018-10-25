@@ -565,8 +565,10 @@ const RootMutation = new GraphQLObjectType({
         targetID: { type: new GraphQLNonNull(GraphQLID) }
       },
       async resolve(_, { id: _id, login, password, targetID }) {
-        let user = await User.find({ _id, login, password });
+        let user = await User.findOne({ _id, login, password });
         let tweet = await Tweet.findById(targetID);
+
+        if(user._id.toString() !== tweet.creatorID.toString()) return null; // OWNER_VALIDATION
 
         if(user && tweet) {
           await Comment.remove({
@@ -704,8 +706,10 @@ const RootMutation = new GraphQLObjectType({
         targetID: { type: new GraphQLNonNull(GraphQLID) }
       },
       async resolve(_, { id: _id, login, password, targetID }) {
-        let user = await User.find({ _id, login, password }),
+        let user = await User.findOne({ _id, login, password }),
             comment = await Comment.findById(targetID);
+
+        if(user._id.toString() !== comment.creatorID.toString()) return null; // OWNER_VALIDATION
 
         if(user) {
           // let tweet = await Tweet.findById(comment.sendedToID);

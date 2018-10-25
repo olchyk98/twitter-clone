@@ -281,13 +281,17 @@ class TweetsTweet extends Component {
               <i className={ `${ (!this.getLikeSource().isLiked) ? "far" : "fas" } fa-heart` } />
               <span>{ this.getLikeSource().likes }</span>
             </button>
-            <button
-              className={ `rn-account-tweets-mat-item-content-mat-controls-btn delete${ (!this.state.deleteInFocus) ? "" : " active" }` }
-              onClick={ () => this.setState({ deleteInFocus: true }) }
-              onBlur={ () => this.setState({ deleteInFocus: false }) }
-              onDoubleClick={ this.deleteTweet }>
-              <i className="fas fa-times" />
-            </button>
+            {
+              (this.props.creator.id !== cookieControl.get("userdata").id) ? null : (
+                <button
+                  className={ `rn-account-tweets-mat-item-content-mat-controls-btn delete${ (!this.state.deleteInFocus) ? "" : " active" }` }
+                  onClick={ () => this.setState({ deleteInFocus: true }) }
+                  onBlur={ () => this.setState({ deleteInFocus: false }) }
+                  onDoubleClick={ this.deleteTweet }>
+                  <i className="fas fa-times" />
+                </button>
+              )
+            }
           </div>
         </div>
       </div>
