@@ -16,7 +16,7 @@ import LoadingIcon from '../__forall__/vertificated/app';
 const clearCache = () => client.clearStore();
 function destroySession() {
 	cookieControl.delete("userdata");
-  return window.location.href = links["REGISTER_PAGE"];
+  	return window.location.href = links["REGISTER_PAGE"];
 }
 
 class UsersUser extends Component {

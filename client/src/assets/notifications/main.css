@@ -1,6 +1,7 @@
 .rn-notifications {
 	width:575px;
 	max-width:100vw;
+	overflow:hidden;
 	display:flex;
 	margin-left:auto;
 	margin-right:auto;
@@ -212,4 +213,15 @@
 	margin-top:10px;
 	margin-bottom:10px;
 	text-align:center;
+}
+
+@media only screen and (max-width:520px) {
+	.rn-notifications-mat-notification-sizer {
+		display:none;
+		width:0;
+	}
+
+	.rn-notifications-mat-notification-content {
+		width:100%;
+	}
 }

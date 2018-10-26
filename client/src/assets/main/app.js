@@ -14,7 +14,6 @@ import VertificatedStar from '../__forall__/vertificated/app';
 import LoadingIcons from '../__forall__/loader/app';
 
 function destroySession() {
-  return;
   cookieControl.delete("userdata");
   return window.location.reload();
 }

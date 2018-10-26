@@ -13,6 +13,8 @@ import links from '../../links';
 
 import LoadingIcon from '../__forall__/loader/app';
 
+let clearCache = () => client.clearStore();
+
 class Br extends Component {
 	render() {
 		return(
@@ -168,7 +170,7 @@ class Notifications extends Component {
 	render() {
 		if(this.props.isLoading) return <LoadingIcon />;
 		if(this.props.data && !this.props.data.length) return(
-			<span className="rn-notifications-inf">Nothing new here :)</span>
+			<span className="rn-notifications-inf">Voiddd.....</span>
 		);
 
 		return(
@@ -266,7 +268,7 @@ class App extends Component {
 					return {
 						notifications: []
 					}
-				});
+				}, clearCache);
 			} else {
 				this.props.history.push(links["NOT_FOUND_PAGE"]);
 			}
