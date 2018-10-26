@@ -238,18 +238,11 @@ class App extends Component {
     // TODO: Debug if statement
 
     { // Subscriptions > likesIntUpdated
-      if(
-        (
-          !a.likesUpdated.updatedTweetLikes &&
-          b.likesUpdated.updatedTweetLikes
-        ) ||
-        (
-          a.likesUpdated.updatedTweetLikes && b.likesUpdated.updatedTweetLikes &&
-          a.likesUpdated.updatedTweetLikes.likesInt !== b.likesUpdated.updatedTweetLikes.likesInt
-        )
-      ) {
+      let z = a.likesUpdated.updatedTweetLikes,
+          x = b.likesUpdated.updatedTweetLikes;
+      if((!z && x) || (z && x && z.likesInt !== x.likesInt)) {
         let c = Object.assign({}, this.state.tweet);
-        c.likesInt = b.likesUpdated.updatedTweetLikes.likesInt;
+        c.likesInt = x.likesInt;
         this.setState(() => {
           return {
             tweet: c
@@ -258,18 +251,11 @@ class App extends Component {
       }
     }
     { // Subscriptions > comment added
-      if(
-        (
-          !a.commentAdded.addedTweetComment &&
-          b.commentAdded.addedTweetComment
-        ) ||
-        (
-          a.commentAdded.addedTweetComment && b.commentAdded.addedTweetComment &&
-          a.commentAdded.addedTweetComment.id !== b.commentAdded.addedTweetComment.id
-        )
-      ) {
+      let z = a.commentAdded.addedTweetComment,
+          x = b.commentAdded.addedTweetComment
+      if((!z && x) || (z && x && z.id !== x.id)) {
         let c = Object.assign({}, this.state.tweet);
-        c.comments.unshift(b.commentAdded.addedTweetComment);
+        c.comments.unshift(x);
         c.commentsInt++;
         this.setState(({ tweet }) => {
           return {
@@ -279,19 +265,25 @@ class App extends Component {
       }
     }
     { // Subscriptions > comment deleted
-      if(
-        (
-          !a.commentDeleted.deletedTweetComment &&
-          b.commentDeleted.deletedTweetComment
-        ) ||
-        (
-          a.commentDeleted.deletedTweetComment && b.commentDeleted.deletedTweetComment &&
-          a.commentDeleted.deletedTweetComment.id !== b.commentDeleted.deletedTweetComment.id
-        )
-      ) {
+      let z = a.commentDeleted.deletedTweetComment,
+          x = b.commentDeleted.deletedTweetComment;
+      if((!z && x) || (z && x && z.id !== x.id)) {
         let c = Object.assign({}, this.state.tweet);
-        c.comments = c.comments.filter(({ id }) => id !== b.commentDeleted.deletedTweetComment.id);
+        c.comments = c.comments.filter(({ id }) => id !== x.id);
         c.commentsInt--;
+        this.setState(({ tweet }) => {
+          return {
+            tweet: c
+          }
+        });
+      }
+    }
+    { // Subscriptions > comment liked
+      let z = a.commentLiked.likedTweetComment,
+          x = b.commentLiked.likedTweetComment;
+      if((!z && x) || (z && x && (z.id !== x.id || z.likesInt !== x.likesInt))) {
+        let c = Object.assign({}, this.state.tweet);
+        c.comments.find(({ id }) => id === x.id).likesInt = x.likesInt;
         this.setState(({ tweet }) => {
           return {
             tweet: c

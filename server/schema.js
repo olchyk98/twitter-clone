@@ -818,7 +818,7 @@ const RootMutation = new GraphQLObjectType({
               contributorID: _id,
               eventType: "LIKED_TWEET_EVENT",
               redirectID: tweet._id,
-              shortContent: "",
+              shortContent: shortCon(tweet.content),
               time: new Date()
             })).save();
 
@@ -929,7 +929,7 @@ const RootMutation = new GraphQLObjectType({
               contributorID: _id,
               eventType: "LIKED_COMMENT_EVENT",
               redirectID: comment.sendedToID,
-              shortContent: "",
+              shortContent: shortCon(comment.content),
               time: new Date()
             })).save();
 
@@ -968,7 +968,7 @@ const RootMutation = new GraphQLObjectType({
       },
       async resolve(_, { id: _id, login, password }) {
         // let user = await User.findOne({ _id, login, password });
-        
+
         // if(user) {
         //   await user.updateOne({
         //     notifications: []

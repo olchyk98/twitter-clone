@@ -50,7 +50,7 @@ class MainNewsNew extends Component {
 
       this.props.onNewTweet(Object.assign({}, addTweet));
       clearMemory();
-    }).catch(console.log); // destroySession
+    }).catch(destroySession);
   }
 
   render() {

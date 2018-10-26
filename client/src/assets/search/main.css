@@ -23,7 +23,7 @@
 	display:flex;
 	justify-content:center;
 	transform:translateY(calc(-100% - 10px));
-	animation:rn-search-initam 1s .5s ease;
+	animation:rn-search-initam .2s .5s ease;
 	animation-fill-mode:forwards;
 }
 
