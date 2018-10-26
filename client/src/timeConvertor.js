@@ -9,7 +9,7 @@ function convertTime(time, addon = "") { // clf
       d = Math.round;
 
   if(c(60)) {
-    return d((a - time)) + "s";
+    return d((a - time)) + "s" + addon;
   } else if(c(3600)) {
     return d((a - time) / 60) + "m" + addon;
   } else if(c(86400)) {

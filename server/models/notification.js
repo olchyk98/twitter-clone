@@ -5,7 +5,8 @@ const NotificationSchema = new Schema({
 	contributorID: String,
 	eventType: String,
 	redirectID: String,
-	time: Date
+	time: Date,
+	shortContent: String
 });
 
 module.exports = mongoose.model("Notification", NotificationSchema);

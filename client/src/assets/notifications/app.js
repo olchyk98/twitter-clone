@@ -13,8 +13,6 @@ import links from '../../links';
 
 import LoadingIcon from '../__forall__/loader/app';
 
-const image = "https://pbs.twimg.com/profile_images/1040133177279434753/_0WCrXJp_normal.jpg";
-
 class Br extends Component {
 	render() {
 		return(
@@ -148,6 +146,13 @@ class Notification extends Component {
 						<div className="rn-notifications-mat-notification-content-mat">
 							{ this.generateContent() }
 						</div>
+						{
+							(this.props.content) ? (
+								<p className="rn-notifications-mat-notification-content-twpreview">
+									{ this.props.content }
+								</p>
+							) : null
+						}
 						<p className="rn-notifications-mat-notification-content-twpreview">
 							{ convertTime(this.props.time, " ago") }
 						</p>
@@ -162,17 +167,21 @@ class Notification extends Component {
 class Notifications extends Component {
 	render() {
 		if(this.props.isLoading) return <LoadingIcon />;
+		if(this.props.data && !this.props.data.length) return(
+			<span className="rn-notifications-inf">Nothing new here :)</span>
+		);
 
 		return(
 			<div className="rn-notifications-mat">
 			{
-				this.props.data.map(({ id, contributor, eventType, redirectID, time }) => (
+				this.props.data.map(({ id, contributor, eventType, shortContent, redirectID, time }) => (
 					<Notification
 						key={ id }
 						id={ id }
 						contributor={ contributor }
 						eventType={ eventType }
 						redirectID={ redirectID }
+						content={ shortContent }
 						time={ time }
 					/>
 				))
@@ -196,6 +205,22 @@ class App extends Component {
 		this.fetchAPI();
 	}
 
+	componentDidUpdate(a) {
+		let b = this.props;
+
+		{ // Subscription > New notification
+			let c = a.addedNotification.receivedNotification,
+					d = b.addedNotification.receivedNotification;
+			if((!c && d) || (c && d && c.id !== d.id )) {
+				let a = Array.from(this.state.notifications);
+				a.unshift(d);
+				this.setState(() => ({
+					notifications: a
+				}));
+			}
+		}
+	}
+
 	fetchAPI = () => {
 		let variables = cookieControl.get("userdata");
 
@@ -209,6 +234,7 @@ class App extends Component {
 							eventType,
 							redirectID,
 							time,
+							shortContent,
 							contributor {
 								image,
 								name,
@@ -230,11 +256,33 @@ class App extends Component {
 		});
 	}
 
+	destroyNotifications = () => {
+		let variables = cookieControl.get("userdata");
+		this.props.destroyNotifications(
+			{ variables }
+		).then(({ data: { destroyNotifications } }) => {
+			if(destroyNotifications) {
+				this.setState(() => {
+					return {
+						notifications: []
+					}
+				});
+			} else {
+				this.props.history.push(links["NOT_FOUND_PAGE"]);
+			}
+		});
+	}
+
 	render() {
 		return(
 			<div className="rn-notifications">
 				<div className="rn-notifications-title">
 					<h1 className="rn-notifications-title-mat">Notifications</h1>
+					<button
+						className="rn-notifications-title-dsthis"
+						onClick={ this.destroyNotifications }>
+						<i className="fas fa-trash" />
+					</button>
 				</div>
 				<Br />
 				<Nav
@@ -250,4 +298,33 @@ class App extends Component {
 	}
 }
 
-export default App;
+export default compose(
+	graphql(gql`
+		mutation($id: ID!, $login: String!, $password: String!) {
+			destroyNotifications(id: $id, login: $login, password: $password)
+		}
+	`, { name: "destroyNotifications" }),
+	graphql(gql`
+		subscription($id: ID!) {
+			receivedNotification(id: $id) {
+		    id,
+				eventType,
+				redirectID,
+				time,
+				shortContent,
+				contributor {
+					image,
+					name,
+					url
+				}
+		  }
+		}
+	`, {
+		name: "addedNotification",
+		options: {
+			variables: {
+				id: cookieControl.get("userdata").id
+			}
+		}
+	})
+)(App);

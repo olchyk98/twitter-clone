@@ -31,6 +31,8 @@ function gen() {
   return a;
 }
 
+let shortCon = text => (text.length > 125) ? text.substr(0, 125) + "..." : text;
+
 const UserType = new GraphQLObjectType({
   name: "User",
   fields: () => ({
@@ -135,14 +137,15 @@ const NotificationType = new GraphQLObjectType({
     contributorID: { type: GraphQLID },
     eventType: { type: GraphQLString },
     /*
-      CREATED_TWEET_EVENT,
-      SUBSCRIBED_USER_EVENT,
-      LIKED_TWEET_EVENT,
-      COMMENTED_TWEET_EVENT,
-      LIKED_COMMENT_EVENT
+      CREATED_TWEET_EVENT // subscribers,
+      SUBSCRIBED_USER_EVENT // tweet's owner, +
+      LIKED_TWEET_EVENT // tweet's owner, +
+      COMMENTED_TWEET_EVENT // comments's owner,
+      LIKED_COMMENT_EVENT // comment's owner +
     */
     redirectID: { type: GraphQLID },
     time: { type: GraphQLString },
+    shortContent: { type: GraphQLString },
     contributor: {
       type: UserType,
       resolve: ({ contributorID: id }) => User.findById(id)
@@ -580,8 +583,14 @@ const RootMutation = new GraphQLObjectType({
               contributorID: _id,
               eventType: "SUBSCRIBED_USER_EVENT",
               redirectID: _id,
+              shortContent: "",
               time: new Date()
             })).save();
+
+            pubsub.publish("receivedNotification", {
+              notification,
+              target: targetID
+            });
 
             await User.findByIdAndUpdate(targetID,
               {
@@ -631,8 +640,14 @@ const RootMutation = new GraphQLObjectType({
             contributorID: _id,
             eventType: "CREATED_TWEET_EVENT",
             redirectID: tweet._id,
+            shortContent: shortCon(content),
             time: new Date()
           })).save();
+
+          pubsub.publish("receivedNotification", {
+            notification,
+            target: _id
+          });
 
           await User.updateMany(
             {
@@ -713,8 +728,14 @@ const RootMutation = new GraphQLObjectType({
             contributorID: _id,
             eventType: "COMMENTED_TWEET_EVENT",
             redirectID: tweet._id,
+            shortContent: shortCon(content),
             time: new Date()
           })).save();
+
+          pubsub.publish("receivedNotification", {
+            notification,
+            target: tweet.creatorID
+          });
 
           await User.findByIdAndUpdate(tweet.creatorID,
             {
@@ -797,8 +818,14 @@ const RootMutation = new GraphQLObjectType({
               contributorID: _id,
               eventType: "LIKED_TWEET_EVENT",
               redirectID: tweet._id,
+              shortContent: "",
               time: new Date()
             })).save();
+
+            pubsub.publish("receivedNotification", {
+              notification,
+              target: tweet.creatorID
+            });
 
             await User.findByIdAndUpdate(tweet.creatorID,
               {
@@ -902,8 +929,14 @@ const RootMutation = new GraphQLObjectType({
               contributorID: _id,
               eventType: "LIKED_COMMENT_EVENT",
               redirectID: comment.sendedToID,
+              shortContent: "",
               time: new Date()
             })).save();
+
+            pubsub.publish("receivedNotification", {
+              notification,
+              target: comment.creatorID
+            });
 
             await User.findByIdAndUpdate(comment.creatorID,
               {
@@ -924,6 +957,40 @@ const RootMutation = new GraphQLObjectType({
 
           return !isLiked;
         }
+      }
+    },
+    destroyNotifications: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      async resolve(_, { id: _id, login, password }) {
+        // let user = await User.findOne({ _id, login, password });
+        
+        // if(user) {
+        //   await user.updateOne({
+        //     notifications: []
+        //   })
+
+        //   return true;
+        // } else {
+        //   return false;
+        // }
+
+        // let user = await User.findOne({ _id, login, password });
+
+        let a = (await User.findOneAndUpdate(
+          {
+            _id, login, password
+          },
+          {
+            notifications: []
+          }
+        )) ? true:false;
+
+        return a;
       }
     }
   }
@@ -1139,9 +1206,26 @@ const RootSubscription = new GraphQLObjectType({
       resolve: ({ notification }) => notification,
       subscribe: withFilter(
         () => pubsub.asyncIterator('receivedNotification'),
-        ({ notification, id }) => {
-          console.log(notification, id);
-          return true;
+        async ({ notification: { eventType }, target: owner }, { id: _id }) => {
+          let a = false;
+          switch(eventType) {
+            case 'CREATED_TWEET_EVENT':
+              a = (await User.findOne({
+                  _id,
+                  subscribedTo: {
+                    $in: [owner]
+                  }
+              })) ? true:false;
+            break;
+            case 'SUBSCRIBED_USER_EVENT':
+            case 'LIKED_TWEET_EVENT':
+            case 'COMMENTED_TWEET_EVENT':
+            case 'LIKED_COMMENT_EVENT':
+              a = owner.toString() === _id.toString();
+            break;
+            default:break;
+          }
+          return a;
         }
       )
     }
