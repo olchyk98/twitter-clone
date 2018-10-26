@@ -47,9 +47,17 @@ const UserType = new GraphQLObjectType({
     isVertificated: { type: GraphQLBoolean },
     notifications: {
       type: new GraphQLList(NotificationType),
-      resolve: ({ notifications }) => Notification.find({
-        _id: [notifications]
-      })
+      resolve: ({ notifications }) => {
+        let a = [];
+        notifications.forEach((_, io, ia) => {
+          a[io] = ia[io].toString();
+        });
+        return Notification.find({
+          _id: {
+            $in: a
+          }
+        }).sort({ time: -1 })
+      }
     },
     notificationsInt: {
       type: GraphQLInt,
@@ -125,8 +133,16 @@ const NotificationType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLID },
     contributorID: { type: GraphQLID },
-    eventType: { type: GraphQLString }, // CREATED_TWEET_EVENT, SUBSCRIBED_USER_EVENT
+    eventType: { type: GraphQLString },
+    /*
+      CREATED_TWEET_EVENT,
+      SUBSCRIBED_USER_EVENT,
+      LIKED_TWEET_EVENT,
+      COMMENTED_TWEET_EVENT,
+      LIKED_COMMENT_EVENT
+    */
     redirectID: { type: GraphQLID },
+    time: { type: GraphQLString },
     contributor: {
       type: UserType,
       resolve: ({ contributorID: id }) => User.findById(id)
@@ -273,16 +289,17 @@ const RootQuery = new GraphQLObjectType({
       async resolve(_, { id: _id, login, password, targetID, targetUrl }) {
         let a = await User.findOne({ _id, login, password }); // requester
 
-        // if(targetUrl) {
-        //   b = await User.findOne({ url: targetUrl }); // result
-        // } else if(targetID || _id) {
-        //   b = await User.findById(targetID || _id); // result
-        // } else {
-        //   return null;
-        // }
-        let b = await User[targetUrl ? "findOne" : "findById"](targetUrl ? { url: targetUrl } : (targetID || _id));
+        if(targetUrl) {
+          b = await User.findOne({ url: targetUrl }); // result
+          if(!b) b = await User.findById(targetUrl); // try to use url as id
+        } else if(targetID || _id) {
+          b = await User.findById(targetID || _id); // result
+        } else {
+          return null;
+        }
+        // let b = await User[targetUrl ? "findOne" : "findById"](targetUrl ? { url: targetUrl } : (targetID || _id));
 
-        return (a && b) ? b : null
+        return (a && b) ? b : null;
       }
     },
     login: {
@@ -508,7 +525,7 @@ const RootMutation = new GraphQLObjectType({
             profileBackground: (backgroundPath && !deleteBackground) ? (backgroundPath) : (deleteBackground) ? "" : user.profileBackground,
             image: (imagePath && !deleteImage) ? (imagePath) : (deleteImage) ? "" : user.image
           }
-          user.updateOne(a);
+          await user.updateOne(a);
 
           // Send response to page subscribers
           pubsub.publish("accountInfoUpdated", {
@@ -562,7 +579,8 @@ const RootMutation = new GraphQLObjectType({
             let notification = await (new Notification({
               contributorID: _id,
               eventType: "SUBSCRIBED_USER_EVENT",
-              redirectID: _id
+              redirectID: _id,
+              time: new Date()
             })).save();
 
             await User.findByIdAndUpdate(targetID,
@@ -612,7 +630,8 @@ const RootMutation = new GraphQLObjectType({
           let notification = await (new Notification({
             contributorID: _id,
             eventType: "CREATED_TWEET_EVENT",
-            redirectID: tweet._id
+            redirectID: tweet._id,
+            time: new Date()
           })).save();
 
           await User.updateMany(
@@ -690,6 +709,21 @@ const RootMutation = new GraphQLObjectType({
             time: new Date()
           }).save());
 
+          let notification = await (new Notification({
+            contributorID: _id,
+            eventType: "COMMENTED_TWEET_EVENT",
+            redirectID: tweet._id,
+            time: new Date()
+          })).save();
+
+          await User.findByIdAndUpdate(tweet.creatorID,
+            {
+              $push: {
+                notifications: notification._id
+              }
+            }
+          );
+
           tweet.commentsInt = (await Comment.find({
             sendedToID: tweet.id
           })).length;
@@ -757,6 +791,23 @@ const RootMutation = new GraphQLObjectType({
 
           //   return false;
           // }
+
+          if(!isLiked) {
+            let notification = await (new Notification({
+              contributorID: _id,
+              eventType: "LIKED_TWEET_EVENT",
+              redirectID: tweet._id,
+              time: new Date()
+            })).save();
+
+            await User.findByIdAndUpdate(tweet.creatorID,
+              {
+                $push: {
+                  notifications: notification._id
+                }
+              }
+            );
+          }
 
           await tweet.updateOne({
             [ !isLiked ? "$push" : "$pull" ]: { likes: user._id }
@@ -845,6 +896,23 @@ const RootMutation = new GraphQLObjectType({
           await Comment.findOneAndUpdate({ _id: comment.id }, {
             [!isLiked ? "$push" : "$pull"]: { likes: user._id }
           });
+
+          if(!isLiked) {
+            let notification = await (new Notification({
+              contributorID: _id,
+              eventType: "LIKED_COMMENT_EVENT",
+              redirectID: comment.sendedToID,
+              time: new Date()
+            })).save();
+
+            await User.findByIdAndUpdate(comment.creatorID,
+              {
+                $push: {
+                  notifications: notification._id
+                }
+              }
+            );
+          }
 
           pubsub.publish("likedComment", {
             comment: {
@@ -1060,6 +1128,20 @@ const RootSubscription = new GraphQLObjectType({
             user.id !== id &&
             user.url && url && user.url === url
           );
+        }
+      )
+    },
+    receivedNotification: {
+      type: NotificationType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ notification }) => notification,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('receivedNotification'),
+        ({ notification, id }) => {
+          console.log(notification, id);
+          return true;
         }
       )
     }

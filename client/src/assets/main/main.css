@@ -289,32 +289,6 @@
   font-size:.95em;
 }
 
-.loading-icon {
-  height:30px;
-  width:30px;
-  border:7.5px solid transparent;
-  border-top-color:rgb(110, 95, 226);
-  display:none;
-  border-radius:50%;
-  margin-left:auto;
-  margin-right:auto;
-  margin-top:20px;
-}
-
-.loading-icon.visible {
-  display:block;
-  animation:loading-icon-am 1s infinite linear;
-}
-
-@keyframes loading-icon-am {
-  from {
-    transform:rotate(0deg);
-  }
-  to {
-    transform:rotate(360deg)
-  }
-}
-
 @media only screen and (max-width:350px) {
   .rn-main-news-mat-item-mg {
     width:35px;

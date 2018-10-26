@@ -11,6 +11,7 @@ import { apiPath } from '../../apiPath';
 import { convertTime } from '../../timeConvertor';
 
 import VertificatedStar from '../__forall__/vertificated/app';
+import LoadingIcons from '../__forall__/loader/app';
 
 function destroySession() {
   return;
@@ -221,7 +222,11 @@ class MainNews extends Component {
           tweetMutation={ this.props.tweetMutation }
           onNewTweet={ this.props.addCTweet }
         />
-        <div className={ `loading-icon${ (this.props.loading) ? " visible" : "" }` }></div>
+        {
+          (!this.props.loading) ? null : (
+            <LoadingIcons />
+          )
+        }
         <div className={ `rn-main-news-mat${ (this.props.loading) ? " hidden" : "" }` }>
           {
             this.props.data.map(({ id, time, isLiked, customAdded, content, creator, likesInt: likes, commentsInt: comments }) => {

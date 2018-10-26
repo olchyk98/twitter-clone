@@ -336,27 +336,6 @@
 	color:red;
 }
 
-.rn-search-loading {
-	height:35px;
-	width:35px;
-	border:4px solid rgba(0, 0, 0, .2);
-	border-top-color:rebeccapurple;
-	border-radius:50%;
-	display:block;
-	margin-left:auto;
-	margin-right:auto;
-	animation:rn-search-loading-am 1s linear infinite;
-}
-
-@keyframes rn-search-loading-am {
-	from {
-		transform:rotate(0deg);
-	}
-	to {
-		transform:rotate(360deg);
-	}
-}
-
 .rn-search-err {
 	font-weight:200;
 	font-family:"Quicksand";

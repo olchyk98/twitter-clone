@@ -11,6 +11,7 @@ import links from '../../links';
 import { apiPath } from '../../apiPath';
 
 import VertificatedStar from '../__forall__/vertificated/app';
+import LoadingIcon from '../__forall__/loader/app';
 
 function destroySession() {
   cookieControl.delete("userdata");
@@ -230,6 +231,8 @@ class App extends Component {
 
   componentDidUpdate(a) {
     let b = this.props;
+
+    console.log(b);
 
     // FIXME: Subscription data (data from the subscription) was received, but processed in wrong way.
     // TODO: Debug if statement
@@ -529,7 +532,7 @@ class App extends Component {
     if(this.state.tweet === false) {
       return(
         <div className="rn-tweet">
-          <div className="rn-tweet-loadingic"></div>
+          <LoadingIcon />
         </div>
       );
     }

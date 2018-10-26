@@ -1,4 +1,4 @@
-function convertTime(time) { // clf
+function convertTime(time, addon = "") { // clf
   if(!time) return "";
 
   time = parseInt(time);
@@ -11,13 +11,13 @@ function convertTime(time) { // clf
   if(c(60)) {
     return d((a - time)) + "s";
   } else if(c(3600)) {
-    return d((a - time) / 60) + "m";
+    return d((a - time) / 60) + "m" + addon;
   } else if(c(86400)) {
-    return d((a - time) / 3600) + "h";
+    return d((a - time) / 3600) + "h" + addon;
   } else if(c(604800)) {
-    return d((a - time) / 86400) + "d";
+    return d((a - time) / 86400) + "d" + addon;
   } else if(c(2419200)) {
-    return d((a - time) / 604800) + "w";
+    return d((a - time) / 604800) + "w" + addon;
   } else if(time < 0) {
     return "";
   } else {

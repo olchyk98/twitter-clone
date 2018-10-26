@@ -3,9 +3,15 @@ import './main.css';
 
 import { gql } from 'apollo-boost';
 import { graphql, compose } from 'react-apollo';
+import { Link } from 'react-router-dom';
 
 import client from '../../apollo';
 import cookieControl from '../../cookieControl';
+import { apiPath } from '../../apiPath';
+import { convertTime } from '../../timeConvertor';
+import links from '../../links';
+
+import LoadingIcon from '../__forall__/loader/app';
 
 const image = "https://pbs.twimg.com/profile_images/1040133177279434753/_0WCrXJp_normal.jpg";
 
@@ -49,26 +55,101 @@ class Nav extends Component {
 }
 
 class Notification extends Component {
+	generateContent = () => {
+		let a = this.props.contributor.name,
+				b = "";
+
+		switch(this.props.eventType) {
+			case 'CREATED_TWEET_EVENT':
+				b = (
+					<React.Fragment>
+						<span className="rn-notifications-mat-notification-content-mat-content">Recent tweet from</span>
+						<Link className="rn-notifications-mat-notification-content-mat-name" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.contributor.url }` }>{ a }</Link>
+					</React.Fragment>
+				);
+			break;
+			case 'SUBSCRIBED_USER_EVENT':
+				b = (
+					<React.Fragment>
+						<Link className="rn-notifications-mat-notification-content-mat-name" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.contributor.url }` }>{ a }</Link>
+						<span className="rn-notifications-mat-notification-content-mat-content">subscribed to you</span>
+					</React.Fragment>
+				);
+			break;
+			case 'LIKED_TWEET_EVENT':
+				b = (
+					<React.Fragment>
+						<Link className="rn-notifications-mat-notification-content-mat-name" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.contributor.url }` }>{ a }</Link>
+						<span className="rn-notifications-mat-notification-content-mat-content">liked your tweet</span>
+					</React.Fragment>
+				);
+			break;
+			case 'COMMENTED_TWEET_EVENT':
+				b = (
+					<React.Fragment>
+						<Link className="rn-notifications-mat-notification-content-mat-name" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.contributor.url }` }>{ a }</Link>
+						<span className="rn-notifications-mat-notification-content-mat-content">commented your tweet</span>
+					</React.Fragment>
+				);
+			break;
+			case 'LIKED_COMMENT_EVENT':
+				b = (
+					<React.Fragment>
+						<Link className="rn-notifications-mat-notification-content-mat-name" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.contributor.url }` }>{ a }</Link>
+						<span className="rn-notifications-mat-notification-content-mat-content">liked your comment</span>
+					</React.Fragment>
+				);
+			break;
+			default:
+				b = null;
+			break;
+		}
+
+		return b;
+	}
+
+	generateTargetRedirect = () => {
+		let a = this.props.eventType,
+				b = "";
+
+		switch(a) {
+			case 'CREATED_TWEET_EVENT':
+			case 'COMMENTED_TWEET_EVENT':
+			case 'LIKED_TWEET_EVENT':
+			case 'LIKED_COMMENT_EVENT':
+				b = `${ links["TWEET_PAGE"] }/${ this.props.redirectID }`;
+			break;
+			case 'SUBSCRIBED_USER_EVENT':
+				b = `${ links["ACCOUNT_PAGE"] }/${ this.props.redirectID }`;
+			break;
+			default:
+				b = "#";
+			break;
+		}
+
+		return b;
+	}
+
 	render() {
 		return(
 			<React.Fragment>
 				<div className="rn-notifications-mat-notification">
-					<div className="rn-notifications-mat-notification-sizer">{ /* some star or icon here */ }</div>
+					<div className="rn-notifications-mat-notification-sizer">{ /* icon here */ }</div>
 					<div className="rn-notifications-mat-notification-content">
-						<div className="rn-notifications-mat-notification-content-redirect" />
+						<Link
+							className="rn-notifications-mat-notification-content-redirect"
+							to={ this.generateTargetRedirect() }
+						/>
 						<div className="rn-notifications-mat-notification-content-creators">
-							<div className="rn-notifications-mat-notification-content-creators-creator">
-								<img src={ image } alt="" />
-							</div>
+							<Link className="rn-notifications-mat-notification-content-creators-creator" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.contributor.url }` }>
+								<img src={ this.props.contributor.image ? apiPath + this.props.contributor.image : "" } alt="" />
+							</Link>
 						</div>
 						<div className="rn-notifications-mat-notification-content-mat">
-							<div className="rn-notifications-mat-notification-content-mat-name">
-								<span>Oles Odynets</span>
-							</div>
-							<span className="rn-notifications-mat-notification-content-mat-content">Something hello</span>
+							{ this.generateContent() }
 						</div>
 						<p className="rn-notifications-mat-notification-content-twpreview">
-							Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life Chill the life 
+							{ convertTime(this.props.time, " ago") }
 						</p>
 					</div>
 				</div>
@@ -80,18 +161,22 @@ class Notification extends Component {
 
 class Notifications extends Component {
 	render() {
+		if(this.props.isLoading) return <LoadingIcon />;
+
 		return(
 			<div className="rn-notifications-mat">
-				<Notification />
-				<Notification />
-				<Notification />
-				<Notification />
-				<Notification />
-				<Notification />
-				<Notification />
-				<Notification />
-				<Notification />
-				<Notification />
+			{
+				this.props.data.map(({ id, contributor, eventType, redirectID, time }) => (
+					<Notification
+						key={ id }
+						id={ id }
+						contributor={ contributor }
+						eventType={ eventType }
+						redirectID={ redirectID }
+						time={ time }
+					/>
+				))
+			}
 			</div>
 		);
 	}
@@ -103,7 +188,7 @@ class App extends Component {
 
 		this.state = {
 			stage: "ALL_STAGE",
-			notifications: []
+			notifications: false
 		}
 	}
 
@@ -118,11 +203,12 @@ class App extends Component {
       query: gql`
 				query($id: ID!, $login: String!, $password: String!) {
 					user(id: $id, login: $login, password: $password) {
+						id,
 						notifications {
 							id,
-							contributorID,
 							eventType,
 							redirectID,
+							time,
 							contributor {
 								image,
 								name,
@@ -133,7 +219,15 @@ class App extends Component {
 				}
 			`,
 			variables
-		})
+		}).then(({ data: { user: { notifications } } }) => {
+			if(notifications === null) return;
+
+			this.setState(() => {
+				return {
+					notifications: notifications
+				}
+			})
+		});
 	}
 
 	render() {
@@ -147,7 +241,10 @@ class App extends Component {
 					currStage={ this.state.stage }
 				/>
 				<Br />
-				<Notifications />
+				<Notifications
+					isLoading={ this.state.notifications === false }
+					data={ this.state.notifications || [] }
+				/>
 			</div>
 		);
 	}

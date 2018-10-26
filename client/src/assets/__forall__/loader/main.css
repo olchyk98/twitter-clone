@@ -1,0 +1,22 @@
+.gl-loaderdt {
+	height:25px;
+	width:25px;
+	display:block;
+	margin-left:auto;
+	margin-right:auto;
+	border-radius:50%;
+	margin-top:15px;
+	margin-bottom:15px;
+	border:5px solid rgba(0, 0, 0, .0);
+	border-top-color:rebeccapurple;
+	animation:gl-loaderdt-am .75s linear infinite;
+}
+
+@keyframes gl-loaderdt-am {
+	from {
+		transform:rotate(0deg);
+	}
+	to {
+		transform:rotate(360deg);
+	}
+}

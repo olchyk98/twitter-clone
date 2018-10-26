@@ -10,7 +10,9 @@ import cookieControl from '../../cookieControl';
 import links from '../../links';
 import { apiPath } from '../../apiPath';
 import { convertTime } from '../../timeConvertor';
+
 import VertificatedStar from '../__forall__/vertificated/app';
+import LoadingIcon from '../__forall__/loader/app';
 
 let clearCache = () => client.clearStore();
 
@@ -458,7 +460,7 @@ class App extends Component {
 				/>
 				{
 					(!this.state.isFetching) ? null : (
-						<div className="rn-search-loading" />
+						<LoadingIcon />
 					)
 				}
 				{

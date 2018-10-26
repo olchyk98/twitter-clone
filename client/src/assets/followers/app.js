@@ -11,6 +11,7 @@ import links from '../../links';
 import { apiPath } from '../../apiPath';
 
 import VertificatedStar from '../__forall__/vertificated/app';
+import LoadingIcon from '../__forall__/vertificated/app';
 
 const clearCache = () => client.clearStore();
 function destroySession() {
@@ -376,7 +377,7 @@ class App extends Component {
 						reqStage={ this.state.reqStage }
 						setStage={ this.setStage }
 					/>
-					<div className="rn-followers-loader" />
+					<LoadingIcon />
 				</div>
 			);
 		}

@@ -12,12 +12,12 @@ import { convertTime } from '../../timeConvertor';
 import links from '../../links';
 
 import VertificatedStar from '../__forall__/vertificated/app';
+import LoadingIcon from '../__forall__/loader/app';
 
 const defaultBg = "/files/backgrounds/default.jpeg";
 
 function destroySession() {
-  cookieControl.delete("userdata");
-  return window.location.href = links["REGISTER_PAGE"];
+  window.location.href = links["NOT_FOUND_PAGE"];
 }
 
 let clearCache = () => client.clearStore();
@@ -620,7 +620,7 @@ class App extends Component {
           b = this.state.user;
       if(
         b &&
-        ((a && b.url !== a) ||
+        ((a && (b.url !== a && b.id !== a)) ||
         (!a && b.id !== cookieControl.get("userdata").id))
       ) { // XXX
         this.setState(() => {
@@ -631,7 +631,7 @@ class App extends Component {
       }
 
       if(this.state.userFetched && b === null) {
-        window.location.href = links["NOT_FOUND_PAGE"];
+        destroySession();
       }
     }
     { // Subscription > Likes counter was updated
@@ -730,13 +730,15 @@ class App extends Component {
         targetUrl: this.props.match.params.url || ""
       }
     }).then(({ data: { user } }) => {
+      if(!user) destroySession();
+
       this.setState(() => {
         return {
           user: user,
           userFetched: true
         }
       });
-    });
+    }).catch(destroySession);
   }
 
   editData = a => {
@@ -759,7 +761,7 @@ class App extends Component {
     if(!this.state.userFetched || !this.state.user) {
       return(
         <div className="rn-account">
-          <div className="rn-account-loader"></div>
+          <LoadingIcon />
         </div>
       )
     }
