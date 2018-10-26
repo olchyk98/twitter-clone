@@ -170,7 +170,7 @@ class Notifications extends Component {
 	render() {
 		if(this.props.isLoading) return <LoadingIcon />;
 		if(this.props.data && !this.props.data.length) return(
-			<span className="rn-notifications-inf">Voiddd.....</span>
+			<span className="rn-notifications-inf">Hmm. I haven't found anything here</span>
 		);
 
 		return(
