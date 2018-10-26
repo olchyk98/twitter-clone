@@ -13,6 +13,7 @@ import { convertTime } from '../../timeConvertor';
 import VertificatedStar from '../__forall__/vertificated/app';
 
 function destroySession() {
+  return;
   cookieControl.delete("userdata");
   return window.location.reload();
 }
@@ -49,7 +50,7 @@ class MainNewsNew extends Component {
 
       this.props.onNewTweet(Object.assign({}, addTweet));
       clearMemory();
-    }).catch(destroySession);
+    }).catch(console.log); // destroySession
   }
 
   render() {

@@ -20,6 +20,7 @@ const fs = require('fs');
 const User = require('./models/user');
 const Tweet = require('./models/tweet');
 const Comment = require('./models/comment');
+const Notification = require('./models/notification');
 
 function gen() {
   let a = "",
@@ -44,6 +45,16 @@ const UserType = new GraphQLObjectType({
     location: { type: GraphQLString },
     joinedDate: { type: GraphQLString },
     isVertificated: { type: GraphQLBoolean },
+    notifications: {
+      type: new GraphQLList(NotificationType),
+      resolve: ({ notifications }) => Notification.find({
+        _id: [notifications]
+      })
+    },
+    notificationsInt: {
+      type: GraphQLInt,
+      resolve: ({ notifications }) => notifications.length
+    },
     requesterIsSubscriber: {
       type: GraphQLBoolean,
       args: {
@@ -109,62 +120,16 @@ const UserType = new GraphQLObjectType({
   })
 });
 
-const CommentType = new GraphQLObjectType({
-  name: "Comment",
+const NotificationType = new GraphQLObjectType({
+  name: "Notification",
   fields: () => ({
     id: { type: GraphQLID },
-    creatorID: { type: GraphQLID },
-    sendedToID: { type: GraphQLID },
-    content: { type: GraphQLString },
-    time: { type: GraphQLString },
-    isLiked: {
-      type: GraphQLBoolean,
-      args: {
-        id: { type: new GraphQLNonNull(GraphQLID) },
-        login: { type: new GraphQLNonNull(GraphQLString) },
-        password: { type: new GraphQLNonNull(GraphQLString) }
-      },
-      async resolve(parent, args) {
-        let user = await User.findOne({ _id: args.id, login: args.login, password: args.password });
-        if(user) {
-          return parent.likes.find(io => io.toString() === user._id.toString()) ? true:false;
-        } else {
-          return null;
-        }
-      }
-    },
-    likes: {
-      type: new GraphQLList(UserType),
-      async resolve({ id }) {
-        let a = await Comment.findById(id);
-        return User.find({
-          _id: {
-            $in: a.likes
-          }
-        });
-      }
-    },
-    likesInt: {
-      type: GraphQLInt,
-      async resolve({ id }) {
-        let a = await Comment.findById(id);
-        if(!a) return 0;
-
-        let b = await User.find({
-          _id: {
-            $in: a.likes
-          }
-        });
-        return b.length;
-      }
-    },
-    creator: {
+    contributorID: { type: GraphQLID },
+    eventType: { type: GraphQLString }, // CREATED_TWEET_EVENT, SUBSCRIBED_USER_EVENT
+    redirectID: { type: GraphQLID },
+    contributor: {
       type: UserType,
-      resolve: ({ creatorID }) => User.findById(creatorID)
-    },
-    sendedTo: {
-      type: TweetType,
-      resolve: ({ sendedToID }) => Tweet.findById(sendedToID)
+      resolve: ({ contributorID: id }) => User.findById(id)
     }
   })
 })
@@ -225,6 +190,66 @@ const TweetType = new GraphQLObjectType({
     creator: {
       type: UserType,
       resolve: ({ creatorID }) => User.findById(creatorID)
+    }
+  })
+});
+
+const CommentType = new GraphQLObjectType({
+  name: "Comment",
+  fields: () => ({
+    id: { type: GraphQLID },
+    creatorID: { type: GraphQLID },
+    sendedToID: { type: GraphQLID },
+    content: { type: GraphQLString },
+    time: { type: GraphQLString },
+    isLiked: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      async resolve(parent, args) {
+        let user = await User.findOne({ _id: args.id, login: args.login, password: args.password });
+        if(user) {
+          return parent.likes.find(io => io.toString() === user._id.toString()) ? true:false;
+        } else {
+          return null;
+        }
+      }
+    },
+    likes: {
+      type: new GraphQLList(UserType),
+      async resolve({ id }) {
+        let a = await Comment.findById(id);
+        return User.find({
+          _id: {
+            $in: a.likes
+          }
+        });
+      }
+    },
+    likesInt: {
+      type: GraphQLInt,
+      async resolve({ id }) {
+        let a = await Comment.findById(id);
+        if(!a) return 0;
+
+        let b = await User.find({
+          _id: {
+            $in: a.likes
+          }
+        });
+        return b.length;
+      }
+    },
+    creator: {
+      type: UserType,
+      resolve: ({ creatorID }) => User.findById(creatorID)
+    },
+    sendedTo: {
+      type: TweetType,
+      resolve: ({ sendedToID }) => Tweet.findById(sendedToID)
     }
   })
 });
@@ -533,6 +558,22 @@ const RootMutation = new GraphQLObjectType({
           //   return false;
           // }
 
+          if(!subscribed) {
+            let notification = await (new Notification({
+              contributorID: _id,
+              eventType: "SUBSCRIBED_USER_EVENT",
+              redirectID: _id
+            })).save();
+
+            await User.findByIdAndUpdate(targetID,
+              {
+                $push: {
+                  notifications: notification._id
+                }
+              }
+            );
+          }
+
           await User.findOneAndUpdate({ _id: mainUser._id }, {
             [ (!subscribed) ? "$push" : "$pull" ]: { subscribedTo: targetID }
           });
@@ -552,20 +593,45 @@ const RootMutation = new GraphQLObjectType({
         content: { type: new GraphQLNonNull(GraphQLString) }
       },
       async resolve(_, { id: _id, login, password, content }) {
+        // Validate creator
         let user = await User.findOne({ _id, login, password });
         if(user) {
-          let a = await new Tweet({
+          // Create tweet
+          let tweet = await new Tweet({
             content,
             creatorID: user.id,
             time: new Date()
           }).save();
 
+          // Send data to page subscribers
           pubsub.publish('addedTweet', {
-            addedTweet: a
+            addedTweet: tweet
           });
 
-          return a;
+          // Create and send data to subscribers as notification
+          let notification = await (new Notification({
+            contributorID: _id,
+            eventType: "CREATED_TWEET_EVENT",
+            redirectID: tweet._id
+          })).save();
+
+          await User.updateMany(
+            {
+              subscribedTo: {
+                $in: [_id]
+              }
+            },
+            {
+              $push: {
+                notifications: notification._id
+              }
+            }
+          );
+
+          // Send data to creator's client
+          return tweet;
         } else {
+          // Reject generation
           return null;
         }
       }
@@ -692,7 +758,7 @@ const RootMutation = new GraphQLObjectType({
           //   return false;
           // }
 
-          await tweet.update({
+          await tweet.updateOne({
             [ !isLiked ? "$push" : "$pull" ]: { likes: user._id }
           });
 

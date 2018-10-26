@@ -12,6 +12,7 @@ const UserSchema = new Schema({
   location: String,
   joinedDate: Date,
   subscribedTo: Array,
+  notifications: Array,
   isVertificated: Boolean
 });
 
