@@ -6,23 +6,23 @@ import VertificationStar from '../__forall__/vertificated/app';
 const messageStickers = {
 	oops: {
 		label: "OOPSSMILE_STICKER",
-		url: "https://abs-0.twimg.com/emoji/v2/svg/1f633.svg"
+		url: require("./stickers/1f633.svg")
 	},
 	happy: {
 		label: "HAPPYSMILE_STICKER",
-		url: "https://abs-0.twimg.com/emoji/v2/svg/1f603.svg"
+		url: require("./stickers/1f603.svg")
 	},
 	funny: {
 		label: "FUNNYSMILE_STICKER",
-		url: "https://abs-0.twimg.com/emoji/v2/svg/1f602.svg"
+		url: require("./stickers/1f602.svg")
 	},
 	fest: {
 		label: "FESTCONFETI_STICKER",
-		url: "https://abs-0.twimg.com/emoji/v2/svg/1f389.svg"
+		url: require("./stickers/1f389.svg")
 	},
 	like: {
 		label: "LIKEHEART_STICKER",
-		url: "https://abs-0.twimg.com/emoji/v2/svg/2764.svg"
+		url: require("./stickers/2764.svg")
 	}
 }
 
