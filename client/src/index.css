@@ -1,3 +1,5 @@
+/*@import url('https://fonts.googleapis.com/css?family=Lato|Quicksand|Roboto');*/
+
 :root {
   --navcol:#243447;
   --uicol: #1b2836;
@@ -34,10 +36,12 @@ input {
   position:relative;
   top:var(--nav-height);
   height:calc(100vh - var(--nav-height));
+  overflow:auto;
 }
 
 .rn-followers-backnav,
-.mj-nav {
+.mj-nav,
+.rn-chat-mat-nav {
   background:var(--navcol);
 }
 
@@ -57,14 +61,17 @@ input {
 .rn-nfp,
 .rn-search-mat,
 .rn-search-block,
-.rn-notifications {
+.rn-notifications,
+.rn-chat {
   background:var(--uicol);
 }
 
 .rn-followers-split,
 .rn-search-mat-search,
 .rn-search-block-split,
-.rn-notifications-br {
+.rn-notifications-br,
+.rn-chat-brgl,
+.rn-chat-mat-input-mat {
   background:var(--bgcol);
 }
 
@@ -89,7 +96,9 @@ input {
 .rn-followers-menu-btn.active,
 .rn-followers-users-user-content-controls-btn,
 .mj-nav-navigation-btn:hover,
-.rn-notifications-nav-btn.active {
+.rn-notifications-nav-btn.active,
+.rn-chat-mat-nav-mat-inf-back,
+.rn-chat-mat-input-btn {
   color:var(--focuscol);
 }
 
@@ -104,7 +113,10 @@ input {
 .mj-nav-navigation-btn:before,
 .mj-nav-navigation-btn:after,
 .rn-notifications-nav-btn:before,
-.rn-notifications-nav-btn:before {
+.rn-chat-mat-nav-mat-inf-back:before,
+.rn-chat-mat-display-mat-message-content-mat,
+.rn-chat-mat-display-mat-message.r .rn-chat-mat-display-mat-message-content-mat,
+.rn-chat-mat-input-btn:before {
   background:var(--focuscol);
 }
 

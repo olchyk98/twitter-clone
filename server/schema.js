@@ -21,6 +21,7 @@ const User = require('./models/user');
 const Tweet = require('./models/tweet');
 const Comment = require('./models/comment');
 const Notification = require('./models/notification');
+const Conversation = require('./models/conversation');
 
 function gen() {
   let a = "",
@@ -273,6 +274,68 @@ const CommentType = new GraphQLObjectType({
   })
 });
 
+const MessageType = new GraphQLObjectType({
+  name: "Message",
+  fields: () => ({
+    creator: {
+      type: UserType,
+      resolve: ({ creator }) => User.findById(creator)
+    },
+    content: { type: GraphQLString },
+    contentType: { type: GraphQLString }, // STICKER_TYPE, MESSAGE_TYPE
+    time: { type: GraphQLString },
+    isRequesterViewed: { type: GraphQLBoolean }
+  })
+});
+
+const ConversationType = new GraphQLObjectType({
+  name: "Conversation",
+  fields: () => ({
+    id: { type: GraphQLID },
+    members: {
+      type: GraphQLList(UserType),
+      resolve({ members }) {
+        return User.find({
+          _id: {
+            $in: members
+          }
+        });
+      }
+    },
+    messages: { type: new GraphQLList(MessageType) },
+    lastContent: { type: GraphQLString },
+    lastTime: { type: GraphQLString },
+    isWriting: {
+      type: new GraphQLList(UserType),
+      resolve({ isWriting }) { // A client can receive the only id, but I think that will be a better way.
+        return User.find({
+          _id: {
+            $in: isWriting
+          }
+        });
+      }
+    },
+    victim: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLID) },
+        password: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve({ members }, { id: _id, login, password }) {
+        let user = await User.findOne({ _id, login, password });
+
+        if(user) {
+          let nextMember = members.find(io => io.toString() !== _id.toString());
+          return User.findById(nextMember);
+        } else {
+          return null;
+        }
+      }
+    }
+  })
+});
+
 const RootQuery = new GraphQLObjectType({
   name: "RootQuery",
   fields: {
@@ -430,6 +493,27 @@ const RootQuery = new GraphQLObjectType({
             ],
             _id: { // dont search yourself :)
               $ne: _id
+            }
+          });
+        } else {
+          return null;
+        }
+      }
+    },
+    conversations: {
+      type: new GraphQLList(ConversationType),
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLID) },
+        password: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(_, { id: _id, login, password }) {
+        let user = await User.findOne({ _id, login, password });
+
+        if(user) {
+          return Conversation.find({
+            members: {
+              $in: [_id]
             }
           });
         } else {
@@ -988,6 +1072,186 @@ const RootMutation = new GraphQLObjectType({
         )) ? true:false;
 
         return a;
+      }
+    },
+    createConversation: {
+      type: ConversationType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        victimID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(_, { id: _id, login, password, victimID }) {
+        // If conversation with those members exists -> return exists conversation
+        let conversation = await Conversation.findOne({
+          members: {
+            $in: [_id, victimID]
+          }
+        });
+
+        if(!conversation) { // validate user and create a new conversation
+          let user = await User.findOne({ _id, login, password });
+          if(user && victimID) { // create a new conversation
+            let nConversation = await (new Conversation({
+              members: [_id, victimID],
+              messages: [],
+              lastContent: "",
+              lastTime: new Date(),
+              isWriting: []
+            })).save();
+
+            return nConversation;
+          } else { // invalid user data -> null
+            return null;
+          }
+        } else { // return exists conversation
+          return conversation;
+        }
+      }
+    },
+    sendMessage: {
+      type: MessageType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        conversationID: { type: new GraphQLNonNull(GraphQLID) },
+        content: { type: GraphQLString },
+        contentType: { type: GraphQLString }
+      },
+      async resolve(_, { id: _id, login, password, conversationID, content, contentType }) {
+        // Validate user in conversation
+        let conversation = await Conversation.findOne({
+          _id: conversationID,
+          members: {
+            $in: [_id]
+          }
+        });
+
+        if(conversation) { // validated
+          let message = {
+            creator: _id,
+            content, contentType,
+            time: new Date(),
+            isRequesterViewed: false
+          }
+
+          await conversation.updateOne({
+            $push: {
+              messages: message
+            },
+            lastTime: new Date(),
+            lastContent: shortCon(content)
+          });
+
+          return message;
+        } else {
+          return null;
+        }
+      }
+    },
+    viewMessages: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        conversationID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(_, { id, login, password, conversationID }) {
+        let conversation = await Conversation.findOne({
+          _id: conversationID,
+          members: {
+            $in: [id]
+          }
+        });
+
+        let nextMember = conversation.members.find(io => io.toString() !== id.toString());
+
+        if(conversation) {
+          let messages = [];
+          conversation.messages.forEach(io => {
+            if(io.creator.toString() === nextMember.toString()) io.isRequesterViewed = true;
+            messages.push(io);
+          });
+
+          await conversation.updateOne({
+            messages
+          });
+
+          return true;
+        } else {
+          return false;
+        }
+      }
+    },
+    startMessage: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLID) },
+        password: { type: new GraphQLNonNull(GraphQLID) },
+        conversationID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(_, { id: _id, login, password, conversationID }) {
+        let user = await User.find({ _id, login, password });
+        if(user) {
+          let conversation = await Conversation.findOne({
+            _id: conversationID,
+            members: {
+              $in: [_id]
+            }
+          });
+
+          if(!conversation) return false;
+
+          if(!conversation.isWriting.find(io => io.toString() === _id)) { // start
+            await conversation.updateOne({
+              $push: {
+                isWriting: _id
+              }
+            });
+          }
+
+          return true;
+        } else {
+          return false;
+        }
+      }
+    },
+    stopMessage: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLID) },
+        password: { type: new GraphQLNonNull(GraphQLID) },
+        conversationID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(_, { id: _id, login, password, conversationID }) {
+        let user = await User.find({ _id, login, password });
+        if(user) {
+          let conversation = await Conversation.findOne({
+            _id: conversationID,
+            members: {
+              $in: [_id]
+            }
+          });
+
+          if(!conversation) return false;
+
+          if(conversation.isWriting.find(io => io.toString() === _id)) { // stop
+            await conversation.updateOne({
+              $pull: {
+                isWriting: _id
+              }
+            });
+          }
+
+          return true;
+        } else {
+          return false;
+        }
       }
     }
   }

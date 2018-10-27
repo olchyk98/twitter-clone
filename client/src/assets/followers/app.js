@@ -11,7 +11,7 @@ import links from '../../links';
 import { apiPath } from '../../apiPath';
 
 import VertificatedStar from '../__forall__/vertificated/app';
-import LoadingIcon from '../__forall__/vertificated/app';
+import LoadingIcon from '../__forall__/loader/app';
 
 const clearCache = () => client.clearStore();
 function destroySession() {
@@ -88,7 +88,7 @@ class UsersUser extends Component {
 									<span className="rn-followers-users-user-content-mat-name-mat">{ this.props.name }</span>
 								</Link>
 								{
-									(!this.props.isVertificated) ? null:(
+									(!this.props.isVertificated) ? null : (
 										<VertificatedStar />
 									)
 								}

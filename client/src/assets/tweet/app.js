@@ -232,8 +232,6 @@ class App extends Component {
   componentDidUpdate(a) {
     let b = this.props;
 
-    console.log(b);
-
     // FIXME: Subscription data (data from the subscription) was received, but processed in wrong way.
     // TODO: Debug if statement
 

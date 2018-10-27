@@ -280,11 +280,15 @@ class App extends Component {
 			<div className="rn-notifications">
 				<div className="rn-notifications-title">
 					<h1 className="rn-notifications-title-mat">Notifications</h1>
-					<button
-						className="rn-notifications-title-dsthis"
-						onClick={ this.destroyNotifications }>
-						<i className="fas fa-trash" />
-					</button>
+					{
+						(this.state.notifications && this.state.notifications.length) ? (
+							<button
+								className="rn-notifications-title-dsthis"
+								onClick={ this.destroyNotifications }>
+								<i className="fas fa-trash" />
+							</button>
+						) : null
+					}
 				</div>
 				<Br />
 				<Nav

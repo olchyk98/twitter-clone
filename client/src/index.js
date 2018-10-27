@@ -13,6 +13,7 @@ import Followers from './assets/followers/app';
 import Search from './assets/search/app';
 import Notifications from './assets/notifications/app';
 import NFP404 from './assets/nfp404/app';
+import Chat from './assets/chat/app';
 
 import { BrowserRouter, Redirect, Switch } from 'react-router-dom';
 import { Route } from 'react-router';
@@ -101,6 +102,13 @@ ReactDOM.render(
               exact
               path={ links["EVENTS_PAGE"] }
               component={ Notifications }
+              aif={ cookieControl.get("userdata") }
+              redirect={ links["REGISTER_PAGE"] }
+            />
+            <QuaRoute
+              exact
+              path={ links["CHAT_PAGE"] }
+              component={ Chat }
               aif={ cookieControl.get("userdata") }
               redirect={ links["REGISTER_PAGE"] }
             />
