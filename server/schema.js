@@ -386,16 +386,13 @@ const RootQuery = new GraphQLObjectType({
 
         if(user) {
           return Tweet.find({
-            // $or: [
-
-            // ]
             content: {
               $in: [(new RegExp(req, "i"))]
             },
             creatorID: {
               $ne: _id
             }
-          });
+          }).sort({ time: -1 });
         } else {
           return null;
         }

@@ -203,7 +203,7 @@ class BlockTweet extends Component {
 						likable: true
 					}
 				}
-			});
+			}, clearCache);
 		});
 	}
 

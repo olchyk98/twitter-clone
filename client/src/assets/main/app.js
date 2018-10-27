@@ -264,10 +264,16 @@ class App extends Component {
       feed: false,
       feedFetching: true
     }
+
+    this.fetchPromise = null;
   }
 
   componentDidMount() {
     this.fetchFeed();
+  }
+
+  componentWillUnmount() {
+    if(this.fetchPromise) this.fetchPromise.cancel();
   }
 
   componentDidUpdate(pProps) {
@@ -361,7 +367,7 @@ class App extends Component {
       }
     });
 
-    client.query({
+    this.fetchPromise = client.query({
       query: gql`
         query($id: ID!, $login: String!, $password: String!) {
           fetchFeed(id: $id, login: $login, password: $password) {
@@ -387,6 +393,7 @@ class App extends Component {
         password: cookieControl.get("userdata").password
       }
     }).then(({ data: { fetchFeed } }) => {
+      this.fetchPromise = null;
       if(fetchFeed === null) return destroySession();
 
       this.setState(() => {
