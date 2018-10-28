@@ -319,8 +319,8 @@ const ConversationType = new GraphQLObjectType({
       type: UserType,
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
-        login: { type: new GraphQLNonNull(GraphQLID) },
-        password: { type: new GraphQLNonNull(GraphQLID) }
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) }
       },
       async resolve({ members }, { id: _id, login, password }) {
         let user = await User.findOne({ _id, login, password });
@@ -504,8 +504,8 @@ const RootQuery = new GraphQLObjectType({
       type: new GraphQLList(ConversationType),
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
-        login: { type: new GraphQLNonNull(GraphQLID) },
-        password: { type: new GraphQLNonNull(GraphQLID) }
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) }
       },
       async resolve(_, { id: _id, login, password }) {
         let user = await User.findOne({ _id, login, password });
@@ -519,6 +519,25 @@ const RootQuery = new GraphQLObjectType({
         } else {
           return null;
         }
+      }
+    },
+    conversation: {
+      type: ConversationType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        conversationID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(_, { id: _id, login, password, conversationID }) {
+        let user = await User.findOne({ _id, login, password });
+        if(!user) return null;
+        return Conversation.findOne({
+          _id: conversationID,
+          members: {
+            $in: [_id]
+          }
+        });
       }
     }
   }
@@ -1080,9 +1099,22 @@ const RootMutation = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(GraphQLID) },
         login: { type: new GraphQLNonNull(GraphQLString) },
         password: { type: new GraphQLNonNull(GraphQLString) },
-        victimID: { type: new GraphQLNonNull(GraphQLID) }
+        victimID: { type: new GraphQLNonNull(GraphQLID) },
+        victimURL: { type: new GraphQLNonNull(GraphQLString) }
       },
-      async resolve(_, { id: _id, login, password, victimID }) {
+      async resolve(_, { id: _id, login, password, victimID, victimURL }) {
+        if(_id === victimID || (!victimID && !victimURL)) return null;
+
+        if(!victimID && victimURL) {
+          victimID = await User.findOne({
+            url: victimURL
+          });
+
+          // Victim validation
+          if(!victimID || _id === victimID.id) return null;
+          else victimID = victimID.id;
+        }
+
         // If conversation with those members exists -> return exists conversation
         let conversation = await Conversation.findOne({
           members: {

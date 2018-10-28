@@ -50,8 +50,8 @@
 }
 
 .rn-chat-users-user-mg > img {
-	height:45px;
-	width:45px;
+	height:50px;
+	width:50px;
 	border-radius:50%;
 }
 
@@ -262,6 +262,14 @@
 	font-family:"Quicksand";
 	border-radius:var(--radius);
 	flex-shrink:666; /* WELCOME TO HELL */
+}
+
+.rn-chat-mat-display-mat-message-content-mat.sticker {
+	background:transparent!important;
+}
+
+.rn-chat-mat-display-mat-message-content-mat.sticker > img {
+	height:115px;
 }
 
 .rn-chat-mat-display-mat-message-content-mat > span {

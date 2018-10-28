@@ -107,7 +107,7 @@ ReactDOM.render(
             />
             <QuaRoute
               exact
-              path={ links["CHAT_PAGE"] }
+              path={ `${ links["CHAT_PAGE"] }/:url?` }
               component={ Chat }
               aif={ cookieControl.get("userdata") }
               redirect={ links["REGISTER_PAGE"] }
