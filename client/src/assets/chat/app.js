@@ -192,7 +192,7 @@ class ChatDisplay extends Component {
 	}
 
 	componentDidUpdate({ data }) {
-		if(data && data.length !== this.props.data.length) this.viewRef.scrollIntoView();
+		if(data && data.length !== this.props.data.length && this.viewRef) this.viewRef.scrollIntoView();
 	}
 
 	getMessages = () => {
@@ -215,6 +215,10 @@ class ChatDisplay extends Component {
 	}
 
 	render() {
+		if(this.props.isLoading) return(
+			<div className="rn-chat-mat-display"><LoadingIcon /></div>
+		);
+
 		return(
 			<div className="rn-chat-mat-display">
 				<div className="rn-chat-mat-display-mat">
@@ -269,11 +273,17 @@ class ChatInput extends Component {
 		this.aField = React.createRef();
 	}
 
+	sendMessage = e => {
+		e.preventDefault();
+		this.props.onSendMessage("MESSAGE_TYPE", this.aField.value);
+		this.aField.value = "";
+	}
+
 	render() {
 		return(
 			<React.Fragment>
 				<Br />
-				<form className="rn-chat-mat-input" onSubmit={ e => this.props.onSendMessage("MESSAGE_TYPE", this.aField.value, e.preventDefault()) }>
+				<form className="rn-chat-mat-input" onSubmit={ this.sendMessage }>
 					<ChatInputStickers
 						visible={ this.state.isStickers }
 						onSendMessage={ this.props.onSendMessage }
@@ -315,6 +325,7 @@ class Chat extends Component {
 					requestMainStage={ this.props.requestMainStage }
 				/>
 				<ChatDisplay
+					isLoading={ this.props.data === false }
 					data={ this.props.data.messages || [] }
 				/>
 				<ChatInput
@@ -332,7 +343,7 @@ class App extends Component {
 		this.state = {
 			stage: "CONVERSATIONS_STAGE", // CONVERSATIONS_STAGE, CHAT_STAGE,
 			conversations: false,
-			conversation: {},
+			conversation: false,
 			viewSended: false
 		}
 
@@ -372,7 +383,7 @@ class App extends Component {
 				...cookieControl.get("userdata"),
 				conversationID: this.state.conversation.id
 			}
-		}).then(console.log);
+		});
 		this.setState(() => ({
 			viewSended: true
 		}));
@@ -464,7 +475,12 @@ class App extends Component {
 	}
 
 	sendMessage = (type, content) => {
-		if(!this.state.conversation || !this.state.conversation.id) return null;
+		if(
+			!this.state.conversation ||
+			!this.state.conversation.id ||
+			!content ||
+			!content.replace(/ /g, "").length
+		) return null;
 
 		this.props.sendMessage({
 			variables: {

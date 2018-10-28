@@ -73,7 +73,7 @@ class App extends Component {
                     key={ index }
                     href={ session.pageName }
                     icon={ session.icon }
-                    active={ window.location.pathname === session.pageName }
+                    active={ window.location.pathname.indexOf(session.pageName) !== -1 }
                   />
                 );
               })
