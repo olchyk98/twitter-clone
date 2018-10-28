@@ -1228,8 +1228,8 @@ const RootMutation = new GraphQLObjectType({
       type: GraphQLBoolean,
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
-        login: { type: new GraphQLNonNull(GraphQLID) },
-        password: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
         conversationID: { type: new GraphQLNonNull(GraphQLID) }
       },
       async resolve(_, { id: _id, login, password, conversationID }) {
@@ -1262,8 +1262,8 @@ const RootMutation = new GraphQLObjectType({
       type: GraphQLBoolean,
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
-        login: { type: new GraphQLNonNull(GraphQLID) },
-        password: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
         conversationID: { type: new GraphQLNonNull(GraphQLID) }
       },
       async resolve(_, { id: _id, login, password, conversationID }) {

@@ -270,7 +270,12 @@
 
 .rn-chat-mat-display-mat-message-content-mat.sticker > img {
 	height:115px;
+	/*transition:.2s;*/
 }
+
+/*.rn-chat-mat-display-mat-message-content-mat.sticker:hover > img {
+	filter:drop-shadow(0px 0px 50px white);
+}*/
 
 .rn-chat-mat-display-mat-message-content-mat > span {
 	position:relative;

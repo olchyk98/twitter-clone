@@ -8,7 +8,7 @@ import { getMainDefinition } from 'apollo-utilities';
 import { apiPath, wssPath } from './apiPath';
 
 const client = new ApolloClient({
-	link: new RetryLink().split( // YOHOOOOOO!!! FIXED
+	link: new RetryLink().split(
 		// sys => {
 		// 	let { operation } = getMainDefinition(sys.query);
 		// 	console.log(operation);

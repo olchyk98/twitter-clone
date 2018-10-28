@@ -129,9 +129,31 @@ class ChatNav extends Component {
 
 class ChatDisplayMessage extends Component {
 	convertTime = t => {
-		let time = new Date(t / 1000);
+		let a = new Date(t),
+				b = "",
+				c = c1 => (c1.toString().length === 1) ? "0" + c1 : c1;
 
-		return `${ time.getHours() }:${ time.getMinutes() }`;
+		if((new Date()).getTime() - t < 86400000) { // less than day -> 27:32
+			b = `${ c(a.getHours()) }:${ c(a.getMinutes()) }`;
+		} else { // -> 27 June, 23:32
+			let d = [
+				"Jan",
+				"Feb",
+				"March",
+				"April",
+				"May",
+				"June",
+				"July",
+				"Aug",
+				"Sep",
+				"Oct",
+				"Nov",
+				"Dec"
+			][a.getMonths()];
+			b = `${ c(a.getDate()) } ${ d }, ${ c(a.getHours()) }:${ c(a.getMinutes()) }`;
+		}
+
+		return b;
 	}
 
 	generateContent = () => {
@@ -167,7 +189,7 @@ class ChatDisplayMessage extends Component {
 					</div>
 				</div>
 				<div className="rn-chat-mat-display-mat-message-info">
-					<span>{ this.convertTime(this.props.time) }</span>
+					<span>{ this.convertTime(parseInt(this.props.time)) }</span>
 					<span>•</span>
 					<span>Sent</span>
 					{
@@ -271,6 +293,28 @@ class ChatInput extends Component {
 		}
 
 		this.aField = React.createRef();
+		this.aInt = null;
+	}
+
+	updateTypeStatus = () => {
+		let a = cookieControl.get("userdata");
+
+		clearTimeout(this.aInt);
+
+		this.props.startMessageMutation({
+			variables: {
+				...a,
+				conversationID: this.props.conversationID
+			}
+		});
+		this.aInt = setTimeout(() => {
+			this.props.stopMessageMutation({
+				variables: {
+					...a,
+					conversationID: this.props.conversationID
+				}
+			});
+		}, 1000);
 	}
 
 	sendMessage = e => {
@@ -305,6 +349,7 @@ class ChatInput extends Component {
 						type="text"
 						className="rn-chat-mat-input-mat"
 						placeholder="Start a new message"
+						onChange={ this.updateTypeStatus }
 						ref={ ref => this.aField = ref }
 					/>
 					<button type="submit" className="rn-chat-mat-input-btn">
@@ -330,6 +375,9 @@ class Chat extends Component {
 				/>
 				<ChatInput
 					onSendMessage={ this.props.onSendMessage }
+					startMessageMutation={ this.props.startMessageMutation }
+					stopMessageMutation={ this.props.stopMessageMutation }
+					conversationID={ this.props.data.id }
 				/>
 			</div>
 		);
@@ -461,7 +509,7 @@ class App extends Component {
 				}
 			}).then(({ data: { createConversation: conversation } }) => {
 				if(!conversation) {
-					window.history.pushState(null, null, links["CHAT_PAGE"]);
+					// window.history.pushState(null, null, links["CHAT_PAGE"]);
 					return this.fetchAPI(true);
 				}
 
@@ -519,6 +567,8 @@ class App extends Component {
 					data={ this.state.conversation }
 					requestMainStage={ () => this.setStage("CONVERSATIONS_STAGE", this.fetchAPI(true)) }
 					onSendMessage={ this.sendMessage }
+					startMessageMutation={ this.props.startMessage }
+					stopMessageMutation={ this.props.stopMessage }
 				/>
 			break;
 		}
@@ -623,5 +673,25 @@ export default compose(
 		    conversationID: $conversationID
 		  )
 		}
-	`, { name: "viewMessages" })
+	`, { name: "viewMessages" }),
+	graphql(gql`
+		mutation($id: ID!, $login: String!, $password: String!, $conversationID: ID!) {
+		  startMessage(
+		    id: $id,
+		    login: $login,
+		    password: $password,
+		    conversationID: $conversationID
+		  )
+		}
+	`, { name: "startMessage" }),
+	graphql(gql`
+		mutation($id: ID!, $login: String!, $password: String!, $conversationID: ID!) {
+		  stopMessage(
+		    id: $id,
+		    login: $login,
+		    password: $password,
+		    conversationID: $conversationID
+		  )
+		}
+	`, { name: "stopMessage" })
 )(App);

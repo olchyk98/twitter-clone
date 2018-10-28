@@ -112,9 +112,12 @@ class Info extends Component {
             }
             {
               (this.props.info.id !== cookieControl.get("userdata").id) ? (
-                <button className="rn-account-controls-mat-btn icon">
-                  <i className="far fa-envelope" />
-                </button>
+                <Link to={ `${ links["CHAT_PAGE"] }/${ this.props.info.url }` }>
+                  <button
+                    className="rn-account-controls-mat-btn icon">
+                    <i className="far fa-envelope" />
+                  </button>
+                </Link>
               ) : null
             }
             {
