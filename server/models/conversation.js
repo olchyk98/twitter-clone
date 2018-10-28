@@ -5,6 +5,7 @@ const ConversationSchema = new Schema({
 	members: Array,
 	messages: Array,
 	lastContent: String,
+	lastContentType: String,
 	lastTime: Date,
 	isWriting: Array
 });

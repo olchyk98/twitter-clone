@@ -304,6 +304,7 @@ const ConversationType = new GraphQLObjectType({
     },
     messages: { type: new GraphQLList(MessageType) },
     lastContent: { type: GraphQLString },
+    lastContentType: { type: GraphQLString },
     lastTime: { type: GraphQLString },
     isWriting: {
       type: new GraphQLList(UserType),
@@ -1129,6 +1130,7 @@ const RootMutation = new GraphQLObjectType({
               members: [_id, victimID],
               messages: [],
               lastContent: "",
+              lastContentType: "",
               lastTime: new Date(),
               isWriting: []
             })).save();
@@ -1174,7 +1176,8 @@ const RootMutation = new GraphQLObjectType({
               messages: message
             },
             lastTime: new Date(),
-            lastContent: shortCon(content)
+            lastContent: shortCon(content),
+            lastContentType: contentType
           });
 
           return message;
@@ -1192,6 +1195,9 @@ const RootMutation = new GraphQLObjectType({
         conversationID: { type: new GraphQLNonNull(GraphQLID) }
       },
       async resolve(_, { id, login, password, conversationID }) {
+        let user = await User.findOne({ _id: id, login, password });
+        if(!user) return false;
+
         let conversation = await Conversation.findOne({
           _id: conversationID,
           members: {

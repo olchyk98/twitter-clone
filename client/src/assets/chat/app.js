@@ -55,9 +55,13 @@ class Conversation extends Component {
 							</Link>
 							<span className="rn-chat-users-user-content-time">{ convertTime(this.props.time) }</span>
 						</div>
-						<p className="rn-chat-users-user-content-mat">
-							{ this.props.content }
-						</p>
+						{
+							(this.props.contentType !== "STICKER_TYPE") ? (
+								<p className="rn-chat-users-user-content-mat">
+									{ this.props.content }
+								</p>
+							) : null
+						}
 					</div>
 				</div>
 				<Br />
@@ -73,7 +77,7 @@ class Conversations extends Component {
 		return(
 			<div className="rn-chat-users">
 				{
-					this.props.data.map(({ id, lastTime, lastContent, victim: { image, name, url, isVertificated } }) => (
+					this.props.data.map(({ id, lastTime, lastContent, lastContentType, victim: { image, name, url, isVertificated } }) => (
 						<Conversation
 							key={ id }
 							id={ id }
@@ -83,6 +87,7 @@ class Conversations extends Component {
 							isVertificated={ isVertificated }
 							time={ lastTime }
 							content={ lastContent }
+							contentType={ lastContentType }
 							requestConversation={ this.props.setConversation }
 						/>
 					))
@@ -166,7 +171,7 @@ class ChatDisplayMessage extends Component {
 					<span>•</span>
 					<span>Sent</span>
 					{
-						(this.props.seen && !this.props.isClients) ? (
+						(this.props.seen && this.props.isClients) ? (
 							<React.Fragment>
 								<span>•</span>
 								<span>Seen</span>
@@ -187,7 +192,7 @@ class ChatDisplay extends Component {
 	}
 
 	componentDidUpdate({ data }) {
-		if(data.length !== this.props.data.length) this.viewRef.scrollIntoView();
+		if(data && data.length !== this.props.data.length) this.viewRef.scrollIntoView();
 	}
 
 	getMessages = () => {
@@ -327,7 +332,8 @@ class App extends Component {
 		this.state = {
 			stage: "CONVERSATIONS_STAGE", // CONVERSATIONS_STAGE, CHAT_STAGE,
 			conversations: false,
-			conversation: {}
+			conversation: {},
+			viewSended: false
 		}
 
 		this.postConvPromise = true;
@@ -341,10 +347,35 @@ class App extends Component {
 		this.postConvPromise = false; // XXX: promise.cancel()
 	}
 
+	componentDidUpdate() {
+		{
+			let a = this.state;
+			if(
+			!a.viewSended &&
+			a.stage === "CHAT_STAGE" &&
+			a.conversation &&
+			a.conversation.id &&
+			a.conversation.messages.length
+		) this.viewMessagesMutation();
+		}
+	}
+
 	setStage = (stage, callback = null) => {
 		this.setState(() => ({
 			stage
 		}), callback);
+	}
+
+	viewMessagesMutation = () => {
+		this.props.viewMessages({
+			variables: {
+				...cookieControl.get("userdata"),
+				conversationID: this.state.conversation.id
+			}
+		}).then(console.log);
+		this.setState(() => ({
+			viewSended: true
+		}));
 	}
 
 	fetchAPI = (forceCon = false) => {
@@ -356,12 +387,13 @@ class App extends Component {
 				query: gql`
 					query($id: ID!, $login: String!, $password: String!) {
 						conversations(id: $id, login: $login, password: $password) {
-					    id
-					    lastContent
-					    lastTime
+					    id,
+					    lastContent,
+					    lastTime,
+					    lastContentType,
 					    victim(id: $id, login: $login, password: $password) {
-					      name
-					      image
+					      name,
+					      image,
 					      url,
 					      isVertificated
 					    }
@@ -482,7 +514,8 @@ class App extends Component {
 		this.setStage("CHAT_STAGE", () => {
 			this.setState(() => {
 				return {
-					conversation: false
+					conversation: false,
+					viewSended: false
 				}
 			});
 		});
@@ -564,5 +597,15 @@ export default compose(
 	      }
 	    }
 		}
-	`, { name: "sendMessage" })
+	`, { name: "sendMessage" }),
+	graphql(gql`
+		mutation($id: ID!, $login: String!, $password: String!, $conversationID: ID!) {
+		  viewMessages(
+		    id: $id,
+		    login: $login,
+		    password: $password,
+		    conversationID: $conversationID
+		  )
+		}
+	`, { name: "viewMessages" })
 )(App);
