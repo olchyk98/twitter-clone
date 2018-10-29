@@ -1,4 +1,5 @@
 // NOTE: All those validations (...User.findOne({...})...) can be optimized by using try/catch statement
+// NOTE: Dict.count({ some: "type" }) - for clear ints
 
 const {
   GraphQLSchema,
@@ -148,14 +149,18 @@ const NotificationType = new GraphQLObjectType({
     eventType: { type: GraphQLString },
     /*
       CREATED_TWEET_EVENT // subscribers,
-      SUBSCRIBED_USER_EVENT // tweet's owner, +
-      LIKED_TWEET_EVENT // tweet's owner, +
+      SUBSCRIBED_USER_EVENT // tweet's owner,
+      LIKED_TWEET_EVENT // tweet's owner,
       COMMENTED_TWEET_EVENT // comments's owner,
-      LIKED_COMMENT_EVENT // comment's owner +
+      LIKED_COMMENT_EVENT // comment's owner
     */
     redirectID: { type: GraphQLID },
     time: { type: GraphQLString },
     shortContent: { type: GraphQLString },
+    influenced: {
+      type: new GraphQLList(UserType),
+      resolve: ({ influenced }) => User.find({ _id: { $in: [influenced] } })
+    },
     contributor: {
       type: UserType,
       resolve: ({ contributorID: id }) => User.findById(id)
@@ -693,6 +698,7 @@ const RootMutation = new GraphQLObjectType({
               eventType: "SUBSCRIBED_USER_EVENT",
               redirectID: _id,
               shortContent: "",
+              influenced: [targetID],
               time: new Date()
             })).save();
 
@@ -744,24 +750,22 @@ const RootMutation = new GraphQLObjectType({
             time: new Date()
           }).save();
 
-          // Send data to page subscribers
-          pubsub.publish('addedTweet', {
-            addedTweet: tweet
-          });
-
           // Create and send data to subscribers as notification
+          let notificationInfluenced = await User.find({ // XXX
+            subscribedTo: {
+              $in: [_id]
+            }
+          });
+          notificationInfluenced.forEach(({ id }, index, arr) => arr[index] = id);
+
           let notification = await (new Notification({
             contributorID: _id,
             eventType: "CREATED_TWEET_EVENT",
             redirectID: tweet._id,
             shortContent: shortCon(content),
+            influenced: notificationInfluenced,
             time: new Date()
           })).save();
-
-          pubsub.publish("receivedNotification", {
-            notification,
-            target: _id
-          });
 
           await User.updateMany(
             {
@@ -775,6 +779,16 @@ const RootMutation = new GraphQLObjectType({
               }
             }
           );
+
+          // Send data to page subscribers
+          pubsub.publish('addedTweet', {
+            addedTweet: tweet
+          });
+
+          pubsub.publish("receivedNotification", {
+            notification,
+            target: _id
+          });
 
           // Send data to creator's client
           return tweet;
@@ -843,6 +857,7 @@ const RootMutation = new GraphQLObjectType({
             eventType: "COMMENTED_TWEET_EVENT",
             redirectID: tweet._id,
             shortContent: shortCon(content),
+            influenced: [tweet.creatorID],
             time: new Date()
           })).save();
 
@@ -937,6 +952,7 @@ const RootMutation = new GraphQLObjectType({
               eventType: "LIKED_TWEET_EVENT",
               redirectID: tweet._id,
               shortContent: shortCon(tweet.content),
+              influenced: [tweet.creatorID],
               time: new Date()
             })).save();
 
@@ -1052,6 +1068,7 @@ const RootMutation = new GraphQLObjectType({
               eventType: "LIKED_COMMENT_EVENT",
               redirectID: comment.sendedToID,
               shortContent: shortCon(comment.content),
+              influenced: [comment.creatorID],
               time: new Date()
             })).save();
 
@@ -1116,6 +1133,48 @@ const RootMutation = new GraphQLObjectType({
             notifications: []
           }
         )) ? true:false;
+
+        { // https://github.com/olchyk98/twitter-clone/issues/3
+          let b = await Notification.find({
+            influenced: {
+              $in: [_id]
+            }
+          });
+
+          if(b.length) {
+            let c = [], // delete notification
+                d = []; // delete user from notification
+            b.forEach(io => { // every notification
+              if(io.influenced.length - 1 <= 0) { // detach notification
+                c.push(io.id);
+              } else { // detach user from influenced array
+                d.push(io.id);
+              }
+            });
+
+            if(c.length) {
+              await Notification.remove({
+                _id: {
+                  $in: c
+                }
+              });
+            }
+            if(d.length) {
+              await Notification.updateMany(
+                {
+                  _id: {
+                    $in: d
+                  }
+                },
+                {
+                  $pull: {
+                    influenced: _id
+                  }
+                }
+              );
+            }
+          }
+        }
 
         return a;
       }
