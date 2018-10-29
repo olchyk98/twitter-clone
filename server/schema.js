@@ -33,6 +33,7 @@ function gen() {
 }
 
 let shortCon = text => (text.length > 125) ? text.substr(0, 125) + "..." : text;
+let str = str1 => str1.toString();
 
 const UserType = new GraphQLObjectType({
   name: "User",
@@ -53,7 +54,7 @@ const UserType = new GraphQLObjectType({
       resolve: ({ notifications }) => {
         let a = [];
         notifications.forEach((_, io, ia) => {
-          a[io] = ia[io].toString();
+          a[io] = str(ia[io]);
         });
         return Notification.find({
           _id: {
@@ -127,6 +128,14 @@ const UserType = new GraphQLObjectType({
     tweets: {
       type: new GraphQLList(TweetType),
       resolve: ({ id }) => Tweet.find({ creatorID: id }).sort({ time: -1 })
+    },
+    conversations: {
+      type: new GraphQLList(ConversationType),
+      resolve: ({ id }) => Conversation.find({
+        members: {
+          $in: [id]
+        }
+      })
     }
   })
 });
@@ -167,7 +176,7 @@ const TweetType = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(GraphQLID) }
       },
       async resolve(parent, args) {
-        return parent.likes.find(io => io.toString() === args.id.toString()) ? true:false;
+        return parent.likes.find(io => str(io) === str(args.id)) ? true:false;
       }
     },
     isSubscribedToCreator: { type: GraphQLBoolean },
@@ -232,7 +241,7 @@ const CommentType = new GraphQLObjectType({
       async resolve(parent, args) {
         let user = await User.findOne({ _id: args.id, login: args.login, password: args.password });
         if(user) {
-          return parent.likes.find(io => io.toString() === user._id.toString()) ? true:false;
+          return parent.likes.find(io => str(io) === str(user._id)) ? true:false;
         } else {
           return null;
         }
@@ -327,7 +336,7 @@ const ConversationType = new GraphQLObjectType({
         let user = await User.findOne({ _id, login, password });
 
         if(user) {
-          let nextMember = members.find(io => io.toString() !== _id.toString());
+          let nextMember = members.find(io => str(io) !== str(_id));
           return User.findById(nextMember);
         } else {
           return null;
@@ -391,11 +400,10 @@ const RootQuery = new GraphQLObjectType({
       },
       async resolve(_, { id: _id, login, password, targetID }) {
         let user = await User.findOne({ _id, login, password }),
-            tweet = await Tweet.findById(targetID),
-            str = str1 => str1.toString();
+            tweet = await Tweet.findById(targetID);
 
         tweet.isLiked = tweet.likes.find(io => str(io) === str(user._id)) ? true:false;
-        tweet.isSubscribedToCreator = user.subscribedTo.find(io => io.toString() === tweet.creatorID) ? true:false;
+        tweet.isSubscribedToCreator = user.subscribedTo.find(io => str(io) === tweet.creatorID) ? true:false;
 
         if(user && tweet) {
           return tweet;
@@ -432,7 +440,7 @@ const RootQuery = new GraphQLObjectType({
           }
         }).sort({ time: -1 });
 
-        a.forEach(io => io.isLiked = io.likes.find(ic => ic.toString() === user._id.toString()) ? true:false);
+        a.forEach(io => io.isLiked = io.likes.find(ic => str(ic) === str(user._id)) ? true:false);
 
         return a;
       }
@@ -663,7 +671,7 @@ const RootMutation = new GraphQLObjectType({
           let subscribed = await User.findOne({
             _id: mainUser._id,
             subscribedTo: {
-              $in: [targetUser._id.toString()]
+              $in: [str(targetUser._id)]
             }
           });
 
@@ -783,7 +791,7 @@ const RootMutation = new GraphQLObjectType({
         let user = await User.findOne({ _id, login, password });
         let tweet = await Tweet.findById(targetID);
 
-        if(user._id.toString() !== tweet.creatorID.toString()) return null; // OWNER_VALIDATION
+        if(str(user._id) !== str(tweet.creatorID)) return null; // OWNER_VALIDATION
 
         if(user && tweet) {
           await Comment.remove({
@@ -880,7 +888,7 @@ const RootMutation = new GraphQLObjectType({
             tweet = await Tweet.findById(targetID);
 
         if(user && tweet) {
-          let str = st => st.toString();
+          let str = st => str(st);
           let isLiked = tweet.likes.find(io => str(io) === str(user._id)) ? true:false
 
           // if(!isLiked) {
@@ -968,7 +976,7 @@ const RootMutation = new GraphQLObjectType({
         let user = await User.findOne({ _id, login, password }),
             comment = await Comment.findById(targetID);
 
-        if(user._id.toString() !== comment.creatorID.toString()) return null; // OWNER_VALIDATION
+        if(str(user._id) !== str(comment.creatorID)) return null; // OWNER_VALIDATION
 
         if(user) {
           let tweet = await Tweet.findById(comment.sendedToID);
@@ -1006,7 +1014,6 @@ const RootMutation = new GraphQLObjectType({
             comment = await Comment.findById(targetID);
 
         if(user && comment) {
-          let str = st => st.toString();
           let isLiked = comment.likes.find(io => str(io) === str(user._id)) ? true:false;
 
           // if(!isLiked) {
@@ -1171,13 +1178,31 @@ const RootMutation = new GraphQLObjectType({
             isRequesterViewed: false
           }
 
+          let upConversation = {
+            lastTime: new Date(),
+            lastContent: (contentType !== "STICKER_TYPE") ? shortCon(content) : content,
+            lastContentType: contentType
+          }
+
+          pubsub.publish("conversationsContentUpdated", { // conversation preview
+            conversation: {
+              id: str(conversation._id),
+              members: conversation.members,
+              ...upConversation
+            }
+          });
+          pubsub.publish("conversationSendedMessage", {
+            sendedTo: conversation._id,
+            members: conversation.members,
+            creator: _id,
+            message
+          });
+
           await conversation.updateOne({
             $push: {
               messages: message
             },
-            lastTime: new Date(),
-            lastContent: shortCon(content),
-            lastContentType: contentType
+            ...upConversation
           });
 
           return message;
@@ -1205,17 +1230,30 @@ const RootMutation = new GraphQLObjectType({
           }
         });
 
-        let nextMember = conversation.members.find(io => io.toString() !== id.toString());
+        let nextMember = conversation.members.find(io => str(io) !== str(id));
 
         if(conversation) {
           let messages = [];
           conversation.messages.forEach(io => {
-            if(io.creator.toString() === nextMember.toString()) io.isRequesterViewed = true;
+            if(str(io.creator) === str(nextMember)) io.isRequesterViewed = true;
             messages.push(io);
           });
 
+          pubsub.publish("viewedMessages", {
+            conversation,
+            viewer: id
+          });
+          pubsub.publish("conversationTypingStatus", {
+            target: conversationID,
+            typer: id,
+            typing: false
+          });
+
           await conversation.updateOne({
-            messages
+            messages,
+            $pull: {
+              isWriting: id
+            }
           });
 
           return true;
@@ -1244,7 +1282,13 @@ const RootMutation = new GraphQLObjectType({
 
           if(!conversation) return false;
 
-          if(!conversation.isWriting.find(io => io.toString() === _id)) { // start
+          if(!conversation.isWriting.find(io => str(io) === _id)) { // start
+            pubsub.publish("conversationTypingStatus", {
+              target: conversationID,
+              typer: _id,
+              typing: true
+            });
+
             await conversation.updateOne({
               $push: {
                 isWriting: _id
@@ -1278,7 +1322,13 @@ const RootMutation = new GraphQLObjectType({
 
           if(!conversation) return false;
 
-          if(conversation.isWriting.find(io => io.toString() === _id)) { // stop
+          if(conversation.isWriting.find(io => str(io) === _id)) { // stop
+            pubsub.publish("conversationTypingStatus", {
+              target: conversationID,
+              typer: _id,
+              typing: false
+            });
+
             await conversation.updateOne({
               $pull: {
                 isWriting: _id
@@ -1520,11 +1570,94 @@ const RootSubscription = new GraphQLObjectType({
             case 'LIKED_TWEET_EVENT':
             case 'COMMENTED_TWEET_EVENT':
             case 'LIKED_COMMENT_EVENT':
-              a = owner.toString() === _id.toString();
+              a = str(owner) === str(_id);
             break;
             default:break;
           }
           return a;
+        }
+      )
+    },
+    conversationsContentUpdated: {
+      type: ConversationType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      resolve: ({ conversation }) => conversation,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('conversationsContentUpdated'),
+        async ({ conversation }, { id: _id, login, password, conversationID }) => {
+          if(conversation.members.indexOf(_id) === -1) return false;
+          let user = await User.findOne({ _id, login, password });
+
+          return user ? true:false;
+        }
+      )
+    },
+    conversationGotMessage: {
+      type: MessageType, // sendedTO, members
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        conversationID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ message }) => message,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('conversationSendedMessage'),
+        async ({ message, sendedTo, members, creator }, { id: _id, login, password, conversationID }) => {
+          if(str(creator) === str(_id) || members.indexOf(str(_id)) === -1) return false;
+
+          let conversation = await Conversation.findOne({
+            _id: conversationID,
+            members: {
+              $in: [_id]
+            }
+          });
+          if(!conversation || str(sendedTo) !== str(conversation._id)) return false;
+          let user = await User.findOne({ _id, login, password });
+
+          return (user) ? true:false;
+        }
+      )
+    },
+    conversationSeenMessages: {
+      type: ConversationType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        conversationID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ conversation }) => conversation,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator("viewedMessages"),
+        async ({ conversation, viewer }, { id: _id, login, password, conversationID }) => {
+          if(viewer === _id || conversation.members.indexOf(str(user._id)) === -1) return false;
+          let user = await User.findOne({ _id, login, password });
+
+          return (user) ? true:false; 
+        }
+      )
+    },
+    conversationNewTypingStatus: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        conversationID: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve: ({ typing }) => typing,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('conversationTypingStatus'),
+        async ({ target, typer }, { id: _id, login, password, conversationID }) => {
+          if(str(typer) === str(_id) || str(target) !== str(conversationID)) return false;
+
+          let user = await User.find({ _id, login, password });
+          return (user) ? true:false;
         }
       )
     }

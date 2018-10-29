@@ -63,7 +63,7 @@
 	height:100%;
 	padding-left:var(--padding);
 	padding-right:var(--padding);
-	width:100%;
+	width:calc(100% - 60px);
 }
 
 .rn-chat-users-user-content-inf {
@@ -102,6 +102,9 @@
 	color:rgba(255, 255, 255, .75);
 	margin-top:4.5px;
 	margin-bottom:0px;
+	width:95%;
+	overflow:hidden;
+	text-overflow:ellipsis;
 }
 
 .rn-chat-brgl {
@@ -447,4 +450,77 @@
 .rn-chat-mat-input-stickers-sticker:active {
 	transition:.1s;
 	transform:scale(.85);
+}
+
+.rn-chat-mat-display-mat-typing {
+	--padding:5px;
+
+	height:30px;
+	width:calc(45px - var(--padding) * 2);
+	padding-left:var(--padding);
+	padding-right:var(--padding);
+	background:red;
+	border-radius:45px;
+	background:#e5e6ec;
+	margin-left:10px;
+	margin-top:15px;
+	margin-bottom:20px;
+	position:relative;
+	animation:rn-chat-display-typing-am 1s ease infinite alternate;
+	display:flex;
+	align-items:center;
+	justify-content:space-around;
+}
+
+@keyframes rn-chat-display-typing-am {
+	from {
+		transform:scale(.9);
+	}
+	to {
+		transform:scale(1.1);
+	}
+}
+
+.rn-chat-mat-display-mat-typing:before,
+.rn-chat-mat-display-mat-typing:after {
+	content:'';
+	position:absolute;
+	background:#e5e6ec;
+	border-radius:50%;
+}
+
+.rn-chat-mat-display-mat-typing:before {
+	height:7.5px;
+	width:7.5px;
+	bottom:1px;
+	left:1px;
+}
+
+.rn-chat-mat-display-mat-typing:after {
+	--dist:-4px;
+
+	height:4px;
+	width:4px;
+	bottom:var(--dist);
+	left:var(--dist);
+}
+
+.rn-chat-mat-display-mat-typing > div {
+	height:6px;
+	width:6px;
+	border-radius:50%;
+	background:red;
+	animation:rn-chat-display-typing-dots-am 1s infinite alternate;
+}
+
+@keyframes rn-chat-display-typing-dots-am {
+	0% {
+		background:#CDCDDC;
+	}
+	50% {
+		background:#A9A9B5;
+	}
+	100% {
+		background:#908E9C;
+	}
 }

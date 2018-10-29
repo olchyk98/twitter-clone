@@ -55,13 +55,9 @@ class Conversation extends Component {
 							</Link>
 							<span className="rn-chat-users-user-content-time">{ convertTime(this.props.time) }</span>
 						</div>
-						{
-							(this.props.contentType !== "STICKER_TYPE") ? (
-								<p className="rn-chat-users-user-content-mat">
-									{ this.props.content }
-								</p>
-							) : null
-						}
+						<p className="rn-chat-users-user-content-mat">
+							{ this.props.contentType !== "STICKER_TYPE" ? this.props.content : "*STICKER*" }
+						</p>
 					</div>
 				</div>
 				<Br />
@@ -190,8 +186,14 @@ class ChatDisplayMessage extends Component {
 				</div>
 				<div className="rn-chat-mat-display-mat-message-info">
 					<span>{ this.convertTime(parseInt(this.props.time)) }</span>
-					<span>•</span>
-					<span>Sent</span>
+					{
+						(this.props.isClients) ? (
+							<React.Fragment>
+								<span>•</span>
+								<span>Sent</span>
+							</React.Fragment>
+						) : null
+					}
 					{
 						(this.props.seen && this.props.isClients) ? (
 							<React.Fragment>
@@ -206,6 +208,16 @@ class ChatDisplayMessage extends Component {
 	}
 }
 
+class ChatDisplayTyping extends Component {
+	render() {
+		return(
+			<div className="rn-chat-mat-display-mat-typing">
+				<div /><div /><div />
+			</div>
+		);
+	}
+}
+
 class ChatDisplay extends Component {
 	constructor(props) {
 		super(props);
@@ -213,8 +225,8 @@ class ChatDisplay extends Component {
 		this.viewRef = React.createRef();
 	}
 
-	componentDidUpdate({ data }) {
-		if(data && data.length !== this.props.data.length && this.viewRef) this.viewRef.scrollIntoView();
+	componentDidUpdate(pProps) {
+		if((pProps.data && pProps.data.length !== this.props.data.length && this.viewRef) || (pProps.isTyping !== this.props.isTyping)) this.viewRef.scrollIntoView();
 	}
 
 	getMessages = () => {
@@ -245,6 +257,11 @@ class ChatDisplay extends Component {
 			<div className="rn-chat-mat-display">
 				<div className="rn-chat-mat-display-mat">
 					{ this.getMessages() }
+					{
+						(!this.props.isTyping) ? null : (
+							<ChatDisplayTyping />
+						)
+					}
 					<div ref={ ref => this.viewRef = ref } />
 				</div>
 			</div>
@@ -297,6 +314,11 @@ class ChatInput extends Component {
 	}
 
 	updateTypeStatus = () => {
+		if(!this.props.dataLoaded) return;
+
+		// if(this.aInt) return;
+		/* Performance VS Smoothness (because i have no idea how to do that correctly) */
+
 		let a = cookieControl.get("userdata");
 
 		clearTimeout(this.aInt);
@@ -308,6 +330,7 @@ class ChatInput extends Component {
 			}
 		});
 		this.aInt = setTimeout(() => {
+			this.aInt = null;
 			this.props.stopMessageMutation({
 				variables: {
 					...a,
@@ -372,8 +395,10 @@ class Chat extends Component {
 				<ChatDisplay
 					isLoading={ this.props.data === false }
 					data={ this.props.data.messages || [] }
+					isTyping={ (this.props.data.isTyping) ? true:false } // undefined || false || true
 				/>
 				<ChatInput
+					dataLoaded={ this.props.data !== false }
 					onSendMessage={ this.props.onSendMessage }
 					startMessageMutation={ this.props.startMessageMutation }
 					stopMessageMutation={ this.props.stopMessageMutation }
@@ -396,6 +421,7 @@ class App extends Component {
 		}
 
 		this.postConvPromise = true;
+		this.newMesSub = this.seenStatSub = this.typingStatSub;
 	}
 
 	componentDidMount() {
@@ -404,22 +430,54 @@ class App extends Component {
 
 	componentWillUnmount() {
 		this.postConvPromise = false; // XXX: promise.cancel()
+
+		if(this.props.conversation) {
+			this.props.stopMessageMutation({
+				variables: {
+					...cookieControl.get("userdata"),
+					conversationID: this.props.conversation.id
+				}
+			});
+		}
 	}
 
-	componentDidUpdate() {
+	componentDidUpdate(pProps) {
 		{
 			let a = this.state;
 			if(
-			!a.viewSended &&
-			a.stage === "CHAT_STAGE" &&
-			a.conversation &&
-			a.conversation.id &&
-			a.conversation.messages.length
-		) this.viewMessagesMutation();
+				!a.viewSended &&
+				a.stage === "CHAT_STAGE" &&
+				a.conversation &&
+				a.conversation.id &&
+				a.conversation.messages.length
+			) this.viewMessagesMutation();
+		}
+		{ // Subscripton > Conversation on gate was updated
+			let a = pProps.gateContentUpdated.conversationsContentUpdated,
+					b = this.props.gateContentUpdated.conversationsContentUpdated;
+			if((!a && b) || (a && b && (a.id !== b.id || a.lastTime !== b.lastTime || a.lastContent !== b.lastContent))) {
+				let c = this.state.conversations;
+				if(!c) return;
+
+				let d = Array.from(c),
+						e = d.find(({ id }) => id === b.id);
+
+				e.lastContent = b.lastContent;
+				e.lastContentType = b.lastContentType;
+				e.lastTime = b.lastTime;
+
+				this.setState(() => {
+					return {
+						conversations: d
+					}
+				});
+			}
 		}
 	}
 
 	setStage = (stage, callback = null) => {
+		this.stopSubscription();
+
 		this.setState(() => ({
 			stage
 		}), callback);
@@ -509,7 +567,7 @@ class App extends Component {
 				}
 			}).then(({ data: { createConversation: conversation } }) => {
 				if(!conversation) {
-					// window.history.pushState(null, null, links["CHAT_PAGE"]);
+					window.history.pushState(null, null, links["CHAT_PAGE"]);
 					return this.fetchAPI(true);
 				}
 
@@ -517,7 +575,7 @@ class App extends Component {
 					return {
 						conversation
 					}
-				})
+				}, this.startSubscription);
 			});
 		}
 	}
@@ -528,7 +586,7 @@ class App extends Component {
 			!this.state.conversation.id ||
 			!content ||
 			!content.replace(/ /g, "").length
-		) return null;
+		) return;
 
 		this.props.sendMessage({
 			variables: {
@@ -576,6 +634,125 @@ class App extends Component {
 		return a;
 	}
 
+	startSubscription = () => {
+		if(!this.state.conversation) return;
+
+		// New message
+		this.newMesSub = client.subscribe({
+			query: gql`
+				subscription($id: ID!, $login: String!, $password: String!, $conversationID: ID!) {
+				  conversationGotMessage(
+				    id: $id,
+				    login: $login,
+				    password: $password,
+				    conversationID: $conversationID
+				  ) {
+				    content,
+			      isRequesterViewed,
+			      time,
+			      content,
+			      contentType,
+			      creator {
+							image,
+			        id,
+			        name
+			      }
+				  }
+				}
+			`,
+			variables: {
+				...cookieControl.get("userdata"),
+				conversationID: this.state.conversation.id // this.props.match.params.url
+			}
+		}).subscribe({
+			next: ({ data: { conversationGotMessage: message } }) => {
+				if(!message) return;
+
+				this.setState(({ conversation, conversation: { messages } }) => ({
+					viewSended: false,
+					conversation: {
+						...conversation,
+						messages: [
+							...messages,
+							message
+						]
+					}
+				}));
+			}
+		});
+
+		// Messages seen status
+		this.seenStatSub = client.subscribe({
+			query: gql`
+			subscription($id: ID!, $login: String!, $password: String!, $conversationID: ID!) {
+			  conversationSeenMessages(
+			    id: $id,
+			    login: $login,
+			    password: $password,
+			    conversationID: $conversationID
+			  ) {
+			    id,
+			    lastContent,
+			    members {
+			      name
+			    }
+			  }
+			}
+			`,
+			variables: {
+				...cookieControl.get("userdata"),
+				conversationID: this.state.conversation.id
+			}
+		}).subscribe({
+			next: ({ data: { conversationSeenMessages: conversation } }) => {
+				let a = Array.from(this.state.conversation.messages);
+				a.forEach(io => io.isRequesterViewed = true);
+
+				this.setState(({ conversation }) => {
+					return {
+						conversation: {
+							...conversation,
+							messages: a
+						}
+					}
+				});
+			}
+		});
+
+		// Typing status
+		this.typingStatSub = client.subscribe({
+			query: gql`
+				subscription($id: ID!, $login: String!, $password: String!, $conversationID: ID!) {
+				  conversationNewTypingStatus(
+				    id: $id,
+				    login: $login,
+				    password: $password,
+				    conversationID: $conversationID
+				  )
+				}
+			`,
+			variables: {
+				...cookieControl.get("userdata"),
+				conversationID: this.state.conversation.id
+			}
+		}).subscribe({
+			next: ({ data: { conversationNewTypingStatus: isTyping } }) => {
+				this.setState(({ conversation }) => ({
+					conversation: {
+						...conversation,
+						isTyping
+					}
+				}));
+			}
+		});
+	}
+
+	stopSubscription = () => {
+		if(this.newMesSub) this.newMesSub.unsubscribe();
+		if(this.seenStatSub) this.seenStatSub.unsubscribe();
+		if(this.typingStatSub) this.typingStatSub.unsubscribe();
+	}
+
 	setConversation = conversationID => {
 		this.setStage("CHAT_STAGE", () => {
 			this.setState(() => {
@@ -619,14 +796,14 @@ class App extends Component {
 				conversationID
 			}
 		}).then(({ data: { conversation } }) => {
-			if(this.postConvPromise === false) return null;
+			if(this.postConvPromise === false) return;
 
 			window.history.pushState(null, null, `${ links["CHAT_PAGE"] }/${ conversation.victim.url }`)
 
 			this.setStage("CHAT_STAGE", () => {
 				this.setState(() => ({
 					conversation
-				}));
+				}), this.startSubscription);
 			});
 		})
 	}
@@ -693,5 +870,24 @@ export default compose(
 		    conversationID: $conversationID
 		  )
 		}
-	`, { name: "stopMessage" })
+	`, { name: "stopMessage" }),
+	graphql(gql`
+		subscription($id: ID!, $login: String!, $password: String!) {
+		  conversationsContentUpdated(
+		    id: $id,
+		    login: $login,
+		    password: $password
+		  ) {
+		    id
+		    lastTime
+		    lastContent
+		    lastContentType
+		  }
+		}
+	`, {
+		name: "gateContentUpdated",
+		options: {
+			variables: cookieControl.get("userdata")
+		}
+	})
 )(App);
