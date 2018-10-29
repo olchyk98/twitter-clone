@@ -578,7 +578,7 @@ const RootMutation = new GraphQLObjectType({
 
         let a = await new User({
           name, login, password, url,
-          image: "/" + imagePath,
+          image: imagePath,
           location: "",
           joinedDate: new Date(),
           subscribedTo: [],
@@ -1125,9 +1125,7 @@ const RootMutation = new GraphQLObjectType({
 
         // If conversation with those members exists -> return exists conversation
         let conversation = await Conversation.findOne({
-          members: {
-            $in: [_id, victimID]
-          }
+          members: [_id, victimID]
         });
 
         if(!conversation) { // validate user and create a new conversation
@@ -1141,6 +1139,11 @@ const RootMutation = new GraphQLObjectType({
               lastTime: new Date(),
               isWriting: []
             })).save();
+
+            pubsub.publish("conversationCreatedNew", {
+              conversation: nConversation,
+              creator: _id
+            });
 
             return nConversation;
           } else { // invalid user data -> null
@@ -1607,18 +1610,11 @@ const RootSubscription = new GraphQLObjectType({
       resolve: ({ message }) => message,
       subscribe: withFilter(
         () => pubsub.asyncIterator('conversationSendedMessage'),
-        async ({ message, sendedTo, members, creator }, { id: _id, login, password, conversationID }) => {
+        async ({ message, sendedTo, members, convID, creator }, { id: _id, login, password, conversationID }) => {
           if(str(creator) === str(_id) || members.indexOf(str(_id)) === -1) return false;
+          if(str(sendedTo) !== str(conversationID)) return false;
 
-          let conversation = await Conversation.findOne({
-            _id: conversationID,
-            members: {
-              $in: [_id]
-            }
-          });
-          if(!conversation || str(sendedTo) !== str(conversation._id)) return false;
           let user = await User.findOne({ _id, login, password });
-
           return (user) ? true:false;
         }
       )
@@ -1658,6 +1654,31 @@ const RootSubscription = new GraphQLObjectType({
 
           let user = await User.find({ _id, login, password });
           return (user) ? true:false;
+        }
+      )
+    },
+    conversationGotNew: {
+      type: ConversationType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      resolve: ({ conversation }) => conversation,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator("conversationCreatedNew"),
+        async ({ conversation, creator }, { id: _id, login, password }) => {
+          if(creator === _id) return false;
+
+          // Validate user
+          let user = await User.findOne({ _id, login, password });
+          if(!user) return false;
+
+          // Validate if user's id exists in conversation's members array
+          if(conversation.members.indexOf(user._id) === -1) return false;
+
+          // Return result
+          return true;
         }
       )
     }

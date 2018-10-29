@@ -430,6 +430,7 @@ class App extends Component {
 
 	componentWillUnmount() {
 		this.postConvPromise = false; // XXX: promise.cancel()
+		this.stopSubscription();
 
 		if(this.props.conversation) {
 			this.props.stopMessageMutation({
@@ -457,27 +458,57 @@ class App extends Component {
 					b = this.props.gateContentUpdated.conversationsContentUpdated;
 			if((!a && b) || (a && b && (a.id !== b.id || a.lastTime !== b.lastTime || a.lastContent !== b.lastContent))) {
 				let c = this.state.conversations;
-				if(!c) return;
 
-				let d = Array.from(c),
-						e = d.find(({ id }) => id === b.id);
+				if(c) {
+					let d = Array.from(c),
+							e = d.find(({ id }) => id === b.id);
 
-				e.lastContent = b.lastContent;
-				e.lastContentType = b.lastContentType;
-				e.lastTime = b.lastTime;
+					if(e) {
+						e.lastContent = b.lastContent;
+						e.lastContentType = b.lastContentType;
+						e.lastTime = b.lastTime;
 
-				this.setState(() => {
-					return {
-						conversations: d
+						this.setState(() => {
+							return {
+								conversations: d
+							}
+						});
 					}
-				});
+				}
+			}
+		}
+		{ // Subscription > New conversation on gate
+			let a = pProps.gateConversationCreated.conversationGotNew,
+					b = this.props.gateConversationCreated.conversationGotNew;
+
+			if((!a && b) || (a && b && a.id && b.id && a.id !== b.id)) {
+				// try to find new array in storage -> if found -> nothing | if not found -> add
+				let c = () => {
+					let d = this.state.conversations;
+					if(!d || (d && d.find(({ id }) => id === b.id))) {
+						return false;
+					} else {
+						return true;
+					}
+				}
+
+				// array exists?
+				if(c()) {
+					// nope, push
+					this.setState(({ conversations }) => {
+						return {
+							conversations: [
+								...conversations,
+								b
+							]
+						}
+					});
+				}
 			}
 		}
 	}
 
 	setStage = (stage, callback = null) => {
-		this.stopSubscription();
-
 		this.setState(() => ({
 			stage
 		}), callback);
@@ -495,10 +526,12 @@ class App extends Component {
 		}));
 	}
 
-	fetchAPI = (forceCon = false) => {
+	fetchAPI = async (forceCon = false) => {
 		let a = this.props.match.params.url;
 		if(!a || forceCon) {
 			this.setStage("CONVERSATIONS_STAGE");
+
+			if(forceCon) await client.clearStore();
 
 			client.query({
 				query: gql`
@@ -517,7 +550,11 @@ class App extends Component {
 					  }
 					}
 				`,
-				variables: cookieControl.get("userdata")
+				variables: {
+					id: cookieControl.get("userdata").id,
+					login: cookieControl.get("userdata").login,
+					password: cookieControl.get("userdata").password
+				}
 			}).then(({ data: { conversations } }) => {
 				this.setState(() => ({
 					conversations
@@ -623,7 +660,10 @@ class App extends Component {
 			case 'CHAT_STAGE':
 				a = <Chat
 					data={ this.state.conversation }
-					requestMainStage={ () => this.setStage("CONVERSATIONS_STAGE", this.fetchAPI(true)) }
+					requestMainStage={() => {
+						this.setStage("CONVERSATIONS_STAGE");
+						if(!this.state.conversations) this.fetchAPI(true);
+					}}
 					onSendMessage={ this.sendMessage }
 					startMessageMutation={ this.props.startMessage }
 					stopMessageMutation={ this.props.stopMessage }
@@ -636,6 +676,7 @@ class App extends Component {
 
 	startSubscription = () => {
 		if(!this.state.conversation) return;
+		this.stopSubscription();
 
 		// New message
 		this.newMesSub = client.subscribe({
@@ -662,7 +703,7 @@ class App extends Component {
 			`,
 			variables: {
 				...cookieControl.get("userdata"),
-				conversationID: this.state.conversation.id // this.props.match.params.url
+				conversationID: this.state.conversation.id
 			}
 		}).subscribe({
 			next: ({ data: { conversationGotMessage: message } }) => {
@@ -672,6 +713,7 @@ class App extends Component {
 					viewSended: false,
 					conversation: {
 						...conversation,
+						isTyping: false,
 						messages: [
 							...messages,
 							message
@@ -887,7 +929,36 @@ export default compose(
 	`, {
 		name: "gateContentUpdated",
 		options: {
-			variables: cookieControl.get("userdata")
+			variables: {
+				id: cookieControl.get("userdata").id,
+				login: cookieControl.get("userdata").login,
+				password: cookieControl.get("userdata").password
+			}
+		}
+	}),
+	graphql(gql`
+		subscription($id: ID!, $login: String!, $password: String!) {
+			conversationGotNew(id: $id, login: $login, password: $password) {
+		    id,
+		    lastContent,
+		    lastTime,
+		    lastContentType,
+		    victim(id: $id, login: $login, password: $password) {
+		      name,
+		      image,
+		      url,
+		      isVertificated
+		    }
+		  }
+		}
+	`, {
+		name: "gateConversationCreated",
+		options: {
+			variables: {
+				id: cookieControl.get("userdata").id,
+				login: cookieControl.get("userdata").login,
+				password: cookieControl.get("userdata").password
+			}
 		}
 	})
 )(App);
