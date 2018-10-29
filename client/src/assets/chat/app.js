@@ -111,7 +111,7 @@ class ChatNav extends Component {
 								onClick={ this.moveToMain }>
 								<i className="fas fa-arrow-left" />
 							</button>
-							<Link className="rn-chat-mat-nav-mat-inf-mat" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.url }` }>
+							<Link className="rn-chat-mat-nav-mat-inf-mat" to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.data.url }` }>
 								<p className="rn-chat-mat-nav-mat-inf-mat-name">{ this.props.data.name || "" }</p>
 								<p className="rn-chat-mat-nav-mat-inf-mat-url">{ this.props.data.url ? "@" + this.props.data.url : "" }</p>
 							</Link>
@@ -424,8 +424,8 @@ class App extends Component {
 		this.newMesSub = this.seenStatSub = this.typingStatSub;
 	}
 
-	componentDidMount() {
-		this.fetchAPI();
+	async componentDidMount() {
+		this.fetchAPI(false, true);
 	}
 
 	componentWillUnmount() {
@@ -526,12 +526,11 @@ class App extends Component {
 		}));
 	}
 
-	fetchAPI = async (forceCon = false) => {
+	fetchAPI = async (forceCon = false, passStore = false) => {
 		let a = this.props.match.params.url;
 		if(!a || forceCon) {
 			this.setStage("CONVERSATIONS_STAGE");
-
-			if(forceCon) await client.clearStore();
+			if(!passStore) await client.clearStore();
 
 			client.query({
 				query: gql`

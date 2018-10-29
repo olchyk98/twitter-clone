@@ -700,6 +700,11 @@ const RootMutation = new GraphQLObjectType({
               notification,
               target: targetID
             });
+            pubsub.publish("navigationUpdated", {
+              topic: "NOTIFICATIONS_TOPIC",
+              sendedTo: targetID,
+              sender: _id
+            });
 
             await User.findByIdAndUpdate(targetID,
               {
@@ -845,6 +850,11 @@ const RootMutation = new GraphQLObjectType({
             notification,
             target: tweet.creatorID
           });
+          pubsub.publish("navigationUpdated", {
+            topic: "NOTIFICATIONS_TOPIC",
+            sendedTo: tweet.creatorID,
+            sender: _id
+          });
 
           await User.findByIdAndUpdate(tweet.creatorID,
             {
@@ -887,8 +897,7 @@ const RootMutation = new GraphQLObjectType({
         let user = await User.findOne({ _id, login, password }),
             tweet = await Tweet.findById(targetID);
 
-        if(user && tweet) {
-          let str = st => str(st);
+        if(true) { // user && tweet
           let isLiked = tweet.likes.find(io => str(io) === str(user._id)) ? true:false
 
           // if(!isLiked) {
@@ -934,6 +943,11 @@ const RootMutation = new GraphQLObjectType({
             pubsub.publish("receivedNotification", {
               notification,
               target: tweet.creatorID
+            });
+            pubsub.publish("navigationUpdated", {
+              topic: "NOTIFICATIONS_TOPIC",
+              sendedTo: tweet.creatorID,
+              sender: _id
             });
 
             await User.findByIdAndUpdate(tweet.creatorID,
@@ -1045,6 +1059,11 @@ const RootMutation = new GraphQLObjectType({
               notification,
               target: comment.creatorID
             });
+            pubsub.publish("navigationUpdated", {
+              topic: "NOTIFICATIONS_TOPIC",
+              sendedTo: comment.creatorID,
+              sender: _id
+            });
 
             await User.findByIdAndUpdate(comment.creatorID,
               {
@@ -1125,7 +1144,9 @@ const RootMutation = new GraphQLObjectType({
 
         // If conversation with those members exists -> return exists conversation
         let conversation = await Conversation.findOne({
-          members: [_id, victimID]
+          members: {
+            $all: [_id, victimID]
+          }
         });
 
         if(!conversation) { // validate user and create a new conversation
@@ -1199,6 +1220,11 @@ const RootMutation = new GraphQLObjectType({
             members: conversation.members,
             creator: _id,
             message
+          });
+          pubsub.publish("navigationUpdated", {
+            topic: "MESSAGES_TOPIC",
+            sendedTo: conversation.members.find(io => io !== _id),
+            sender: _id
           });
 
           await conversation.updateOne({
@@ -1631,7 +1657,7 @@ const RootSubscription = new GraphQLObjectType({
       subscribe: withFilter(
         () => pubsub.asyncIterator("viewedMessages"),
         async ({ conversation, viewer }, { id: _id, login, password, conversationID }) => {
-          if(viewer === _id || conversation.members.indexOf(str(user._id)) === -1) return false;
+          if(viewer === _id || conversation.members.indexOf(str(_id)) === -1) return false;
           let user = await User.findOne({ _id, login, password });
 
           return (user) ? true:false; 
@@ -1679,6 +1705,24 @@ const RootSubscription = new GraphQLObjectType({
 
           // Return result
           return true;
+        }
+      )
+    },
+    navigationGotEvent: {
+      type: GraphQLString,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        login: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      resolve: ({ topic }) => topic,
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('navigationUpdated'),
+        async ({ topic, sendedTo, sender }, { id: _id, login, password }) => {
+          if(str(sendedTo) !== str(_id) || sender === _id) return false;
+          // Validate user
+          let user = await User.findOne({ _id, login, password });
+          return (user) ? true:false;
         }
       )
     }

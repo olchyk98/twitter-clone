@@ -83,6 +83,7 @@
 
 .rn-account-controls-mat-btn.active {
   color:white;
+  animation:"h2_sn3" 1s;
 }
 
 .rn-account-controls-mat-btn,
