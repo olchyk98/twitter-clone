@@ -36,6 +36,8 @@ function gen() {
 let shortCon = text => (text.length > 125) ? text.substr(0, 125) + "..." : text;
 let str = str1 => str1.toString();
 
+const infiniteScrollSplit = 15;
+
 const UserType = new GraphQLObjectType({
   name: "User",
   fields: () => ({
@@ -291,6 +293,7 @@ const CommentType = new GraphQLObjectType({
 const MessageType = new GraphQLObjectType({
   name: "Message",
   fields: () => ({
+    id: { type: GraphQLID },
     creator: {
       type: UserType,
       resolve: ({ creator }) => User.findById(creator)
@@ -316,7 +319,33 @@ const ConversationType = new GraphQLObjectType({
         });
       }
     },
-    messages: { type: new GraphQLList(MessageType) },
+    messages: {
+      type: new GraphQLList(MessageType),
+      args: {
+        cursorID: { type: GraphQLID }
+      },
+      resolve({ messages }, { cursorID }) {
+        function limit(arr, limit = infiniteScrollSplit) {
+          return arr.slice(arr.length - limit, arr.length);
+        }
+
+        if(cursorID) {
+          let a = -1;
+          messages.forEach((io, index) => {
+            if(str(io.id) === str(cursorID)) {
+              return a = index;
+            }
+          });
+          if(a === -1) return messages;
+
+          let b = a - infiniteScrollSplit;
+          return limit(messages.slice(((b < 0) ? 0 : b), a));
+
+        } else {
+          return limit(messages);
+        }
+      }
+    },
     lastContent: { type: GraphQLString },
     lastContentType: { type: GraphQLString },
     lastTime: { type: GraphQLString },
@@ -456,13 +485,11 @@ const RootQuery = new GraphQLObjectType({
           }
 
           if(isReal) {
-            a = await Tweet.find(b).sort({ time: -1 }).limit(15);
+            a = await Tweet.find(b).sort({ time: -1 }).limit(infiniteScrollSplit);
           } else {
             a = await Tweet.find(b).sort({ time: -1 });
           }
         }
-
-        a.forEach(io => io.isLiked = io.likes.find(ic => str(ic) === str(user._id)) ? true:false);
 
         return a;
       }
@@ -1272,6 +1299,7 @@ const RootMutation = new GraphQLObjectType({
 
         if(conversation) { // validated
           let message = {
+            id: conversation.messages.length,
             creator: _id,
             content, contentType,
             time: new Date(),

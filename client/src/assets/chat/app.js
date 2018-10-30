@@ -223,6 +223,7 @@ class ChatDisplay extends Component {
 		super(props);
 
 		this.viewRef = React.createRef();
+		this.displayRef = React.createRef();
 	}
 
 	componentDidUpdate(pProps) {
@@ -248,6 +249,12 @@ class ChatDisplay extends Component {
 		);
 	}
 
+	fetchMoreMessages = () => {
+		if(this.displayRef.scrollTop < 100) {
+			this.props.requestMoreMessages(this.displayRef);
+		}
+	}
+
 	render() {
 		if(this.props.isLoading) return(
 			<div className="rn-chat-mat-display"><LoadingIcon /></div>
@@ -255,7 +262,14 @@ class ChatDisplay extends Component {
 
 		return(
 			<div className="rn-chat-mat-display">
-				<div className="rn-chat-mat-display-mat">
+				<div
+					className="rn-chat-mat-display-mat" ref={ ref => this.displayRef = ref }
+					onScroll={ this.fetchMoreMessages }>
+					{
+						(!this.props.loadingMore) ? null : (
+							<LoadingIcon />
+						)
+					}
 					{ this.getMessages() }
 					{
 						(!this.props.isTyping) ? null : (
@@ -394,8 +408,10 @@ class Chat extends Component {
 				/>
 				<ChatDisplay
 					isLoading={ this.props.data === false }
+					loadingMore={ this.props.loadingMore }
 					data={ this.props.data.messages || [] }
 					isTyping={ (this.props.data.isTyping) ? true:false } // undefined || false || true
+					requestMoreMessages={ this.props.requestMoreMessages }
 				/>
 				<ChatInput
 					dataLoaded={ this.props.data !== false }
@@ -417,7 +433,9 @@ class App extends Component {
 			stage: "CONVERSATIONS_STAGE", // CONVERSATIONS_STAGE, CHAT_STAGE,
 			conversations: false,
 			conversation: false,
-			viewSended: false
+			viewSended: false,
+			messagesFetchable: true,
+			messagesFetching: false
 		}
 
 		this.postConvPromise = true;
@@ -574,6 +592,7 @@ class App extends Component {
 					  ) {
 					    id,
 					    messages {
+					    	id,
 					      content,
 					      isRequesterViewed,
 					      time,
@@ -609,7 +628,9 @@ class App extends Component {
 
 				this.setState(() => {
 					return {
-						conversation
+						conversation,
+						messagesFetching: false,
+						messagesFetchable: conversation.messages.length === 15 // >= 15
 					}
 				}, this.startSubscription);
 			});
@@ -644,6 +665,59 @@ class App extends Component {
 		});
 	}
 
+	loadMoreMessages = display => {
+		let a = this.state.conversation;
+		if(!a || !this.state.messagesFetchable || this.state.messagesFetching) return;
+
+		this.setState(() => ({
+			messagesFetching: true
+		}));
+
+		let b = display.scrollHeight;
+
+		let { id, login, password } = cookieControl.get("userdata");
+		client.query({
+			query: gql`
+				query($id: ID!, $login: String!, $password: String!, $conversationID: ID!, $cursorID: ID) {
+				  conversation(id: $id, login: $login, password: $password, conversationID: $conversationID) {
+				    messages(cursorID: $cursorID) {
+				    	id,
+				      content,
+				      isRequesterViewed,
+				      time,
+				      content,
+				      contentType,
+				      creator {
+								image,
+				        id,
+				        name
+				      }
+				    }
+				  }
+				}
+			`,
+			variables: {
+				id, login, password,
+				cursorID: a.messages[0].id,
+				conversationID: a.id
+			}
+		}).then(({ data: { conversation: { messages } } }) => {
+			this.setState(({ conversation }) => ({
+				messagesFetching: false,
+				messagesFetchable: messages.length === 15, // >=
+				conversation: {
+					...conversation,
+					messages: [
+						...messages,
+						...conversation.messages
+					]
+				}
+			}), () => {
+				display.scrollTo({ top: display.scrollHeight - b });
+			});
+		});
+	}
+
 	getStage = () => {
 		let a = null;
 
@@ -659,6 +733,8 @@ class App extends Component {
 			case 'CHAT_STAGE':
 				a = <Chat
 					data={ this.state.conversation }
+					loadingMore={ this.state.messagesFetching }
+					requestMoreMessages={ this.loadMoreMessages }
 					requestMainStage={() => {
 						this.setStage("CONVERSATIONS_STAGE");
 						if(!this.state.conversations) this.fetchAPI(true);
@@ -799,7 +875,9 @@ class App extends Component {
 			this.setState(() => {
 				return {
 					conversation: false,
-					viewSended: false
+					viewSended: false,
+					messagesFetchable: true,
+					messagesFetching: true
 				}
 			});
 		});
@@ -810,6 +888,7 @@ class App extends Component {
 				  conversation(id: $id, login: $login, password: $password, conversationID: $conversationID) {
 				    id,
 				    messages {
+				    	id,
 				      content,
 				      isRequesterViewed,
 				      time,
@@ -839,11 +918,13 @@ class App extends Component {
 		}).then(({ data: { conversation } }) => {
 			if(this.postConvPromise === false) return;
 
-			window.history.pushState(null, null, `${ links["CHAT_PAGE"] }/${ conversation.victim.url }`)
+			window.history.pushState(null, null, `${ links["CHAT_PAGE"] }/${ conversation.victim.url }`);
 
 			this.setStage("CHAT_STAGE", () => {
 				this.setState(() => ({
-					conversation
+					conversation,
+					messagesFetching: false,
+					messagesFetchable: conversation.messages.length === 15 // >= 15
 				}), this.startSubscription);
 			});
 		})

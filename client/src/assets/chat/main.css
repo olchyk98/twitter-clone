@@ -9,6 +9,7 @@
 	margin-left:auto;
 	margin-right:auto;
 	position:relative;
+	overflow:scroll;
 }
 
 .rn-chat-users {
@@ -18,6 +19,10 @@
 	flex-direction:column;
 	align-items:flex-start;
 	justify-content:flex-start;
+}
+
+.rn-chat-users > * { /* users and splits */
+	flex-shrink:0;
 }
 
 .rn-chat-users-user {
@@ -113,6 +118,7 @@
 	display:flex;
 	align-items:center;
 	flex-direction:column;
+	overflow-x:hidden;
 }
 
 .rn-chat-mat-nav {
