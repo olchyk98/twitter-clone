@@ -72,6 +72,7 @@ class App extends Component {
   }
 
   fetchAPI = () => {
+    let { id, login, password } = cookieControl.get("userdata");
     client.query({
       query: gql`
         query($id: ID!, $login: String!, $password: String!) {
@@ -86,9 +87,7 @@ class App extends Component {
         }
       `,
       variables: {
-        id: cookieControl.get("userdata").id,
-        login: cookieControl.get("userdata").login,
-        password: cookieControl.get("userdata").password
+        id, login, password
       }
     }).then(({ data: { user } }) => {
       if(user === null) return destroySession();

@@ -693,6 +693,7 @@ class App extends Component {
   }
 
   fetchUser = () => {
+    let { id, login, password } = cookieControl.get("userdata");
     client.query({
       query: gql`
         query($id: ID!, $login: String!, $password: String!, $targetUrl: String!) {
@@ -727,9 +728,7 @@ class App extends Component {
         }
       `,
       variables: {
-        id: cookieControl.get("userdata").id,
-        login: cookieControl.get("userdata").login,
-        password: cookieControl.get("userdata").password,
+        id, login, password,
         targetUrl: this.props.match.params.url || ""
       }
     }).then(({ data: { user } }) => {

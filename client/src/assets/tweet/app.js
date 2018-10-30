@@ -298,6 +298,7 @@ class App extends Component {
       }
     });
 
+    let { id, login, password } = cookieControl.get("userdata");
     client.query({
       query: gql`
         query($id: ID!, $login: String!, $password: String!, $targetID: ID!) {
@@ -334,9 +335,9 @@ class App extends Component {
         }
       `,
       variables: {
-        id: cookieControl.get("userdata").id || "",
-        login: cookieControl.get("userdata").login || "",
-        password: cookieControl.get("userdata").password || "",
+        id: id || "",
+        login: login || "",
+        password: password || "",
         targetID: window.location.pathname.split("/")[2] || ""
       }
     }).then(({ data: { tweet } }) => {

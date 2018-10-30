@@ -73,20 +73,24 @@ class Conversations extends Component {
 		return(
 			<div className="rn-chat-users">
 				{
-					this.props.data.map(({ id, lastTime, lastContent, lastContentType, victim: { image, name, url, isVertificated } }) => (
-						<Conversation
-							key={ id }
-							id={ id }
-							image={ image }
-							name={ name }
-							url={ url }
-							isVertificated={ isVertificated }
-							time={ lastTime }
-							content={ lastContent }
-							contentType={ lastContentType }
-							requestConversation={ this.props.setConversation }
-						/>
-					))
+					this.props.data.map(({ id, lastTime, lastContent, lastContentType, victim: { image, name, url, isVertificated } }) => {
+						if(!lastContent, !lastContentType) return null;
+
+						return (
+							<Conversation
+								key={ id }
+								id={ id }
+								image={ image }
+								name={ name }
+								url={ url }
+								isVertificated={ isVertificated }
+								time={ lastTime }
+								content={ lastContent }
+								contentType={ lastContentType }
+								requestConversation={ this.props.setConversation }
+							/>
+						);
+					})
 				}
 			</div>
 		);
@@ -333,13 +337,13 @@ class ChatInput extends Component {
 		// if(this.aInt) return;
 		/* Performance VS Smoothness (because i have no idea how to do that correctly) */
 
-		let a = cookieControl.get("userdata");
+		let { id, login, password } = cookieControl.get("userdata");
 
 		clearTimeout(this.aInt);
 
 		this.props.startMessageMutation({
 			variables: {
-				...a,
+				id, login, password,
 				conversationID: this.props.conversationID
 			}
 		});
@@ -347,7 +351,7 @@ class ChatInput extends Component {
 			this.aInt = null;
 			this.props.stopMessageMutation({
 				variables: {
-					...a,
+					id, login, password,
 					conversationID: this.props.conversationID
 				}
 			});
@@ -450,13 +454,16 @@ class App extends Component {
 		this.postConvPromise = false; // XXX: promise.cancel()
 		this.stopSubscription();
 
-		if(this.props.conversation) {
-			this.props.stopMessageMutation({
-				variables: {
-					...cookieControl.get("userdata"),
-					conversationID: this.props.conversation.id
-				}
-			});
+		{
+			let { id, login, password } = cookieControl.get("userdata");
+			if(this.props.conversation) {
+				this.props.stopMessageMutation({
+					variables: {
+						id, login, password,
+						conversationID: this.props.conversation.id
+					}
+				});
+			}
 		}
 	}
 
@@ -533,9 +540,10 @@ class App extends Component {
 	}
 
 	viewMessagesMutation = () => {
+		let { id, login, password } = cookieControl.get("userdata");
 		this.props.viewMessages({
 			variables: {
-				...cookieControl.get("userdata"),
+				id, login, password,
 				conversationID: this.state.conversation.id
 			}
 		});
@@ -546,6 +554,7 @@ class App extends Component {
 
 	fetchAPI = async (forceCon = false, passStore = false) => {
 		let a = this.props.match.params.url;
+		let { id, login, password } = cookieControl.get("userdata");
 		if(!a || forceCon) {
 			this.setStage("CONVERSATIONS_STAGE");
 			if(!passStore) await client.clearStore();
@@ -568,9 +577,7 @@ class App extends Component {
 					}
 				`,
 				variables: {
-					id: cookieControl.get("userdata").id,
-					login: cookieControl.get("userdata").login,
-					password: cookieControl.get("userdata").password
+					id, login, password,
 				}
 			}).then(({ data: { conversations } }) => {
 				this.setState(() => ({
@@ -616,7 +623,7 @@ class App extends Component {
 					}
 				`,
 				variables: {
-					...cookieControl.get("userdata"),
+					id, login, password,
 					victimID: "",
 					victimURL: a
 				}
@@ -645,9 +652,10 @@ class App extends Component {
 			!content.replace(/ /g, "").length
 		) return;
 
+		let { id, login, password } = cookieControl.get("userdata");
 		this.props.sendMessage({
 			variables: {
-				...cookieControl.get("userdata"),
+				id, login, password,
 				content,
 				contentType: type,
 				conversationID: this.state.conversation.id
@@ -754,6 +762,7 @@ class App extends Component {
 		this.stopSubscription();
 
 		// New message
+		let { id, login, password } = cookieControl.get("userdata");
 		this.newMesSub = client.subscribe({
 			query: gql`
 				subscription($id: ID!, $login: String!, $password: String!, $conversationID: ID!) {
@@ -777,7 +786,7 @@ class App extends Component {
 				}
 			`,
 			variables: {
-				...cookieControl.get("userdata"),
+				id, login, password,
 				conversationID: this.state.conversation.id
 			}
 		}).subscribe({
@@ -817,7 +826,7 @@ class App extends Component {
 			}
 			`,
 			variables: {
-				...cookieControl.get("userdata"),
+				id, login, password,
 				conversationID: this.state.conversation.id
 			}
 		}).subscribe({
@@ -849,7 +858,7 @@ class App extends Component {
 				}
 			`,
 			variables: {
-				...cookieControl.get("userdata"),
+				id, login, password,
 				conversationID: this.state.conversation.id
 			}
 		}).subscribe({
@@ -882,6 +891,7 @@ class App extends Component {
 			});
 		});
 
+		let { id, login, password } = cookieControl.get("userdata");
 		this.postConvPromise = client.query({
 			query: gql`
 				query($id: ID!, $login: String!, $password: String!, $conversationID: ID!) {
@@ -912,7 +922,7 @@ class App extends Component {
 				}
 			`,
 			variables: {
-				...cookieControl.get("userdata"),
+				id, login, password,
 				conversationID
 			}
 		}).then(({ data: { conversation } }) => {

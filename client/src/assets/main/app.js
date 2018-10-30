@@ -110,9 +110,7 @@ class MainNewsItem extends Component {
 
     this.props.likePost({
       variables: {
-        id: id,
-        login: login,
-        password: password,
+        id, login, password,
         targetID: this.props.id
       }
     }).then(({ data: { likeTweet } }) => {
@@ -376,7 +374,7 @@ class App extends Component {
       }
     });
 
-    let a = cookieControl.get("userdata");
+    let { id, login, password } = cookieControl.get("userdata");
 
     client.query({
       query: gql`
@@ -399,9 +397,7 @@ class App extends Component {
         }
       `,
       variables: {
-        id: a.id,
-        login: a.login,
-        password: a.password
+        id, login, password
       }
     }).then(({ data: { fetchFeed } }) => {
       if(!this.fetchPromise) return null;
