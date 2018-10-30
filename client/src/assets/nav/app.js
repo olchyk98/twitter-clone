@@ -247,7 +247,11 @@ class App extends Component {
                   <div className="mj-nav-muser-mat-menu-btn-icon">
                     <i className="far fa-user" />
                   </div>
-                  <span className="mj-nav-muser-mat-menu-btn-txt">Account</span>
+                  <span
+                    className="mj-nav-muser-mat-menu-btn-txt"
+                    style={{ position:"relative", left:"-2px" }}>
+                    Account
+                  </span>
                 </Link>
                 <button className="mj-nav-muser-mat-menu-btn" onClick={ destroySession }>
                   <div className="mj-nav-muser-mat-menu-btn-icon">

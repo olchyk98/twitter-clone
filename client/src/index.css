@@ -3,8 +3,8 @@
 :root {
   --nav-height:50px;
   --uisize:550px;
-  /* dark mode */
-  --navcol:#243447;
+
+/*  --navcol:#243447;
   --uicol: #1b2836;
   --bgcol:#141d26;
   --focuscol:#34a1f2;
@@ -21,7 +21,7 @@
   --messagefieldbg:linear-gradient(-180deg, #233447, #213145, #233447);
   --messagefieldbor:black;
   --addnavshadow:0px 0px 5px 0px black;
-  /* white mode */
+  
   --navcol:#ffffff;
   --uicol: #ffffff;
   --bgcol:#e5ecf0;
@@ -38,7 +38,7 @@
   --messagebg:#e5ecf0;
   --messagefieldbg:#ffffff;
   --messagefieldbor:rgba(0, 0, 0, .05);
-  --addnavshadow:0px 0px 5px 0px rgba(0, 0, 0, .35);
+  --addnavshadow:0px 0px 5px 0px rgba(0, 0, 0, .35);*/
 }
 
 html, body {

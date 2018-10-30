@@ -251,6 +251,11 @@ class MainNews extends Component {
               );
             })
           }
+          {
+            (!this.props.loadingMore) ? null : (
+              <LoadingIcons />
+            )
+          }
         </div>
       </div>
     );
@@ -263,10 +268,14 @@ class App extends Component {
 
     this.state = {
       feed: false,
-      feedFetching: true
+      feedFetching: true,
+      feedFetchingMore: false,
+      fetchAvailableMore: true
     }
 
     this.fetchPromise = true;
+    this.displayRef = React.createRef();
+    // this.feedFetchStream = [];
   }
 
   componentDidMount() {
@@ -368,10 +377,12 @@ class App extends Component {
       }
     });
 
+    let a = cookieControl.get("userdata");
+
     client.query({
       query: gql`
         query($id: ID!, $login: String!, $password: String!) {
-          fetchFeed(id: $id, login: $login, password: $password) {
+          fetchFeed(id: $id, login: $login, password: $password, isReal: true) {
             commentsInt,
             likesInt,
             content,
@@ -389,9 +400,9 @@ class App extends Component {
         }
       `,
       variables: {
-        id: cookieControl.get("userdata").id,
-        login: cookieControl.get("userdata").login,
-        password: cookieControl.get("userdata").password
+        id: a.id,
+        login: a.login,
+        password: a.password
       }
     }).then(({ data: { fetchFeed } }) => {
       if(!this.fetchPromise) return null;
@@ -400,7 +411,8 @@ class App extends Component {
       this.setState(() => {
         return {
           feed: fetchFeed,
-          feedFetching: false
+          feedFetching: false,
+          fetchAvailableMore: fetchFeed.length === 15 // >=
         }
       });
     });
@@ -420,11 +432,75 @@ class App extends Component {
     }, clearMemory);
   }
 
+  fetchMoreTweets = () => { // XXX?
+    if(
+      !this.state.fetchAvailableMore ||
+      this.state.feedFetchingMore ||
+      this.displayRef.scrollTop < this.displayRef.scrollHeight - window.innerHeight
+    ) return;
+    let a = cookieControl.get("userdata"),
+        b = this.state.feed,
+        c = this.displayRef.scrollTop;
+
+    // if(this.feedFetchStream.indexOf(d) !== -1) return;
+    // this.feedFetchStream.push(d);  
+
+    // fetch more tweets -> use last's tweet id (11/10)
+    this.setState(() => ({ // for icon
+      feedFetchingMore: true
+    }));
+
+    client.query({ // Twitter order infinite scroll by id, so I'll do the same
+      query: gql`
+        query($id: ID!, $login: String!, $password: String!, $cursorID: ID!) {
+          fetchFeed(id: $id, login: $login, password: $password, cursorID: $cursorID, isReal: true) {
+            commentsInt,
+            likesInt,
+            content,
+            id,
+            time,
+            isLiked(id: $id),
+            creator {
+              id,
+              image,
+              url,
+              name,
+              isVertificated
+            }
+          }
+        }
+      `,
+      variables: {
+        id: a.id,
+        login: a.login,
+        password: a.password,
+        cursorID: b[b.length - 1].id
+      }
+    }).then(({ data: { fetchFeed } }) => {
+      this.setState(({ feed }) => {
+        let a = feed || [];
+
+        return {
+          feedFetchingMore: false,
+          fetchAvailableMore: fetchFeed.length === 15, // >=
+          feed: [
+            ...a,
+            ...fetchFeed
+          ]
+        }
+      });
+    });
+  }
+
   render() {
     return(
-      <div className="rn-main">
+      <div
+        className="rn-main"
+        ref={ ref => this.displayRef = ref }
+        onScroll={ this.fetchMoreTweets }>
         <MainNews
           loading={ this.state.feedFetching }
+          loadingMore={ this.state.feedFetchingMore }
           data={ this.state.feed || [] }
           userdata={ this.props.useracc.user }
           likePostMut={ this.props.likePost }

@@ -433,17 +433,34 @@ const RootQuery = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
         login: { type: new GraphQLNonNull(GraphQLString) },
-        password: { type: new GraphQLNonNull(GraphQLString) }
+        password: { type: new GraphQLNonNull(GraphQLString) },
+        cursorID: { type: GraphQLID },
+        isReal: { type: GraphQLBoolean }
       },
-      async resolve(_, { id: _id, login, password, materialLikes }) {
+      async resolve(_, { id: _id, login, password, materialLikes, cursorID, isReal }) {
         let user = await User.findOne({ _id, login, password });
         if(!user) return null;
 
-        let a = await Tweet.find({
-          creatorID: {
-            $in: [...user.subscribedTo, _id]
+        let a = null;
+        {
+          let b = {
+            creatorID: {
+              $in: [...user.subscribedTo, _id]
+            }
           }
-        }).sort({ time: -1 });
+
+          if(cursorID) {
+            b._id = {
+              $lt: cursorID
+            }
+          }
+
+          if(isReal) {
+            a = await Tweet.find(b).sort({ time: -1 }).limit(15);
+          } else {
+            a = await Tweet.find(b).sort({ time: -1 });
+          }
+        }
 
         a.forEach(io => io.isLiked = io.likes.find(ic => str(ic) === str(user._id)) ? true:false);
 

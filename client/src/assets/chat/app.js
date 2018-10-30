@@ -129,7 +129,7 @@ class ChatDisplayMessage extends Component {
 				b = "",
 				c = c1 => (c1.toString().length === 1) ? "0" + c1 : c1;
 
-		if((new Date()).getTime() - t < 86400000) { // less than day -> 27:32
+		if((new Date()).getTime() - t < 43200000) { // less than 12 hours -> 27:32
 			b = `${ c(a.getHours()) }:${ c(a.getMinutes()) }`;
 		} else { // -> 27 June, 23:32
 			let d = [
