@@ -25,7 +25,7 @@
   padding-left:15px;
   padding-right:15px;
   position:relative;
-  box-shadow:0px 0px 5px -2px black;
+  box-shadow:0px 0px 5px -3px black;
   border-radius:5px;
 }
 
@@ -49,18 +49,14 @@
 }
 
 .rn-main-news-field-mat-inp {
-  --drawcol: rgba(255, 255, 255, .9);
-
   height:100%;
   margin-left:5px;
   width:calc(100% - 60px);
   padding-left:10px;
   padding-right:5px;
   background:transparent;
-  font-weight:200;
+  font-weight:300;
   border:none;
-  caret-color:var(--drawcol);
-  color:var(--drawcol);
   height:100%;
   font-size:1.25em;
 }
@@ -123,18 +119,21 @@
 }
 
 .rn-main-news-mat-item.new {
-  animation:rnmain-tweet-sub-am .5s ease-out;
+  animation:rnmain-tweet-sub-am .25s linear;
 }
 
 @keyframes rnmain-tweet-sub-am {
   0% {
     filter:brightness(100%);
+    transform:translateX(-15px);
   }
   50% {
     filter:brightness(150%);
+    transform:translateX(15px);
   }
   100% {
     filter:brightness(100%);
+    transform:translateX(0px);
   }
 }
 
@@ -198,7 +197,6 @@
   font-family:"Quicksand";
   font-weight:500;
   margin-right:7.5px;
-  color:rgba(255, 255, 255, .9);
   display:flex;
   align-items:center;
 }
@@ -211,14 +209,12 @@
 .rn-main-news-mat-item-mat-time,
 .rn-main-news-mat-item-mat-splitdot {
   font-family:"Quicksand";
-  font-weight:300;
-  color:rgba(255, 255, 255, .5);
+  font-weight:400;
 }
 
 .rn-main-news-mat-item-content {
   font-family:"Quicksand";
   font-weight:400;
-  color:rgba(255, 255, 255, .95);
   margin-top:5px;
   margin-bottom:5px;
 }
@@ -251,7 +247,6 @@
   font-size:1.1em;
   padding:0;
   display:flex;
-  color:rgba(255, 255, 255, .7);
   align-items:center;
   cursor:pointer;
   transition:.4s;
@@ -266,12 +261,12 @@
   0% {
     transform:scale(1);
     opacity:1;
-    color:rgba(255, 255, 255, .7);
+    color:var(--midcol)
   }
   50% {
     transform:scale(2);
     opacity:.5;
-    color:rgba(255, 255, 255, .7);
+    color:var(--midcol)
   }
   100% {
     transform:scale(1);

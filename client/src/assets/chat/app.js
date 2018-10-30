@@ -145,7 +145,7 @@ class ChatDisplayMessage extends Component {
 				"Oct",
 				"Nov",
 				"Dec"
-			][a.getMonths()];
+			][a.getMonth()];
 			b = `${ c(a.getDate()) } ${ d }, ${ c(a.getHours()) }:${ c(a.getMinutes()) }`;
 		}
 

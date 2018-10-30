@@ -1,13 +1,10 @@
 :root {
-	--chatw:600px;
 	--chatnavh:60px;
 	--inpfield:45px;
 	--messagemgsize:40px;
 }
 
 .rn-chat {
-	width:var(--chatw);
-	max-width:100vw;
 	height:100%;
 	margin-left:auto;
 	margin-right:auto;
@@ -81,7 +78,6 @@
 	display:flex;
 	align-items:center;
 	font-weight:500;
-	color:rgba(255, 255, 255, .95);
 }
 
 .rn-chat-users-user-content-url {
@@ -91,7 +87,6 @@
 .rn-chat-users-user-content-url,
 .rn-chat-users-user-content-time {
 	font-weight:400;
-	color:rgba(255, 255, 255, .65);
 	font-family:"Quicksand";
 }
 
@@ -99,7 +94,6 @@
 	font-weight:400;
 	font-family:"Quicksand";
 	font-size:.95em;
-	color:rgba(255, 255, 255, .75);
 	margin-top:4.5px;
 	margin-bottom:0px;
 	width:95%;
@@ -127,6 +121,7 @@
 	position:relative;
 	display:flex;
 	justify-content:center;
+	border-bottom:1px solid rgba(0, 0, 0, .1);
 }
 
 .rn-chat-mat-nav-mat {
@@ -135,7 +130,7 @@
 	padding-left:var(--padding);
 	padding-right:var(--padding);
 	height:100%;
-	width:calc(var(--chatw) - var(--padding) * 2);
+	width:calc(var(--uisize) - var(--padding) * 2);
 	/*max-width:calc(100% - var(--padding) * 2);*/
 	max-width:100%;
 	display:flex;
@@ -192,12 +187,10 @@
 }
 
 .rn-chat-mat-nav-mat-inf-mat-name {
-	color:rgba(255, 255, 255, .9);
 	font-weight:500;
 }
 
 .rn-chat-mat-nav-mat-inf-mat-url {
-	color:rgba(255, 255, 255, .65);
 	font-weight:300;
 }
 
@@ -260,8 +253,8 @@
 	--radius:1rem;
 
 	padding:10px;
-	color:white;
 	font-weight:400;
+	color:white;
 	font-family:"Quicksand";
 	border-radius:var(--radius);
 	flex-shrink:666; /* WELCOME TO HELL */
@@ -290,7 +283,6 @@
 	margin-top:5px;
 	font-weight:400;
 	font-family:"Quicksand";
-	color:rgba(255, 255, 255, .6);
 	font-size:.9em;
 	margin-left:calc(var(--messagemgsize) + 10px); /* imgsize + div margin */
 }
@@ -305,7 +297,6 @@
 }
 
 .rn-chat-mat-display-mat-message.l .rn-chat-mat-display-mat-message-content-mat {
-	background:#4B7197;
 	border-bottom-left-radius:0;
 }
 
@@ -344,21 +335,13 @@
 
 .rn-chat-mat-input {
 	--padding:5px;
-	--margin:5px;
 
 	height:var(--inpfield);
-	width:calc(100% - var(--padding) * 2);
+	width:100%;
 	display:flex;
 	align-items:center;
 	justify-content:space-around;
-	margin-left:var(--margin);
-	margin-right:var(--margin);
 	position:relative;
-}
-
-.rn-chat-mat-input,
-.rn-chat-mat-input-stickers {
-	background:linear-gradient(-180deg, #233447, #213145, #233447);
 }
 
 .rn-chat-mat-input-btn {
@@ -397,21 +380,16 @@
 	--padding:10px;
 
 	height:30px;
-	color:rgba(255, 255, 255, .95);
 	padding-left:var(--padding);
 	padding-right:var(--padding);
-	border:1px solid black;
+	border:1px solid var(--messagefieldbor);
 	font-size:.95em;
 	border-radius:45px;
 	-webkit-box-sizing:border-box;
-  -moz-box-sizing:border-box;
-  box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	box-sizing:border-box;
 	width:calc(100% - (30px + 10px) * 2 - 10px - 5px);
 	/* 100% - (button width + button margin) * buttons.length - input margin - input padding * 2) */
-}
-
-.rn-chat-mat-input-mat::placeholder {
-	color:rgba(255, 255, 255, .55);
 }
 
 .rn-chat-mat-input-stickers {

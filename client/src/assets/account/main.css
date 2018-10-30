@@ -1,16 +1,9 @@
-:root {
-  --seccol: rgba(255, 255, 255, .45);
-  --settings-editcol:rgba(255, 255, 255, .75);;
-}
-
 .rn-account {
   height:100%;
   display:block;
   flex-direction:column;
   margin-left:auto;
   margin-right:auto;
-  width:700px;
-  max-width:100vw;
 }
 
 .rn-account-info {
@@ -134,7 +127,6 @@
 }
 
 .rn-account-info-mat-name > h1 {
-  color:white;
   font-family:"Roboto";
   -webkit-font-smoothing:antialiased;
   font-weight:600;
@@ -153,7 +145,6 @@
   font-family:"Roboto";
   -webkit-font-smoothing:antialiased;
   font-weight:400;
-  color:white;
   margin-top:10px;
   margin-bottom:10px;
   margin-right:10px;
@@ -204,7 +195,6 @@
 }
 
 .rn-account-info-mat-follows-item-num {
-  color:white;
   font-weight:600;
   -webkit-font-smoothing:antialiased;
   font-size:1.05em;
@@ -339,7 +329,6 @@
 }
 
 .rn-account-tweets-mat-item-content-info-name {
-  color:white;
   font-weight:600;
   font-family:"Roboto";
   font-size:1.05em;
@@ -350,7 +339,6 @@
   font-weight:500;
   font-family:"Quicksand";
   margin-right:15px;
-  color:rgba(255, 255, 255, .95);
   margin-top:5px;
   margin-bottom:10px;
 }
@@ -382,12 +370,12 @@
   0% {
     transform:scale(1);
     opacity:1;
-    color:rgba(255, 255, 255, .7);
+    color:var(--midcol);
   }
   50% {
     transform:scale(2);
     opacity:.5;
-    color:rgba(255, 255, 255, .7);
+    color:var(--midcol);
   }
   100% {
     transform:scale(1);
@@ -450,7 +438,7 @@
   z-index:402;
   overflow:hidden;
   transform:translate(calc(-50% + 45px), -50%);
-  box-shadow:0px 0px 15px 1px rgba(0, 0, 0, .5);
+  box-shadow:0px 0px 15px 1px var(--midcol);
 }
 
 .rn-account-settings.focus {
@@ -535,7 +523,6 @@
 }
 
 .rn-account-settings-nav-title {
-  color:rgba(255, 255, 255, .95);
   font-family:"Quicksand";
   font-weight:500;
   font-size:1.25em;
@@ -618,12 +605,11 @@
 .rn-account-settings-content-bg-controls-btn {
   border:none;
   background:transparent;
-  color:var(--settings-editcol);
   font-size:1.5em;
   margin-left:10px;
   margin-right:10px;
   cursor:pointer;
-  filter:drop-shadow(0px 0px 1px rgba(0, 0, 0, .75));
+  filter:drop-shadow(0px 0px 1px var(--dropshcol));
 }
 
 .rn-account-settings-content-avatar-field {
@@ -637,7 +623,6 @@
 }
 
 .rn-account-settings-content-avatar-field-placeholder {
-  color:rgba(255, 255, 255, .65);
   font-family:"Quicksand";
   font-weight:400;
   font-size:.95em;
@@ -651,7 +636,6 @@
   margin-top:-5px;
   border-bottom:1px solid var(--focuscol);
   background:transparent;
-  color:rgba(255, 255, 255, .85);
   padding:0;
   font-size:1.3em;
   outline:0;

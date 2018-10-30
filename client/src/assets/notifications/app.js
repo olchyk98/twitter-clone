@@ -272,7 +272,7 @@ class App extends Component {
 			} else {
 				this.props.history.push(links["NOT_FOUND_PAGE"]);
 			}
-		}).catch(console.log); // -
+		});
 	}
 
 	render() {

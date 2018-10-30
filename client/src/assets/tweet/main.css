@@ -1,5 +1,4 @@
 :root {
-  --iohud:rgba(255, 255, 255, .5);
   --tweetpadd:15px;
 }
 
@@ -49,14 +48,12 @@
 
 .rn-tweet-creator-info-name {
   font-weight:400;
-  color:rgba(255, 255, 255, .95);
   display:flex;
   align-items:center;
 }
 
 .rn-tweet-creator-info-url {
   font-weight:200;
-  color:rgba(255, 255, 255, .5);
   font-size:.85em;
 }
 
@@ -96,14 +93,12 @@
 .rn-tweet-content {
   font-family:"Quicksand";
   font-weight:300;
-  color:white;
   font-size:1.4em;
   margin-top:15px;
   margin-bottom:15px;
 }
 
 .rn-tweet-date {
-  color:var(--iohud);
   font-family:"Quicksand";
   font-weight:400;
   margin-bottom:5px;
@@ -159,12 +154,10 @@
 
 .rn-tweet-stat-num {
   margin-right:5px;
-  color:rgba(255, 255, 255, .75);
   font-weight:600;
 }
 
 .rn-tweet-stat-tit {
-  color:var(--iohud);
   font-weight:300;
 }
 
@@ -175,7 +168,6 @@
 }
 
 .rn-tweet-controls-btn {
-  color:var(--iohud);
   border:none;
   background:transparent;
   font-size:1.25em;
@@ -299,7 +291,6 @@
   display:flex;
   align-items:center;
   font-family:"Quicksand";
-  color:rgba(255, 255, 255, .6);
 }
 
 .rn-tweet-comments-comment-content-cri-inf > * {
@@ -308,7 +299,6 @@
 }
 
 .rn-tweet-comments-comment-content-cri-inf-name {
-  color:white;
   font-weight:400;
   display:flex;
   align-items:center;
@@ -319,7 +309,6 @@
 }
 
 .rn-tweet-comments-comment-content-mat {
-  color:rgba(255, 255, 255, .85);
   font-weight:100;
   margin-top:7.5px;
   margin-bottom:10px;
@@ -336,7 +325,6 @@
 .rn-tweet-comments-comment-content-control-btn {
   background:transparent;
   border:none;
-  color:rgba(255, 255, 255, .5);
   font-size:1.1em;
   cursor:pointer;
   display:flex;
@@ -377,7 +365,6 @@
   padding-left:5px;
   padding-right:5px;
   font-size:1em;
-  color:rgba(255, 255, 255, .95);
   font-family:"Quicksand";
   font-weight:400;
 }

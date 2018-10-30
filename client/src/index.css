@@ -1,12 +1,44 @@
 /*@import url('https://fonts.googleapis.com/css?family=Lato|Quicksand|Roboto');*/
 
 :root {
+  --nav-height:50px;
+  --uisize:550px;
+  /* dark mode */
   --navcol:#243447;
   --uicol: #1b2836;
   --bgcol:#141d26;
-  --nav-height:50px;
-  --uisize:570px;
   --focuscol:#34a1f2;
+  --seccol:rgba(255, 255, 255, .5);
+  --maincol:rgba(255, 255, 255, .95);
+  --midcol:rgba(255, 255, 255, .7);
+  --switchoffbg:#939393;
+  --switchoffbtn:#fafafa;
+  --switchonbg:#5bcafb;
+  --switchonbtn:#009ef6;
+  --vertificationcol:white;
+  --dropshcol:rgba(0, 0, 0, .75);
+  --messagebg:#4B7197;
+  --messagefieldbg:linear-gradient(-180deg, #233447, #213145, #233447);
+  --messagefieldbor:black;
+  --addnavshadow:0px 0px 5px 0px black;
+  /* white mode */
+  --navcol:#ffffff;
+  --uicol: #ffffff;
+  --bgcol:#e5ecf0;
+  --focuscol:#34a1f2;
+  --seccol:rgba(0, 0, 0, .5);
+  --maincol:rgba(0, 0, 0, .95);
+  --midcol:rgba(0, 0, 0, .7);
+  --switchoffbg:#939393;
+  --switchoffbtn:#fafafa;
+  --switchonbg:#5bcafb;
+  --switchonbtn:#009ef6;
+  --vertificationcol:var(--focuscol);
+  --dropshcol:rgba(255, 255, 255, .75);
+  --messagebg:#e5ecf0;
+  --messagefieldbg:#ffffff;
+  --messagefieldbor:rgba(0, 0, 0, .05);
+  --addnavshadow:0px 0px 5px 0px rgba(0, 0, 0, .35);
 }
 
 html, body {
@@ -41,14 +73,22 @@ input {
 
 .rn-followers-backnav,
 .mj-nav,
-.rn-chat-mat-nav {
+.rn-chat-mat-nav,
+.mj-nav-muser-mat {
   background:var(--navcol);
 }
 
 .rn-main-news,
-.rn-tweet {
+.rn-tweet,
+.rn-account,
+.rn-chat,
+.rn-followers,
+.rn-nfp,
+.rn-notifications,
+.rn-search {
   width:var(--uisize);
   position:relative;
+  max-width:100vw!important;
 }
 
 .rn-tweet,
@@ -98,6 +138,7 @@ input {
 .mj-nav-navigation-btn:hover,
 .rn-notifications-nav-btn.active,
 .rn-chat-mat-nav-mat-inf-back,
+.mj-nav-navigation-btn.active,
 .rn-chat-mat-input-btn {
   color:var(--focuscol);
 }
@@ -116,7 +157,9 @@ input {
 .rn-chat-mat-nav-mat-inf-back:before,
 .rn-chat-mat-display-mat-message-content-mat,
 .rn-chat-mat-display-mat-message.r .rn-chat-mat-display-mat-message-content-mat,
-.rn-chat-mat-input-btn:before {
+.rn-chat-mat-input-btn:before,
+.mj-nav-muser-vis:before,
+.mj-nav-navigation-btn-notify {
   background:var(--focuscol);
 }
 
@@ -129,4 +172,127 @@ input {
 .rn-followers-menu-btn.active,
 .rn-notifications-nav-btn.active {
   border-bottom:2px solid var(--focuscol);
+}
+
+.mj-nav-muser-vis-arrow,
+.mj-nav-muser-vis-tit,
+.rn-nav-muser-mat-acc-name,
+.rn-nav-muser-mat-acc-subs-val,
+.mj-nav-muser-mat-menu-btn-txt,
+.rn-main-news-mat-item-content,
+.rn-main-news-field-mat-inp,
+.rn-main-news-mat-item-mat-name,
+.rn-tweet-creator-info-name,
+.rn-tweet-commat > input,
+.rn-tweet-content,
+.rn-tweet-comments-comment-content-cri-inf-name,
+.rn-account-tweets-mat-item-content-mat,
+.rn-account-info-mat-name > h1,
+.rn-account-info-mat-desc,
+.rn-account-info-mat-follows-item-num,
+.rn-account-tweets-mat-item-content-info-name,
+.rn-account-settings-nav-title,
+.rn-account-settings-content-avatar-field-input,
+.rn-chat-users-user-content-name,
+.rn-chat-mat-nav-mat-inf-mat-name,
+.rn-chat-mat-display-mat-message.l .rn-chat-mat-display-mat-message-content-mat,
+.rn-chat-mat-input-mat,
+.rn-followers-users-user-content-mat-name-mat,
+.rn-followers-users-user-content-mat,
+.rn-notifications-title-mat,
+.rn-notifications-mat-notification-content-mat,
+.rn-notifications-mat-notification-content-mat-name,
+.rn-notifications-nav-btn,
+.rn-search-block-title,
+.rn-search-block-disp-item-content-creator-name,
+.rn-search-block-disp-titem-mg-content-creatorinf-name,
+.rn-search-block-disp-titem-mg-content-mat {
+  color:var(--maincol);
+}
+
+.rn-main-news-mat-item-control-btn,
+.rn-account-settings-content-bg-controls-btn,
+.rn-tweet-stat-num,
+.rn-tweet-comments-comment-content-cri-inf,
+.rn-tweet-comments-comment-content-mat,
+.rn-tweet-comments-comment-content-control-btn,
+.rn-account-settings-content-avatar-field-placeholder,
+.rn-chat-users-user-content-mat,
+.rn-chat-users-user-content-url,
+.rn-chat-users-user-content-time,
+.rn-chat-mat-nav-mat-inf-mat-url,
+.rn-chat-mat-display-mat-message-info,
+.rn-nfp-content-tip-logout,
+.rn-notifications-title-dsthis,
+.rn-notifications-inf,
+.rn-search-mat-search-mat:valid,
+.rn-search-block-title-status,
+.rn-search-block-disp-item-content-mat {
+  color:var(--midcol);
+}
+
+.rn-nav-muser-mat-acc-url,
+.rn-nav-muser-mat-acc-subs-place,
+.mj-nav-muser-mat-menu-btn-icon,
+.rn-main-news-mat-item-mat-url,
+.rn-main-news-mat-item-mat-time,
+.rn-main-news-mat-item-mat-splitdot,
+.rn-tweet-date,
+.rn-tweet-stat-tit,
+.rn-tweet-controls-btn,
+.rn-tweet-creator-info-url,
+.rn-chat-mat-input-mat::placeholder,
+.rn-followers-menu-btn,
+.rn-followers-users-user-content-mat-url,
+.rn-nfp-content-tip,
+.rn-notifications-mat-notification-content-twpreview,
+.rn-search-mat-search-icon,
+.rn-search-mat-search-mat,
+.rn-search-block-disp-item-content-creator-url,
+.rn-search-block-disp-titem-mg-content-creatorinf,
+.rn-search-block-disp-titem-mg-content-controls-btn,
+.rn-search-err {
+  color:var(--seccol);
+}
+
+.mj-nav-muser-mat-menu-btn-switch {
+  background:var(--switchoffbg);
+}
+
+.mj-nav-muser-mat-menu-btn-switch:before {
+  background:var(--switchoffbtn);
+}
+
+.mj-nav-muser-mat-menu-btn.switch.active > .mj-nav-muser-mat-menu-btn-switch {
+  background:var(--switchonbg);
+}
+
+.mj-nav-muser-mat-menu-btn.switch.active > .mj-nav-muser-mat-menu-btn-switch:before {
+  background:var(--switchonbtn);
+}
+
+.rn-main-news-field-mat-inp {
+  caret-color:var(--midcol);
+}
+
+.mj-nav-muser-mat {
+  box-shadow:var(--addnavshadow);
+}
+
+.as-forall-vertificatedic {
+  fill:var(--vertificationcol);
+}
+
+.rn-account-settings-content-avatar-mat-controls-btn,
+.rn-account-settings-content-bg-controls-btn {
+  color:var(--dropshcol);
+}
+
+.rn-chat-mat-display-mat-message.l .rn-chat-mat-display-mat-message-content-mat {
+  background:var(--messagebg);
+}
+
+.rn-chat-mat-input,
+.rn-chat-mat-input-stickers {
+  background:var(--messagefieldbg);
 }

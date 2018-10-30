@@ -1,7 +1,5 @@
 .rn-search {
 	height:calc(100% - 10px);
-	width:500px;
-	max-width:100%;
 	position:relative;
 	display:block;
 	margin-left:auto;
@@ -37,7 +35,7 @@
 }
 
 .rn-search-mat-search {
-	width:465px;
+	width:calc(100% / 100 * 90);
 	max-width:90vw;
 	/* 475px - 10px = 465px */
 	height:32.5px;
@@ -52,7 +50,6 @@
 .rn-search-mat-search-mat {
 	height:100%;
 	transition:.4s;
-	color:rgba(255, 255, 255, .5);
 }
 
 .rn-search-mat-search-icon {
@@ -69,10 +66,6 @@
 	background:transparent;
 	font-size:1em;
 	font-weight:200;
-}
-
-.rn-search-mat-search-mat:valid {
-	color:rgba(255, 255, 255, .85);
 }
 
 .rn-search-block {
@@ -95,7 +88,6 @@
 	padding-left:var(--padding);
 	padding-right:var(--padding);
 	width:calc(100% - var(--padding) * 2);
-	color:white;
 	font-size:1.2em;
 	font-family:"Quicksand";
 	font-weight:600;
@@ -108,7 +100,6 @@
 }
 
 .rn-search-block-title-status {
-	color:rgba(255, 255, 255, .65);
 	cursor:pointer;
 	position:relative;
 	transition:.4s;
@@ -194,13 +185,11 @@
 .rn-search-block-disp-item-content-creator-name {
 	font-family:"Quicksand";
 	font-weight:500;
-	color:rgba(255, 255, 255, .95);
 	display:flex;
 	align-items:center;
 }
 
 .rn-search-block-disp-item-content-creator-url {
-	color:rgba(255, 255, 255, .475);
 	font-size:.95em;
 	margin-top:5px;
 	font-family:"Quicksand";
@@ -237,7 +226,6 @@
 	margin-bottom:7.5px;
 	font-family:"Quicksand";
 	font-weight:400;
-	color:rgba(255, 255, 255, .85);
 	font-size:.975em;
 }
 
@@ -281,7 +269,6 @@
 .rn-search-block-disp-titem-mg-content-creatorinf {
 	display:flex;
 	align-items:center;
-	color:rgba(255, 255, 255, .5);
 	font-family:"Quicksand";
 	font-weight:300;
 }
@@ -291,7 +278,6 @@
 }
 
 .rn-search-block-disp-titem-mg-content-creatorinf-name {
-	color:white;
 	font-family:"Quicksand";
 	font-weight:400;
 	display:flex;
@@ -301,7 +287,6 @@
 .rn-search-block-disp-titem-mg-content-mat {
 	font-weight:200;
 	font-family:"Quicksand";
-	color:rgba(255, 255, 255, .95);
 	margin-bottom:5px;
 	margin-top:5px;
 }
@@ -314,7 +299,6 @@
 }
 
 .rn-search-block-disp-titem-mg-content-controls-btn {
-	color:rgba(255, 255, 255, .6);
 	background:transparent;
 	border:none;
 	font-size:1.1em;
@@ -339,7 +323,6 @@
 .rn-search-err {
 	font-weight:200;
 	font-family:"Quicksand";
-	color:rgba(255, 255, 255, .5);
 	display:block;
 	margin-left:auto;
 	margin-right:auto;

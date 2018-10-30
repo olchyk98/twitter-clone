@@ -19,6 +19,14 @@ function destroySession() {
   	return window.location.href = links["REGISTER_PAGE"];
 }
 
+class Split extends Component {
+	render() {
+		return(
+			<div className="rn-followers-split" />
+		);
+	}
+}
+
 class UsersUser extends Component {
 	constructor(props) {
 		super(props);
@@ -70,52 +78,47 @@ class UsersUser extends Component {
 
 	render() {
 		return(
-			<div className="rn-followers-users-user">
-				<div className="rn-followers-users-user-image">
-					<Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.url }` }>
-						<img
-							className="rn-followers-users-user-image-mat"
-							src={ apiPath + this.props.image }
-							alt={ this.props.name }
-						/>
-					</Link>
-				</div>
-				<div className="rn-followers-users-user-content">
-					<div className="rn-followers-users-user-content-name">
-						<div className="rn-followers-users-user-content-mat">
-							<div className="rn-followers-users-user-content-mat-name">
-								<Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.url }` }>
-									<span className="rn-followers-users-user-content-mat-name-mat">{ this.props.name }</span>
-								</Link>
-								{
-									(!this.props.isVertificated) ? null : (
-										<VertificatedStar />
-									)
-								}
-							</div>
-							<span className="rn-followers-users-user-content-mat-url">@{ this.props.url }</span>
-						</div>
-						<div className="rn-followers-users-user-content-controls">
-							<button
-								className={ `rn-followers-users-user-content-controls-btn${ (!this.getSubscription()) ? "" : " active" }` }
-								onClick={ this.subscribeTo }>
-								{ (!this.getSubscription()) ? "Follow" : "Following" }
-							</button>
-						</div>
+			<React.Fragment>
+				<div className="rn-followers-users-user">
+					<div className="rn-followers-users-user-image">
+						<Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.url }` }>
+							<img
+								className="rn-followers-users-user-image-mat"
+								src={ apiPath + this.props.image }
+								alt={ this.props.name }
+							/>
+						</Link>
 					</div>
-					<p className="rn-followers-users-user-content-mat">
-						{ this.props.profileDescription }
-					</p>
+					<div className="rn-followers-users-user-content">
+						<div className="rn-followers-users-user-content-name">
+							<div className="rn-followers-users-user-content-mat">
+								<div className="rn-followers-users-user-content-mat-name">
+									<Link to={ `${ links["ACCOUNT_PAGE"] }/${ this.props.url }` }>
+										<span className="rn-followers-users-user-content-mat-name-mat">{ this.props.name }</span>
+									</Link>
+									{
+										(!this.props.isVertificated) ? null : (
+											<VertificatedStar />
+										)
+									}
+								</div>
+								<span className="rn-followers-users-user-content-mat-url">@{ this.props.url }</span>
+							</div>
+							<div className="rn-followers-users-user-content-controls">
+								<button
+									className={ `rn-followers-users-user-content-controls-btn${ (!this.getSubscription()) ? "" : " active" }` }
+									onClick={ this.subscribeTo }>
+									{ (!this.getSubscription()) ? "Follow" : "Following" }
+								</button>
+							</div>
+						</div>
+						<p className="rn-followers-users-user-content-mat">
+							{ this.props.profileDescription }
+						</p>
+					</div>
 				</div>
-			</div>
-		);
-	}
-}
-
-class Split extends Component {
-	render() {
-		return(
-			<div className="rn-followers-split" />
+				<Split />
+			</React.Fragment>
 		);
 	}
 }
@@ -135,15 +138,13 @@ class Users extends Component {
 								name={ name }
 								image={ image }
 								isSubscribed={ requesterIsSubscriber }
-								profileDescription={ profileDescription.substr(0, 80) + "..." } // XXX
+								profileDescription={ (profileDescription.length > 80) ? profileDescription.substr(0, 80) + "..." : profileDescription } // XXX
 								followUser={ this.props.followUser }
 								onClearCache={ this.props.onClearCache }
 							/>
 						);
 					})
 				}
-
-				<Split />
 			</div>
 		);	
 	}
@@ -343,6 +344,16 @@ class App extends Component {
 
 	setStage = stage => {
 		if(this.state.reqStage === stage) return;
+
+		{
+			let { url, direct } = this.props.match.params;
+			direct = {
+				"FOLLOWING_STAGE": "following",
+				"FOLLOWERS_STAGE": "followers"
+			}[stage];
+			let a = (new URL(window.location.href)).searchParams.get("b");
+			window.history.pushState(null, null, `${ links["FOLLOWERS_PAGE"] }/${ url }/${ direct }/${ (a) ? `?b=${ a }` : "" }`);
+		}
 
 		let a = this.stages[stage];
 		this.setState(state => {

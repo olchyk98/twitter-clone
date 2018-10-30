@@ -117,13 +117,13 @@ const UserType = new GraphQLObjectType({
     subscribersInt: {
       type: GraphQLInt,
       async resolve({ id }) {
-        let a = await User.find({
+        let a = await User.count({
           subscribedTo: {
             $in: [id]
           }
         });
 
-        return a.length;
+        return a;
       }
     },
     tweets: {
@@ -202,12 +202,12 @@ const TweetType = new GraphQLObjectType({
         let a = await Tweet.findById(id);
         if(!a) return 0;
 
-        let b = await User.find({
+        let b = await User.count({
           _id: {
             $in: a.likes
           }
         });
-        return b.length;
+        return b;
       }
     },
     comments: {
@@ -217,8 +217,8 @@ const TweetType = new GraphQLObjectType({
     commentsInt: {
       type: GraphQLInt,
       async resolve({ id }) {
-        let a = await Comment.find({ sendedToID: id });
-        return a.length;
+        let a = await Comment.count({ sendedToID: id });
+        return a;
       }
     },
     creator: {
@@ -269,12 +269,12 @@ const CommentType = new GraphQLObjectType({
         let a = await Comment.findById(id);
         if(!a) return 0;
 
-        let b = await User.find({
+        let b = await User.count({
           _id: {
             $in: a.likes
           }
         });
-        return b.length;
+        return b;
       }
     },
     creator: {
@@ -751,7 +751,7 @@ const RootMutation = new GraphQLObjectType({
           }).save();
 
           // Create and send data to subscribers as notification
-          let notificationInfluenced = await User.find({ // XXX
+          let notificationInfluenced = await User.find({
             subscribedTo: {
               $in: [_id]
             }
@@ -1716,7 +1716,10 @@ const RootSubscription = new GraphQLObjectType({
       subscribe: withFilter(
         () => pubsub.asyncIterator("viewedMessages"),
         async ({ conversation, viewer }, { id: _id, login, password, conversationID }) => {
-          if(viewer === _id || conversation.members.indexOf(str(_id)) === -1) return false;
+          {
+            let a = conversation.members;
+            if(conversationID !== conversation.id || str(viewer) === str(_id) || (a.indexOf(str(_id)) === -1 || a.indexOf(str(viewer)) === -1)) return false; // XXX
+          }
           let user = await User.findOne({ _id, login, password });
 
           return (user) ? true:false; 
