@@ -8,7 +8,7 @@ const schema = require('./schema');
 
 //
 
-mongoose.connect("mongodb://oles:0password@ds263571.mlab.com:63571/graphql-twittersclone", {
+mongoose.connect("mongodb://oles:0password@ds227469.mlab.com:27469/graphql-everdo", {
   useNewUrlParser: true
 });
 mongoose.connection.once('open', () => console.log("Connected to database!"));
