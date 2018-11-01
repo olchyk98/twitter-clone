@@ -14,7 +14,7 @@ import links from '../../links';
 import VertificatedStar from '../__forall__/vertificated/app';
 import LoadingIcon from '../__forall__/loader/app';
 
-const defaultBg = "/files/backgrounds/default.jpeg";
+const defaultBg = "/files/backgrounds/default.jpg";
 
 function destroySession() {
   window.location.href = links["NOT_FOUND_PAGE"];
